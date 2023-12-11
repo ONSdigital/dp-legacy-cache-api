@@ -1,0 +1,15 @@
+---
+
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: golangci/golangci-lint
+    tag: v1.55
+
+inputs:
+  - name: dp-legacy-cache-api
+
+run:
+  path: dp-legacy-cache-api/ci/scripts/lint.sh
