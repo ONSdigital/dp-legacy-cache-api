@@ -2,7 +2,7 @@
 REST API for managing cache control information for pages within the legacy CMS
 
 ### Getting started
-
+* Ensure mongoDB is installed on your local machine, installation steps can be found here https://www.mongodb.com/docs/manual/tutorial/install-mongodb-on-os-x/
 * Run `make debug` to run application on http://localhost:29100
 * Run `make help` to see full list of make targets
 
