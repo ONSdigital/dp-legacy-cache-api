@@ -18,6 +18,7 @@ type Service struct {
 	API         *api.API
 	ServiceList *ExternalServiceList
 	HealthCheck HealthChecker
+	mongoDB     DataStore
 }
 
 // Run the service
@@ -27,43 +28,47 @@ func Run(ctx context.Context, cfg *config.Config, serviceList *ExternalServiceLi
 	log.Info(ctx, "using service configuration", log.Data{"config": cfg})
 
 	// Get HTTP Server and ... // TODO: Add any middleware that your service requires
-	r := mux.NewRouter()
+	router := mux.NewRouter()
 
-	s := serviceList.GetHTTPServer(cfg.BindAddr, r)
+	httpServer := serviceList.GetHTTPServer(cfg.BindAddr, router)
 
-	// TODO: Add other(s) to serviceList here
+	mongoDB, err := serviceList.GetMongoDB(ctx, cfg)
+	if err != nil {
+		log.Fatal(ctx, "failed to initialise mongo DB", err)
+		return nil, err
+	}
 
 	// Setup the API
-	a := api.Setup(ctx, r)
+	cacheAPI := api.Setup(ctx, router, mongoDB)
 
 	hc, err := serviceList.GetHealthCheck(cfg, buildTime, gitCommit, version)
-
 	if err != nil {
 		log.Fatal(ctx, "could not instantiate healthcheck", err)
 		return nil, err
 	}
 
-	if err := registerCheckers(ctx, hc); err != nil {
+	if err := registerCheckers(ctx, hc, mongoDB); err != nil {
 		return nil, errors.Wrap(err, "unable to register checkers")
 	}
 
-	r.StrictSlash(true).Path("/health").HandlerFunc(hc.Handler)
+	router.StrictSlash(true).Path("/health").HandlerFunc(hc.Handler)
 	hc.Start(ctx)
 
-	// Run the http server in a new go-routine
+	// Run the HTTP server in a new go-routine
 	go func() {
-		if err := s.ListenAndServe(); err != nil {
-			svcErrors <- errors.Wrap(err, "failure in http listen and serve")
+		if err := httpServer.ListenAndServe(); err != nil {
+			svcErrors <- errors.Wrap(err, "failure in HTTP listen and serve")
 		}
 	}()
 
 	return &Service{
 		Config:      cfg,
-		Router:      r,
-		API:         a,
+		Router:      router,
+		API:         cacheAPI,
 		HealthCheck: hc,
 		ServiceList: serviceList,
-		Server:      s,
+		Server:      httpServer,
+		mongoDB:     mongoDB,
 	}, nil
 }
 
@@ -90,7 +95,12 @@ func (svc *Service) Close(ctx context.Context) error {
 			hasShutdownError = true
 		}
 
-		// TODO: Close other dependencies, in the expected order
+		if svc.mongoDB != nil {
+			if err := svc.mongoDB.Close(ctx); err != nil {
+				log.Error(ctx, "failed to close MongoDB connection", err)
+				hasShutdownError = true
+			}
+		}
 	}()
 
 	// wait for shutdown success (via cancel) or failure (timeout)
@@ -113,8 +123,19 @@ func (svc *Service) Close(ctx context.Context) error {
 	return nil
 }
 
-func registerCheckers(_ context.Context, _ HealthChecker) (err error) {
-	// TODO: add other health checks here, as per dp-upload-service
+func registerCheckers(ctx context.Context,
+	healthChecker HealthChecker,
+	dataStore DataStore,
+) (err error) {
+	hasErrors := false
 
+	if err = healthChecker.AddCheck("Mongo DB", dataStore.Checker); err != nil {
+		hasErrors = true
+		log.Error(ctx, "error adding check for mongo db", err)
+	}
+
+	if hasErrors {
+		return errors.New("Error(s) registering checkers for health check")
+	}
 	return nil
 }

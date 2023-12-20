@@ -41,8 +41,16 @@ func (f *ComponentTest) InitializeScenario(ctx *godog.ScenarioContext) {
 	component.RegisterSteps(ctx)
 }
 
-func (f *ComponentTest) InitializeTestSuite(_ *godog.TestSuiteContext) {
+func (f *ComponentTest) InitializeTestSuite(ctx *godog.TestSuiteContext) {
+	const MongoVersion = "4.4.8"
+	const DatabaseName = "testing"
 
+	ctx.BeforeSuite(func() {
+		f.MongoFeature = componenttest.NewMongoFeature(componenttest.MongoOptions{MongoVersion: MongoVersion, DatabaseName: DatabaseName})
+	})
+	ctx.AfterSuite(func() {
+		f.MongoFeature.Close()
+	})
 }
 
 func TestComponent(t *testing.T) {

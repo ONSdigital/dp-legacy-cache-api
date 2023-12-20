@@ -2,13 +2,11 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/ONSdigital/dp-legacy-cache-api/config"
-	"github.com/ONSdigital/dp-legacy-cache-api/mongo"
 	"github.com/ONSdigital/dp-legacy-cache-api/service"
 	"github.com/ONSdigital/log.go/v2/log"
 	"github.com/pkg/errors"
@@ -28,7 +26,6 @@ var (
 func main() {
 	log.Namespace = serviceName
 	ctx := context.Background()
-
 
 	if err := run(ctx); err != nil {
 		log.Fatal(ctx, "fatal runtime error", err)
@@ -51,23 +48,6 @@ func run(ctx context.Context) error {
 	if err != nil {
 		return errors.Wrap(err, "error getting configuration")
 	}
-
-	// Initialize MongoDB connection
-    mongoDB := &mongo.Mongo{
-        MongoConfig: cfg.MongoConfig,
-    }
-    err = mongoDB.Init(ctx)
-    if err != nil {
-        return errors.Wrap(err, "failed to initialize MongoDB connection")
-    }
-	mongoDB.CreateCollectionTest(ctx)
-
-	if mongoDB.IsConnected(ctx) {
-		fmt.Println("Successfully connected to MongoDB")
-	} else {
-		fmt.Println("Failed to connect to MongoDB")
-	}
-
 	// Start service
 	svc, err := service.Run(ctx, cfg, svcList, BuildTime, GitCommit, Version, svcErrors)
 	if err != nil {
@@ -80,14 +60,9 @@ func run(ctx context.Context) error {
 		// TODO: call svc.Close(ctx) (or something specific)
 		//  if there are any service connections like Kafka that you need to shut down
 
-		// Close MongoDB connection
-		_ = mongoDB.Close(ctx)
 		return errors.Wrap(err, "service error received")
 	case sig := <-signals:
 		log.Info(ctx, "os signal received", log.Data{"signal": sig})
-
-		// Close MongoDB connection
-		_ = mongoDB.Close(ctx)
 	}
 	return svc.Close(ctx)
 }

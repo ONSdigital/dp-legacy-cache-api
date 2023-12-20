@@ -2,85 +2,80 @@ package mongo
 
 import (
 	"context"
-	"fmt"
 
+	"github.com/ONSdigital/dp-healthcheck/healthcheck"
 	"github.com/ONSdigital/dp-legacy-cache-api/config"
+	"github.com/ONSdigital/dp-legacy-cache-api/models"
+	mongoHealth "github.com/ONSdigital/dp-mongodb/v3/health"
+	mongoDriver "github.com/ONSdigital/dp-mongodb/v3/mongodb"
+	"github.com/ONSdigital/log.go/v2/log"
 	"go.mongodb.org/mongo-driver/bson"
-
-	mongolock "github.com/ONSdigital/dp-mongodb/v3/dplock"
-	mongohealth "github.com/ONSdigital/dp-mongodb/v3/health"
-	mongodriver "github.com/ONSdigital/dp-mongodb/v3/mongodb"
 )
 
 type Mongo struct {
-	config.MongoConfig
+	// 	config.MongoConfig
+	mongoDriver.MongoDriverConfig
 
-	Connection *mongodriver.MongoConnection
-	healthClient *mongohealth.CheckMongoClient
-	lockClient *mongolock.Lock
+	Connection   *mongoDriver.MongoConnection
+	healthClient *mongoHealth.CheckMongoClient
 }
 
-func (m *Mongo) Init(ctx context.Context) (err error) {
+func NewMongoStore(_ context.Context, cfg config.MongoConfig) (m *Mongo, err error) {
+	m = &Mongo{MongoDriverConfig: cfg}
 
-	//instantiate mongo 
-	m.Connection, err = mongodriver.Open(&m.MongoDriverConfig)
+	m.Connection, err = mongoDriver.Open(&m.MongoDriverConfig)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
-	databaseCollectionBuilder := map[mongohealth.Database][]mongohealth.Collection{
-		mongohealth.Database(m.Database): {
-			mongohealth.Collection(m.ActualCollectionName(config.DatasetsCollection)),
+	databaseCollectionBuilder := map[mongoHealth.Database][]mongoHealth.Collection{
+		mongoHealth.Database(m.Database): {
+			mongoHealth.Collection(m.ActualCollectionName(config.DatasetsCollection)),
 		},
 	}
 
-	m.healthClient = mongohealth.NewClientWithCollections(m.Connection, databaseCollectionBuilder)
+	m.healthClient = mongoHealth.NewClientWithCollections(m.Connection, databaseCollectionBuilder)
 
+	return m, nil
+}
+
+func (m *Mongo) GetDataSets(ctx context.Context) (values []models.DataMessage, err error) {
+	filter := bson.M{}
+
+	var results []models.DataMessage
+
+	_, err = m.Connection.Collection(config.DatasetsCollection).Find(ctx, filter, &results)
+	if err != nil {
+		log.Error(ctx, "Error finding collection: %v", err)
+		return nil, err
+	}
+	return results, nil
+}
+
+func (m *Mongo) AddDataSet(ctx context.Context, dataset models.DataMessage) error {
+	_, err := m.Connection.Collection(config.DatasetsCollection).InsertOne(ctx, dataset)
+	if err != nil {
+		log.Error(ctx, "Error inserting document into collection:", err)
+		return err
+	}
 	return nil
 }
 
-// Close represents mongo session closing within the context deadline
+// Checker is called by the healthcheck library to check the health state of this mongoDB instance
+func (m *Mongo) Checker(ctx context.Context, state *healthcheck.CheckState) error {
+	return m.healthClient.Checker(ctx, state)
+}
+
 func (m *Mongo) Close(ctx context.Context) error {
 	return m.Connection.Close(ctx)
 }
 
-//test function to check connection
 func (m *Mongo) IsConnected(ctx context.Context) bool {
-    if m.Connection == nil {
-        return false
-    }
-
-    // Pinging the MongoDB server
-    err := m.Connection.Ping(ctx, 5)
-    return err == nil
-}
-
-func (m *Mongo) CreateCollectionTest(ctx context.Context) error {
-    // Connect to the collection
-    collection := m.Connection.Collection("test-collection")
-
-    // Example document to insert
-    docToInsert := bson.M{"message": "hello"}
-
-    // Insert a document
-    _, err := collection.InsertOne(ctx, docToInsert)
-    if err != nil {
-        return fmt.Errorf("failed to insert document: %w", err)
-    }
-
-    // Find the inserted document
-    var foundDoc bson.M
-    err = collection.FindOne(ctx, bson.M{"message": "hello"}, &foundDoc)
-    if err != nil {
-        return fmt.Errorf("failed to find document: %w", err)
-    }
-
-    fmt.Println("Found document:", foundDoc)
-
-	for key, value := range foundDoc {
-		fmt.Println(key, value)
+	if m.Connection == nil {
+		return false
 	}
 
-    return nil
+	// Pinging the MongoDB server
+	err := m.Connection.Ping(ctx, 5)
+	return err == nil
 }
-

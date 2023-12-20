@@ -8,14 +8,12 @@ import (
 	"github.com/ONSdigital/log.go/v2/log"
 )
 
-// TODO: remove hello world handler
 const helloMessage = "Hello, World!"
 
 type HelloResponse struct {
 	Message string `json:"message,omitempty"`
 }
 
-// HelloHandler returns function containing a simple hello world example of an api handler
 func HelloHandler(ctx context.Context) http.HandlerFunc {
 	log.Info(ctx, "api contains example endpoint, remove hello.go as soon as possible")
 	return func(w http.ResponseWriter, req *http.Request) {

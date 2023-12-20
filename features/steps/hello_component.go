@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"github.com/ONSdigital/dp-legacy-cache-api/config"
+	"github.com/ONSdigital/dp-legacy-cache-api/models"
+	"github.com/ONSdigital/dp-legacy-cache-api/mongo"
 	"github.com/ONSdigital/dp-legacy-cache-api/service"
 	"github.com/ONSdigital/dp-legacy-cache-api/service/mock"
 
@@ -22,6 +24,7 @@ type Component struct {
 	HTTPServer     *http.Server
 	ServiceRunning bool
 	apiFeature     *componenttest.APIFeature
+	MongoClient    *mongo.Mongo
 }
 
 func NewComponent() (*Component, error) {
@@ -41,6 +44,7 @@ func NewComponent() (*Component, error) {
 	initMock := &mock.InitialiserMock{
 		DoGetHealthCheckFunc: c.DoGetHealthcheckOk,
 		DoGetHTTPServerFunc:  c.DoGetHTTPServer,
+		DoGetMongoDBFunc:     c.DoGetMongoDB,
 	}
 
 	c.svcList = service.NewServiceList(initMock)
@@ -86,4 +90,11 @@ func (c *Component) DoGetHTTPServer(bindAddr string, router http.Handler) servic
 	c.HTTPServer.Addr = bindAddr
 	c.HTTPServer.Handler = router
 	return c.HTTPServer
+}
+
+func (c *Component) DoGetMongoDB(_ context.Context, _ *config.Config) (service.DataStore, error) {
+	return &mock.DataStoreMock{
+		CloseFunc:       func(ctx context.Context) error { return nil },
+		GetDataSetsFunc: func(ctx context.Context) ([]models.DataMessage, error) { return []models.DataMessage{}, nil },
+	}, nil
 }
