@@ -5,6 +5,7 @@ import (
 
 	"github.com/ONSdigital/dp-legacy-cache-api/api"
 	"github.com/ONSdigital/dp-legacy-cache-api/config"
+	"github.com/ONSdigital/dp-legacy-cache-api/mongo"
 	"github.com/ONSdigital/log.go/v2/log"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
@@ -12,12 +13,13 @@ import (
 
 // Service contains all the configs, server and clients to run the API
 type Service struct {
-	Config      *config.Config
-	Server      HTTPServer
-	Router      *mux.Router
-	API         *api.API
-	ServiceList *ExternalServiceList
-	HealthCheck HealthChecker
+	Config        *config.Config
+	Server        HTTPServer
+	Router        *mux.Router
+	API           *api.API
+	ServiceList   *ExternalServiceList
+	HealthCheck   HealthChecker
+	MongoDBClient *mongo.Mongo
 }
 
 // Run the service
@@ -33,8 +35,17 @@ func Run(ctx context.Context, cfg *config.Config, serviceList *ExternalServiceLi
 
 	// TODO: Add other(s) to serviceList here
 
+	mongoDB := &mongo.Mongo{
+		MongoConfig: cfg.MongoConfig,
+	}
+	err := mongoDB.Init(ctx)
+	if err != nil {
+		log.Fatal(ctx, "failed to initialize MongoDB", err)
+		return nil, err
+	}
+
 	// Setup the API
-	a := api.Setup(ctx, r)
+	a := api.Setup(ctx, r, mongoDB)
 
 	hc, err := serviceList.GetHealthCheck(cfg, buildTime, gitCommit, version)
 
@@ -58,12 +69,13 @@ func Run(ctx context.Context, cfg *config.Config, serviceList *ExternalServiceLi
 	}()
 
 	return &Service{
-		Config:      cfg,
-		Router:      r,
-		API:         a,
-		HealthCheck: hc,
-		ServiceList: serviceList,
-		Server:      s,
+		Config:        cfg,
+		Router:        r,
+		API:           a,
+		HealthCheck:   hc,
+		ServiceList:   serviceList,
+		Server:        s,
+		MongoDBClient: mongoDB,
 	}, nil
 }
 
@@ -91,6 +103,12 @@ func (svc *Service) Close(ctx context.Context) error {
 		}
 
 		// TODO: Close other dependencies, in the expected order
+		if svc.MongoDBClient != nil {
+			if err := svc.MongoDBClient.Close(ctx); err != nil {
+				log.Error(ctx, "failed to close MongoDB connection", err)
+				hasShutdownError = true
+			}
+		}
 	}()
 
 	// wait for shutdown success (via cancel) or failure (timeout)

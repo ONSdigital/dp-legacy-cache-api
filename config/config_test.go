@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	mongodriver "github.com/ONSdigital/dp-mongodb/v3/mongodb"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -27,6 +28,23 @@ func TestConfig(t *testing.T) {
 					GracefulShutdownTimeout:    5 * time.Second,
 					HealthCheckInterval:        30 * time.Second,
 					HealthCheckCriticalTimeout: 90 * time.Second,
+					MongoConfig: MongoConfig{
+						MongoDriverConfig: mongodriver.MongoDriverConfig{
+							ClusterEndpoint:               "localhost:27017",
+							Username:                      "",
+							Password:                      "",
+							Database:                      "datasets",
+							Collections:                   map[string]string{DatasetsCollection: "datasets", ContactsCollection: "contacts", EditionsCollection: "editions", InstanceCollection: "instances", DimensionOptionsCollection: "dimension.options", InstanceLockCollection: "instances_locks"},
+							ReplicaSet:                    "",
+							IsStrongReadConcernEnabled:    false,
+							IsWriteConcernMajorityEnabled: true,
+							ConnectTimeout:                5 * time.Second,
+							QueryTimeout:                  15 * time.Second,
+							TLSConnectionConfig: mongodriver.TLSConnectionConfig{
+								IsSSL: false,
+							},
+						},
+					},
 				})
 			})
 
