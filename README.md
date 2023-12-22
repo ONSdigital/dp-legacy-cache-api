@@ -2,6 +2,7 @@
 REST API for managing cache control information for pages within the legacy CMS
 
 ### Getting started
+* Ensure Docker is installed on your local machine, installation steps can be found here https://docs.docker.com/desktop/install/mac-install/
 * Ensure mongoDB is installed on your local machine, installation steps can be found here https://www.mongodb.com/docs/manual/tutorial/install-mongodb-on-os-x/
 * Run `docker run --name mongo-test -p 27017:27017 -d mongo`. This command starts a new container named mongo-test using the official MongoDB image, mapping port 27017 of the host to port 27017 of the container, and runs it in the background.
 * Run `make debug` to run application on http://localhost:29100
