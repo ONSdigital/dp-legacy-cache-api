@@ -36,7 +36,8 @@ func (api *API) GetDataSets(ctx context.Context) http.HandlerFunc {
 
 		// Setting the header and encoding the results to JSON
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		if err := json.NewEncoder(w).Encode(results); err != nil {
+		err = json.NewEncoder(w).Encode(results)
+		if err != nil {
 			log.Error(ctx, "Error encoding results to JSON: %v", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		}
