@@ -113,8 +113,7 @@ func (svc *Service) Close(ctx context.Context) error {
 	return nil
 }
 
-func registerCheckers(ctx context.Context,
-	hc HealthChecker) (err error) {
+func registerCheckers(_ context.Context, _ HealthChecker) (err error) {
 	// TODO: add other health checks here, as per dp-upload-service
 
 	return nil
