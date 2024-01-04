@@ -14,6 +14,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/smartystreets/goconvey v1.8.1
 	github.com/stretchr/testify v1.8.4
+	go.mongodb.org/mongo-driver v1.13.1
 )
 
 require (
@@ -56,7 +57,6 @@ require (
 	github.com/xdg-go/scram v1.1.2 // indirect
 	github.com/xdg-go/stringprep v1.0.4 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20201027041543-1326539a0a0a // indirect
-	go.mongodb.org/mongo-driver v1.13.1 // indirect
 	go.opentelemetry.io/otel v1.21.0 // indirect
 	go.opentelemetry.io/otel/metric v1.21.0 // indirect
 	go.opentelemetry.io/otel/trace v1.21.0 // indirect
