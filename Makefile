@@ -51,7 +51,7 @@ lint-local: ## Use locally to run linters against Go code
 
 .PHONY: test
 test: ## Runs unit tests including checks for race conditions and returns coverage
-	go test -race -cover ./...
+	go test -race -cover -count=1 ./...
 
 .PHONY: test-component
 test-component: ## Runs component test suite
