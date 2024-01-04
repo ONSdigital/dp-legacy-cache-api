@@ -64,7 +64,6 @@ func run(ctx context.Context) error {
 		return errors.Wrap(err, "service error received")
 	case sig := <-signals:
 		log.Info(ctx, "os signal received", log.Data{"signal": sig})
-
 	}
 	return svc.Close(ctx)
 }

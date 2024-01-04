@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/ONSdigital/dp-legacy-cache-api/config"
-	mongolock "github.com/ONSdigital/dp-mongodb/v3/dplock"
 	mongohealth "github.com/ONSdigital/dp-mongodb/v3/health"
 	mongodriver "github.com/ONSdigital/dp-mongodb/v3/mongodb"
 )
@@ -14,12 +13,10 @@ type Mongo struct {
 
 	Connection   *mongodriver.MongoConnection
 	healthClient *mongohealth.CheckMongoClient
-	lockClient   *mongolock.Lock
 }
 
-func (m *Mongo) Init(ctx context.Context) (err error) {
-
-	//instantiate mongo
+func (m *Mongo) Init(_ context.Context) (err error) {
+	// instantiate mongo
 	m.Connection, err = mongodriver.Open(&m.MongoDriverConfig)
 
 	if err != nil {

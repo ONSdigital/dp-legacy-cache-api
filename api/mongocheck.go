@@ -40,6 +40,7 @@ func (api *API) GetDataSets(ctx context.Context) http.HandlerFunc {
 		if err != nil {
 			log.Error(ctx, "Error encoding results to JSON: %v", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
 		}
 	}
 }
@@ -49,22 +50,21 @@ func (api *API) AddDataSets(ctx context.Context) http.HandlerFunc {
 	log.Info(ctx, "api contains example endpoint, remove hello.go as soon as possible")
 
 	return func(w http.ResponseWriter, req *http.Request) {
-
 		ctx := req.Context()
 
-		//Deconstruct json into our DataMessage struct
+		// Deconstruct json into our DataMessage struct
 		var input DataMessage
 		err := json.NewDecoder(req.Body).Decode(&input)
-		
+
 		if err != nil {
 			log.Error(ctx, "error decoding request body", err)
 			return
 		}
 
-		//log the received data
+		// log the received data
 		fmt.Println("received data:", input)
 
-		//Insert Document to MongoDB
+		// Insert Document to MongoDB
 		collection := api.MongoClient.Connection.Collection("datasets")
 
 		result, err := collection.InsertOne(ctx, input)
@@ -79,6 +79,11 @@ func (api *API) AddDataSets(ctx context.Context) http.HandlerFunc {
 		// Respond with the inserted document and StatusCreated
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode(input) 
+		err = json.NewEncoder(w).Encode(input)
+		if err != nil {
+			log.Error(ctx, "Error encoding results to JSON: %v", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
 	}
 }
