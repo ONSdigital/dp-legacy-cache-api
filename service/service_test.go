@@ -27,6 +27,7 @@ var (
 )
 
 var (
+	errMongoDB = errors.New("mongoDB")
 	errHealthcheck = errors.New("healthCheck error")
 )
 
@@ -36,6 +37,16 @@ var funcDoGetHealthcheckErr = func(cfg *config.Config, buildTime string, gitComm
 
 var funcDoGetHTTPServerNil = func(bindAddr string, router http.Handler) service.HTTPServer {
 	return nil
+}
+
+var funcDoGetMongoDbErr = func(ctx context.Context, cfg *config.Config) (service.PermissionsStore, error) {
+	return nil, errMongoDB
+}
+
+var funcDoGetMongoDbOk := func(ctx context.Context, cfg *config.Config) (service.DataStore, error) {
+    return &mock.DataStoreMock{
+        CloseFunc: func(ctx context.Context) error { return nil },
+    }, nil
 }
 
 func TestRun(t *testing.T) {
@@ -80,6 +91,7 @@ func TestRun(t *testing.T) {
 			initMock := &mock.InitialiserMock{
 				DoGetHTTPServerFunc:  funcDoGetHTTPServerNil,
 				DoGetHealthCheckFunc: funcDoGetHealthcheckErr,
+				DoGetMongoDBFunc: funcDoGetMongoDbErr,
 			}
 			svcErrors := make(chan error, 1)
 			svcList := service.NewServiceList(initMock)

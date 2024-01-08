@@ -58,3 +58,13 @@ func (e *Init) DoGetHealthCheck(cfg *config.Config, buildTime, gitCommit, versio
 	hc := healthcheck.New(versionInfo, cfg.HealthCheckCriticalTimeout, cfg.HealthCheckInterval)
 	return &hc, nil
 }
+
+// DoGetMongoDB returns a MongoDB
+func (e *Init) DoGetMongoDB(ctx context.Context, cfg *config.Config) (DataStore, error) {
+	mongoDB, err := mongo.NewMongoStore(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return mongoDB, nil
+}

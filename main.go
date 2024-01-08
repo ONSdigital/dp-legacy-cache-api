@@ -7,6 +7,7 @@ import (
 	"syscall"
 
 	"github.com/ONSdigital/dp-legacy-cache-api/config"
+	// "github.com/ONSdigital/dp-legacy-cache-api/mongo"
 	"github.com/ONSdigital/dp-legacy-cache-api/service"
 	"github.com/ONSdigital/log.go/v2/log"
 	"github.com/pkg/errors"
@@ -48,7 +49,6 @@ func run(ctx context.Context) error {
 	if err != nil {
 		return errors.Wrap(err, "error getting configuration")
 	}
-
 	// Start service
 	svc, err := service.Run(ctx, cfg, svcList, BuildTime, GitCommit, Version, svcErrors)
 	if err != nil {
@@ -60,6 +60,7 @@ func run(ctx context.Context) error {
 	case err := <-svcErrors:
 		// TODO: call svc.Close(ctx) (or something specific)
 		//  if there are any service connections like Kafka that you need to shut down
+
 		return errors.Wrap(err, "service error received")
 	case sig := <-signals:
 		log.Info(ctx, "os signal received", log.Data{"signal": sig})

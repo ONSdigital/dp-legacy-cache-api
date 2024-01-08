@@ -5,6 +5,7 @@ go 1.21
 require (
 	github.com/ONSdigital/dp-component-test v0.10.0
 	github.com/ONSdigital/dp-healthcheck v1.6.2
+	github.com/ONSdigital/dp-mongodb/v3 v3.7.0
 	github.com/ONSdigital/dp-net/v2 v2.11.2
 	github.com/ONSdigital/log.go/v2 v2.4.3
 	github.com/cucumber/godog v0.13.0
@@ -13,12 +14,13 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/smartystreets/goconvey v1.8.1
 	github.com/stretchr/testify v1.8.4
+	go.mongodb.org/mongo-driver v1.13.1
 )
 
 require (
 	github.com/ONSdigital/dp-api-clients-go/v2 v2.254.1 // indirect
 	github.com/ONSdigital/dp-mongodb-in-memory v1.7.0 // indirect
-	github.com/chromedp/cdproto v0.0.0-20240102194822-c006b26f21c7 // indirect
+	github.com/chromedp/cdproto v0.0.0-20231205062650-00455a960d61 // indirect
 	github.com/chromedp/chromedp v0.9.3 // indirect
 	github.com/chromedp/sysutil v1.0.0 // indirect
 	github.com/cucumber/gherkin/go/v26 v26.2.0 // indirect
@@ -50,11 +52,11 @@ require (
 	github.com/smarty/assertions v1.15.1 // indirect
 	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/square/mongo-lock v0.0.0-20230808145049-cfcf499f6bf0 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
 	github.com/xdg-go/scram v1.1.2 // indirect
 	github.com/xdg-go/stringprep v1.0.4 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20201027041543-1326539a0a0a // indirect
-	go.mongodb.org/mongo-driver v1.13.1 // indirect
 	go.opentelemetry.io/otel v1.21.0 // indirect
 	go.opentelemetry.io/otel/metric v1.21.0 // indirect
 	go.opentelemetry.io/otel/trace v1.21.0 // indirect
