@@ -5,7 +5,7 @@ import (
 
 	"github.com/ONSdigital/dp-legacy-cache-api/api"
 	"github.com/ONSdigital/dp-legacy-cache-api/config"
-	"github.com/ONSdigital/dp-legacy-cache-api/mongo"
+// 	"github.com/ONSdigital/dp-legacy-cache-api/mongo"
 	"github.com/ONSdigital/log.go/v2/log"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
@@ -19,7 +19,8 @@ type Service struct {
 	API           *api.API
 	ServiceList   *ExternalServiceList
 	HealthCheck   HealthChecker
-	MongoDBClient mongo.MongoDBClient
+	MongoDB       DataStore
+// 	MongoDBClient mongo.MongoDBClient
 }
 
 // Run the service
@@ -32,15 +33,22 @@ func Run(ctx context.Context, cfg *config.Config, serviceList *ExternalServiceLi
     r := mux.NewRouter()
 
     s := serviceList.GetHTTPServer(cfg.BindAddr, r)
-	mongoClient := &mongo.Mongo{
-		MongoConfig: cfg.MongoConfig,
-	}
-	err := mongoClient.Init(ctx)
- 
+
+    mongoDB, err := serviceList.GetMongoDB(ctx)
     if err != nil {
-        log.Fatal(ctx, "failed to initialize MongoDB", err)
+        log.Fatal(ctx, "failed to initialise mongo DB", err)
         return nil, err
     }
+
+// 	mongoClient := &mongo.Mongo{
+// 		MongoConfig: cfg.MongoConfig,
+// 	}
+// 	err := mongoClient.NewMongoStore(ctx)
+//
+//     if err != nil {
+//         log.Fatal(ctx, "failed to initialize MongoDB", err)
+//         return nil, err
+//     }
 
     // Setup the API
     a := api.Setup(ctx, r, mongoClient)

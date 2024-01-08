@@ -1,10 +1,11 @@
 package service
 
 import (
+    "context"
 	"net/http"
 
 	"github.com/ONSdigital/dp-legacy-cache-api/config"
-
+    "github.com/ONSdigital/dp-legacy-cache-api/mongo"
 	"github.com/ONSdigital/dp-healthcheck/healthcheck"
 	dphttp "github.com/ONSdigital/dp-net/v2/http"
 )
@@ -12,6 +13,7 @@ import (
 // ExternalServiceList holds the initialiser and initialisation state of external services.
 type ExternalServiceList struct {
 	HealthCheck bool
+	MongoDB bool
 	Init        Initialiser
 }
 
@@ -59,8 +61,18 @@ func (e *Init) DoGetHealthCheck(cfg *config.Config, buildTime, gitCommit, versio
 	return &hc, nil
 }
 
+// GetMongoDB creates a mongoDB client and sets the Mongo flag to true
+func (e *ExternalServiceList) GetMongoDB(ctx context.Context) (DataStore, error) {
+	mongoDB, err := e.Init.DoGetMongoDB(ctx)
+	if err != nil {
+		return nil, err
+	}
+	e.MongoDB = true
+	return mongoDB, nil
+}
+
 // DoGetMongoDB returns a MongoDB
-func (e *Init) DoGetMongoDB(ctx context.Context, cfg *config.Config) (DataStore, error) {
+func (e *Init) DoGetMongoDB(ctx context.Context) (DataStore, error) {
 	mongoDB, err := mongo.NewMongoStore(ctx)
 	if err != nil {
 		return nil, err

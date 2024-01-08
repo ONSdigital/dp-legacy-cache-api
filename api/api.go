@@ -3,21 +3,22 @@ package api
 import (
 	"context"
 
-	"github.com/ONSdigital/dp-legacy-cache-api/mongo"
+// 	"github.com/ONSdigital/dp-legacy-cache-api/mongo"
 	"github.com/gorilla/mux"
 )
 
 // API provides a struct to wrap the api around
 type API struct {
 	Router      *mux.Router
-	MongoClient mongo.MongoDBClient
+	dataStore    DataStore
+// 	MongoClient mongo.MongoDBClient
 }
 
 // Setup function sets up the api and returns an api
-func Setup(ctx context.Context, r *mux.Router, mongoDB mongo.MongoDBClient) *API {
+func Setup(ctx context.Context, r *mux.Router, dataStore DataStore,) *API {
 	api := &API{
 		Router:      r,
-		MongoClient: mongoDB,
+		dataStore:    dataStore,
 	}
 
 	// TODO: remove hello world example handler route

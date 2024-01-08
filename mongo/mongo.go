@@ -26,12 +26,12 @@ type MongoDBClient interface {
 	AddDataSet(ctx context.Context, dataset models.DataMessage) (*mongodriver.CollectionInsertResult, error)
 }
 
-func (m *Mongo) NewMongoStore(_ context.Context) (err error) {
+func NewMongoStore(_ context.Context) (m *Mongo, err error) {
 	// instantiate mongo
 	m.Connection, err = mongodriver.Open(&m.MongoDriverConfig)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 	databaseCollectionBuilder := map[mongohealth.Database][]mongohealth.Collection{
 		mongohealth.Database(m.Database): {
@@ -41,7 +41,26 @@ func (m *Mongo) NewMongoStore(_ context.Context) (err error) {
 
 	m.healthClient = mongohealth.NewClientWithCollections(m.Connection, databaseCollectionBuilder)
 
-	return nil
+	return m, nil
+
+
+// 	m = &Mongo{MongoDriverConfig: cfg}
+//
+//     	m.Connection, err = mongodriver.Open(&m.MongoDriverConfig)
+//     	if err != nil {
+//     		return nil, err
+//     	}
+//
+//     	databaseCollectionBuilder := map[mongohealth.Database][]mongohealth.Collection{
+//     		mongohealth.Database(m.Database): {
+//     			mongohealth.Collection(m.ActualCollectionName(config.RolesCollection)),
+//     			mongohealth.Collection(m.ActualCollectionName(config.PoliciesCollection)),
+//     		},
+//     	}
+//     	m.healthClient = mongohealth.NewClientWithCollections(m.Connection, databaseCollectionBuilder)
+//
+//     	return m, nil
+
 }
 
 func (m *Mongo) GetDataSets(ctx context.Context) (values []models.DataMessage, err error) {
