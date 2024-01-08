@@ -39,11 +39,11 @@ var funcDoGetHTTPServerNil = func(bindAddr string, router http.Handler) service.
 	return nil
 }
 
-var funcDoGetMongoDbErr = func(ctx context.Context, cfg *config.Config) (service.PermissionsStore, error) {
+var funcDoGetMongoDbErr = func(ctx context.Context, cfg *config.Config) (service.DataStore, error) {
 	return nil, errMongoDB
 }
 
-var funcDoGetMongoDbOk := func(ctx context.Context, cfg *config.Config) (service.DataStore, error) {
+var funcDoGetMongoDbOk = func(ctx context.Context, cfg *config.Config) (service.DataStore, error) {
     return &mock.DataStoreMock{
         CloseFunc: func(ctx context.Context) error { return nil },
     }, nil

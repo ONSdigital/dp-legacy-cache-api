@@ -160,19 +160,19 @@ func TestGetHealthCheck(t *testing.T) {
 }
 func TestGetMongoDB(t *testing.T) {
 
-	Convey("Given a service list that returns a mocked mongo permissions store", t, func() {
+	Convey("Given a service list that returns a mocked mongo data store", t, func() {
 
-		mongoMock := &mock.PermissionsStoreMock{}
+		mongoMock := &mock.DataStoreMock{}
 
 		newServiceMock := &mock.InitialiserMock{
-			DoGetMongoDBFunc: func(ctx context.Context, cfg *config.Config) (service.PermissionsStore, error) {
+			DoGetMongoDBFunc: func(ctx context.Context, cfg *config.Config) (service.DataStore, error) {
 				return mongoMock, nil
 			},
 		}
 		svcList := service.NewServiceList(newServiceMock)
 		Convey("When GetMongoDB is called", func() {
 			m, err := svcList.GetMongoDB(ctx, cfg)
-			Convey(" Then the mongo flag is set to true and the mongo permssions store is returned", func() {
+			Convey(" Then the mongo flag is set to true and the mongo data store is returned", func() {
 				So(svcList.MongoDB, ShouldBeTrue)
 				So(m, ShouldEqual, mongoMock)
 				So(newServiceMock.DoGetMongoDBCalls(), ShouldHaveLength, 1)
@@ -181,10 +181,10 @@ func TestGetMongoDB(t *testing.T) {
 		})
 	})
 
-	Convey("Given a service list that returns nil for mongo permissions store", t, func() {
+	Convey("Given a service list that returns nil for mongo data store", t, func() {
 
 		newServiceMock := &mock.InitialiserMock{
-			DoGetMongoDBFunc: func(ctx context.Context, cfg *config.Config) (service.PermissionsStore, error) {
+			DoGetMongoDBFunc: func(ctx context.Context, cfg *config.Config) (service.DataStore, error) {
 				return nil, errMongoDB
 			},
 		}

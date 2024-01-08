@@ -28,8 +28,7 @@ func TestConfig(t *testing.T) {
 					GracefulShutdownTimeout:    5 * time.Second,
 					HealthCheckInterval:        30 * time.Second,
 					HealthCheckCriticalTimeout: 90 * time.Second,
-					MongoConfig: MongoConfig{
-						MongoDriverConfig: mongodriver.MongoDriverConfig{
+					MongoConfig: mongodriver.MongoDriverConfig{
 							ClusterEndpoint:               "localhost:27017",
 							Username:                      "",
 							Password:                      "",
@@ -43,7 +42,6 @@ func TestConfig(t *testing.T) {
 							TLSConnectionConfig: mongodriver.TLSConnectionConfig{
 								IsSSL: false,
 							},
-						},
 					},
 				})
 			})
