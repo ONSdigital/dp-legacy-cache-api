@@ -10,11 +10,11 @@ import (
 // API provides a struct to wrap the api around
 type API struct {
 	Router      *mux.Router
-	MongoClient *mongo.Mongo
+	MongoClient mongo.MongoDBClient
 }
 
 // Setup function sets up the api and returns an api
-func Setup(ctx context.Context, r *mux.Router, mongoDB *mongo.Mongo) *API {
+func Setup(ctx context.Context, r *mux.Router, mongoDB mongo.MongoDBClient) *API {
 	api := &API{
 		Router:      r,
 		MongoClient: mongoDB,

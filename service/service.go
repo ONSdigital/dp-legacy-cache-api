@@ -19,65 +19,63 @@ type Service struct {
 	API           *api.API
 	ServiceList   *ExternalServiceList
 	HealthCheck   HealthChecker
-	MongoDBClient *mongo.Mongo
+	MongoDBClient mongo.MongoDBClient
 }
 
 // Run the service
 func Run(ctx context.Context, cfg *config.Config, serviceList *ExternalServiceList, buildTime, gitCommit, version string, svcErrors chan error) (*Service, error) {
-	log.Info(ctx, "running service")
+    log.Info(ctx, "running service")
 
-	log.Info(ctx, "using service configuration", log.Data{"config": cfg})
+    log.Info(ctx, "using service configuration", log.Data{"config": cfg})
 
-	// Get HTTP Server and ... // TODO: Add any middleware that your service requires
-	r := mux.NewRouter()
+    // Get HTTP Server and ... // TODO: Add any middleware that your service requires
+    r := mux.NewRouter()
 
-	s := serviceList.GetHTTPServer(cfg.BindAddr, r)
-
-	// TODO: Add other(s) to serviceList here
-
-	mongoDB := &mongo.Mongo{
+    s := serviceList.GetHTTPServer(cfg.BindAddr, r)
+	mongoClient := &mongo.Mongo{
 		MongoConfig: cfg.MongoConfig,
 	}
-	err := mongoDB.Init(ctx)
-	if err != nil {
-		log.Fatal(ctx, "failed to initialize MongoDB", err)
-		return nil, err
-	}
+	err := mongoClient.Init(ctx)
+ 
+    if err != nil {
+        log.Fatal(ctx, "failed to initialize MongoDB", err)
+        return nil, err
+    }
 
-	// Setup the API
-	a := api.Setup(ctx, r, mongoDB)
+    // Setup the API
+    a := api.Setup(ctx, r, mongoClient)
 
-	hc, err := serviceList.GetHealthCheck(cfg, buildTime, gitCommit, version)
+    hc, err := serviceList.GetHealthCheck(cfg, buildTime, gitCommit, version)
+    if err != nil {
+        log.Fatal(ctx, "could not instantiate healthcheck", err)
+        return nil, err
+    }
 
-	if err != nil {
-		log.Fatal(ctx, "could not instantiate healthcheck", err)
-		return nil, err
-	}
+    if err := registerCheckers(ctx, hc); err != nil {
+        return nil, errors.Wrap(err, "unable to register checkers")
+    }
 
-	if err := registerCheckers(ctx, hc); err != nil {
-		return nil, errors.Wrap(err, "unable to register checkers")
-	}
+    r.StrictSlash(true).Path("/health").HandlerFunc(hc.Handler)
+    hc.Start(ctx)
 
-	r.StrictSlash(true).Path("/health").HandlerFunc(hc.Handler)
-	hc.Start(ctx)
+    // Run the HTTP server in a new go-routine
+    go func() {
+        if err := s.ListenAndServe(); err != nil {
+            svcErrors <- errors.Wrap(err, "failure in HTTP listen and serve")
+        }
+    }()
 
-	// Run the http server in a new go-routine
-	go func() {
-		if err := s.ListenAndServe(); err != nil {
-			svcErrors <- errors.Wrap(err, "failure in http listen and serve")
-		}
-	}()
-
-	return &Service{
-		Config:        cfg,
-		Router:        r,
-		API:           a,
-		HealthCheck:   hc,
-		ServiceList:   serviceList,
-		Server:        s,
-		MongoDBClient: mongoDB,
-	}, nil
+    return &Service{
+        Config:        cfg,
+        Router:        r,
+        API:           a,
+        HealthCheck:   hc,
+        ServiceList:   serviceList,
+        Server:        s,
+        MongoDBClient: mongoClient, // Assign the passed-in interface to the service
+    }, nil
 }
+
 
 // Close gracefully shuts the service down in the required order, with timeout
 func (svc *Service) Close(ctx context.Context) error {

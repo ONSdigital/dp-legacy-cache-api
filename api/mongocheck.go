@@ -6,31 +6,17 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/ONSdigital/dp-legacy-cache-api/models"
 	"github.com/ONSdigital/log.go/v2/log"
-	"go.mongodb.org/mongo-driver/bson"
 )
-
-type DataMessage struct {
-	Message string `json:"message,omitempty"`
-}
 
 func (api *API) GetDataSets(ctx context.Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		log.Info(ctx, "Calling get datasets handler")
 
-		// Empty filter to fetch all documents
-		filter := bson.M{}
-
-		// Slice to hold the results
-		var results []DataMessage
-
-		// Getting the collection
-		collection := api.MongoClient.Connection.Collection("datasets")
-
-		// Finding documents in the collection
-		_, err := collection.Find(ctx, filter, &results)
+		results, err := api.MongoClient.GetDataSets(ctx)
 		if err != nil {
-			log.Error(ctx, "Error finding collection: %v", err)
+			log.Error(ctx, "Error retrieving datasets from db:", err)
 			return
 		}
 
@@ -52,22 +38,21 @@ func (api *API) AddDataSets(ctx context.Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		ctx := req.Context()
 
-		// Deconstruct json into our DataMessage struct
-		var input DataMessage
+		// Deconstruct json into our models.DataMessage struct
+		var input models.DataMessage
 		err := json.NewDecoder(req.Body).Decode(&input)
 
 		if err != nil {
 			log.Error(ctx, "error decoding request body", err)
+			http.Error(w, "Bad Request", http.StatusBadRequest)
 			return
 		}
 
 		// log the received data
 		fmt.Println("received data:", input)
 
-		// Insert Document to MongoDB
-		collection := api.MongoClient.Connection.Collection("datasets")
 
-		result, err := collection.InsertOne(ctx, input)
+		result, err := api.MongoClient.AddDataSet(ctx, input)
 		if err != nil {
 			log.Error(ctx, "failed to insert document: %w", err)
 			return
