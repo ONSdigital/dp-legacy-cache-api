@@ -19,14 +19,14 @@ type Mongo struct {
 }
 
 type MongoDBClient interface {
-    Init(ctx context.Context) error
+    NewMongoStore(ctx context.Context) error
     Close(ctx context.Context) error
     IsConnected(ctx context.Context) bool
 	GetDataSets(ctx context.Context) ([]models.DataMessage, error)
 	AddDataSet(ctx context.Context, dataset models.DataMessage) (*mongodriver.CollectionInsertResult, error)
 }
 
-func (m *Mongo) Init(_ context.Context) (err error) {
+func (m *Mongo) NewMongoStore(_ context.Context) (err error) {
 	// instantiate mongo
 	m.Connection, err = mongodriver.Open(&m.MongoDriverConfig)
 

@@ -43,6 +43,12 @@ var funcDoGetMongoDbErr = func(ctx context.Context, cfg *config.Config) (service
 	return nil, errMongoDB
 }
 
+var funcDoGetMongoDbOk := func(ctx context.Context, cfg *config.Config) (service.DataStore, error) {
+    return &mock.DataStoreMock{
+        CloseFunc: func(ctx context.Context) error { return nil },
+    }, nil
+}
+
 func TestRun(t *testing.T) {
 	Convey("Having a set of mocked dependencies", t, func() {
 		cfg, err := config.Get()
