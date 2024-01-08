@@ -9,25 +9,37 @@ import (
 	mongodriver "github.com/ONSdigital/dp-mongodb/v3/mongodb"
 	"github.com/ONSdigital/log.go/v2/log"
 	"go.mongodb.org/mongo-driver/bson"
+// 	mongodb "github.com/ONSdigital/dp-mongodb/v3/mongodb"
 )
 
 type Mongo struct {
-	config.MongoConfig
+// 	config.MongoConfig
+	mongodriver.MongoDriverConfig
 
 	Connection   *mongodriver.MongoConnection
 	healthClient *mongohealth.CheckMongoClient
 }
 
-type MongoDBClient interface {
-    NewMongoStore(ctx context.Context) error
-    Close(ctx context.Context) error
-    IsConnected(ctx context.Context) bool
-	GetDataSets(ctx context.Context) ([]models.DataMessage, error)
-	AddDataSet(ctx context.Context, dataset models.DataMessage) (*mongodriver.CollectionInsertResult, error)
-}
 
-func NewMongoStore(_ context.Context) (m *Mongo, err error) {
+
+// type MongoDBClient interface {
+//     NewMongoStore(ctx context.Context) error
+//     Close(ctx context.Context) error
+//     IsConnected(ctx context.Context) bool
+// 	GetDataSets(ctx context.Context) ([]models.DataMessage, error)
+// 	AddDataSet(ctx context.Context, dataset models.DataMessage) (*mongodriver.CollectionInsertResult, error)
+// }
+
+// func NewMongoStore(_ context.Context, cfg config.MongoDB) (m *Mongo, err error) {
+// 	m = &Mongo{MongoDriverConfig: cfg}
+//
+// 	m.Connection, err = mongodriver.Open(&m.MongoDriverConfig)
+// 	if err != nil {
+
+func NewMongoStore(_ context.Context, cfg config.MongoConfig) (m *Mongo, err error) {
 	// instantiate mongo
+	m = &Mongo{MongoDriverConfig: cfg}
+
 	m.Connection, err = mongodriver.Open(&m.MongoDriverConfig)
 
 	if err != nil {

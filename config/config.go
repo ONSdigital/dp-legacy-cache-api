@@ -3,8 +3,9 @@ package config
 import (
 	"time"
 
-	mongodriver "github.com/ONSdigital/dp-mongodb/v3/mongodb"
+	"github.com/ONSdigital/dp-mongodb/v3/mongodb"
 	"github.com/kelseyhightower/envconfig"
+
 )
 
 const (
@@ -16,6 +17,9 @@ const (
 	InstanceLockCollection     = "InstanceLockCollection"
 )
 
+type MongoConfig = mongodb.MongoDriverConfig
+
+
 // Config represents service configuration for dp-legacy-cache-api
 type Config struct {
 	BindAddr                   string        `envconfig:"BIND_ADDR"`
@@ -25,12 +29,12 @@ type Config struct {
 	MongoConfig
 }
 
-type MongoConfig struct {
-	mongodriver.MongoDriverConfig
-
-	// CodeListAPIURL string `envconfig:"CODE_LIST_API_URL"`
-	// DatasetAPIURL  string `envconfig:"DATASET_API_URL"`
-}
+// type MongoConfig struct {
+// 	mongodriver.MongoDriverConfig
+//
+// 	// CodeListAPIURL string `envconfig:"CODE_LIST_API_URL"`
+// 	// DatasetAPIURL  string `envconfig:"DATASET_API_URL"`
+// }
 
 var cfg *Config
 
@@ -46,8 +50,7 @@ func Get() (*Config, error) {
 		GracefulShutdownTimeout:    5 * time.Second,
 		HealthCheckInterval:        30 * time.Second,
 		HealthCheckCriticalTimeout: 90 * time.Second,
-		MongoConfig: MongoConfig{
-			MongoDriverConfig: mongodriver.MongoDriverConfig{
+		MongoConfig: mongodb.MongoDriverConfig{
 				ClusterEndpoint:               "localhost:27017",
 				Username:                      "",
 				Password:                      "",
@@ -58,10 +61,9 @@ func Get() (*Config, error) {
 				IsWriteConcernMajorityEnabled: true,
 				ConnectTimeout:                5 * time.Second,
 				QueryTimeout:                  15 * time.Second,
-				TLSConnectionConfig: mongodriver.TLSConnectionConfig{
+				TLSConnectionConfig: mongodb.TLSConnectionConfig{
 					IsSSL: false,
 				},
-			},
 		},
 	}
 

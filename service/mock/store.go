@@ -6,6 +6,7 @@ package mock
 import (
 	"context"
 	"github.com/ONSdigital/dp-legacy-cache-api/api"
+	"github.com/ONSdigital/dp-legacy-cache-api/config"
 	"github.com/ONSdigital/dp-legacy-cache-api/models"
 	"sync"
 )
@@ -29,7 +30,7 @@ var _ api.DataStore = &DataStoreMock{}
 //			IsConnectedFunc: func(ctx context.Context) bool {
 //				panic("mock out the IsConnected method")
 //			},
-//			NewMongoStoreFunc: func(ctx context.Context) error {
+//			NewMongoStoreFunc: func(ctx context.Context, cfg *config.Config) error {
 //				panic("mock out the NewMongoStore method")
 //			},
 //		}
@@ -49,7 +50,7 @@ type DataStoreMock struct {
 	IsConnectedFunc func(ctx context.Context) bool
 
 	// NewMongoStoreFunc mocks the NewMongoStore method.
-	NewMongoStoreFunc func(ctx context.Context) error
+	NewMongoStoreFunc func(ctx context.Context, cfg *config.Config) error
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -72,6 +73,8 @@ type DataStoreMock struct {
 		NewMongoStore []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
+			// Cfg is the cfg argument value.
+			Cfg *config.Config
 		}
 	}
 	lockClose         sync.RWMutex
@@ -177,19 +180,21 @@ func (mock *DataStoreMock) IsConnectedCalls() []struct {
 }
 
 // NewMongoStore calls NewMongoStoreFunc.
-func (mock *DataStoreMock) NewMongoStore(ctx context.Context) error {
+func (mock *DataStoreMock) NewMongoStore(ctx context.Context, cfg *config.Config) error {
 	if mock.NewMongoStoreFunc == nil {
 		panic("DataStoreMock.NewMongoStoreFunc: method is nil but DataStore.NewMongoStore was just called")
 	}
 	callInfo := struct {
 		Ctx context.Context
+		Cfg *config.Config
 	}{
 		Ctx: ctx,
+		Cfg: cfg,
 	}
 	mock.lockNewMongoStore.Lock()
 	mock.calls.NewMongoStore = append(mock.calls.NewMongoStore, callInfo)
 	mock.lockNewMongoStore.Unlock()
-	return mock.NewMongoStoreFunc(ctx)
+	return mock.NewMongoStoreFunc(ctx, cfg)
 }
 
 // NewMongoStoreCalls gets all the calls that were made to NewMongoStore.
@@ -198,9 +203,11 @@ func (mock *DataStoreMock) NewMongoStore(ctx context.Context) error {
 //	len(mockedDataStore.NewMongoStoreCalls())
 func (mock *DataStoreMock) NewMongoStoreCalls() []struct {
 	Ctx context.Context
+	Cfg *config.Config
 } {
 	var calls []struct {
 		Ctx context.Context
+		Cfg *config.Config
 	}
 	mock.lockNewMongoStore.RLock()
 	calls = mock.calls.NewMongoStore

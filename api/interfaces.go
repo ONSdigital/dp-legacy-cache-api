@@ -5,6 +5,7 @@ import (
 
 // 	"github.com/ONSdigital/dp-healthcheck/healthcheck"
  	"github.com/ONSdigital/dp-legacy-cache-api/models"
+ 	"github.com/ONSdigital/dp-legacy-cache-api/config"
 )
 
 // moq -out mock/dataStore.go -pkg mock . DataStore
@@ -14,7 +15,7 @@ import (
 //DataStore defines the behaviour of a PermissionsStore
 
 type DataStore interface {
-    NewMongoStore(ctx context.Context) error
+    NewMongoStore(ctx context.Context, cfg *config.Config) error
     Close(ctx context.Context) error
     IsConnected(ctx context.Context) bool
     GetDataSets(ctx context.Context) ([]models.DataMessage, error)

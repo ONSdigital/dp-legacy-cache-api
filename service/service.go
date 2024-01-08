@@ -19,7 +19,7 @@ type Service struct {
 	API           *api.API
 	ServiceList   *ExternalServiceList
 	HealthCheck   HealthChecker
-	MongoDB       DataStore
+	mongoDB       DataStore
 // 	MongoDBClient mongo.MongoDBClient
 }
 
@@ -34,7 +34,7 @@ func Run(ctx context.Context, cfg *config.Config, serviceList *ExternalServiceLi
 
     s := serviceList.GetHTTPServer(cfg.BindAddr, r)
 
-    mongoDB, err := serviceList.GetMongoDB(ctx)
+    mongoDB, err := serviceList.GetMongoDB(ctx, cfg)
     if err != nil {
         log.Fatal(ctx, "failed to initialise mongo DB", err)
         return nil, err
@@ -51,7 +51,7 @@ func Run(ctx context.Context, cfg *config.Config, serviceList *ExternalServiceLi
 //     }
 
     // Setup the API
-    a := api.Setup(ctx, r, mongoClient)
+    a := api.Setup(ctx, r, mongoDB)
 
     hc, err := serviceList.GetHealthCheck(cfg, buildTime, gitCommit, version)
     if err != nil {
@@ -80,7 +80,7 @@ func Run(ctx context.Context, cfg *config.Config, serviceList *ExternalServiceLi
         HealthCheck:   hc,
         ServiceList:   serviceList,
         Server:        s,
-        MongoDBClient: mongoClient, // Assign the passed-in interface to the service
+        mongoDB: mongoDB,
     }, nil
 }
 
@@ -109,8 +109,8 @@ func (svc *Service) Close(ctx context.Context) error {
 		}
 
 		// TODO: Close other dependencies, in the expected order
-		if svc.MongoDBClient != nil {
-			if err := svc.MongoDBClient.Close(ctx); err != nil {
+		if svc.mongoDB != nil {
+			if err := svc.mongoDB.Close(ctx); err != nil {
 				log.Error(ctx, "failed to close MongoDB connection", err)
 				hasShutdownError = true
 			}
