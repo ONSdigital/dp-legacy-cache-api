@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"os"
 	"testing"
 
@@ -45,6 +46,15 @@ func (f *ComponentTest) InitializeTestSuite(_ *godog.TestSuiteContext) {
 
 }
 
+// func (f *ComponentTest) InitializeTestSuite(ctx *godog.TestSuiteContext) {
+// 	ctx.BeforeSuite(func() {
+// 		f.MongoFeature = componenttest.NewMongoFeature(componenttest.MongoOptions{MongoVersion: MongoVersion, DatabaseName: DatabaseName})
+// 	})
+// 	ctx.AfterSuite(func() {
+// 		f.MongoFeature.Close()
+// 	})
+// }
+
 func TestComponent(t *testing.T) {
 	if *componentFlag {
 		status := 0
@@ -63,6 +73,10 @@ func TestComponent(t *testing.T) {
 			TestSuiteInitializer: f.InitializeTestSuite,
 			Options:              &opts,
 		}.Run()
+
+		fmt.Println("=================================")
+		fmt.Printf("Component test coverage: %.2f%%\n", testing.Coverage()*100)
+		fmt.Println("=================================")
 
 		if status > 0 {
 			t.Fail()
