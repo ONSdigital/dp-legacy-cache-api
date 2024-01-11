@@ -35,7 +35,7 @@ REST API for managing cache control information for pages within the legacy CMS
 
 See [CONTRIBUTING](CONTRIBUTING.md) for details.
 
-### LicenseHelloHandler returns function con
+### License
 
 Copyright © 2023, Office for National Statistics (https://www.ons.gov.uk)
 
