@@ -13,7 +13,6 @@ import (
 )
 
 type Mongo struct {
-	// 	config.MongoConfig
 	mongoDriver.MongoDriverConfig
 
 	Connection   *mongoDriver.MongoConnection
