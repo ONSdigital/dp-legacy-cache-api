@@ -40,6 +40,7 @@ job "dp-legacy-cache-api" {
 
         image = "{{ECR_URL}}:concourse-{{REVISION}}"
 
+        ports = ["http"]
       }
 
       service {
@@ -60,7 +61,9 @@ job "dp-legacy-cache-api" {
         memory = "{{WEB_RESOURCE_MEM}}"
 
         network {
-          port "http" {}
+          port "http" {
+            to = 29100
+          }
         }
       }
 
@@ -103,6 +106,8 @@ job "dp-legacy-cache-api" {
         args = ["./dp-legacy-cache-api"]
 
         image = "{{ECR_URL}}:concourse-{{REVISION}}"
+
+        ports = ["http"]
       }
 
       service {
@@ -123,7 +128,9 @@ job "dp-legacy-cache-api" {
         memory = "{{PUBLISHING_RESOURCE_MEM}}"
 
         network {
-          port "http" {}
+          port "http" {
+            to = 29100
+          }
         }
       }
 
