@@ -19,6 +19,7 @@ type Mongo struct {
 	healthClient *mongoHealth.CheckMongoClient
 }
 
+// NewMongoStore creates a connection to mongo database
 func NewMongoStore(_ context.Context, cfg config.MongoConfig) (m *Mongo, err error) {
 	m = &Mongo{MongoDriverConfig: cfg}
 
@@ -38,6 +39,7 @@ func NewMongoStore(_ context.Context, cfg config.MongoConfig) (m *Mongo, err err
 	return m, nil
 }
 
+// GetDataSets reads all records in the connected database collection
 func (m *Mongo) GetDataSets(ctx context.Context) (values []models.DataMessage, err error) {
 	filter := bson.M{}
 
@@ -45,16 +47,17 @@ func (m *Mongo) GetDataSets(ctx context.Context) (values []models.DataMessage, e
 
 	_, err = m.Connection.Collection(config.DatasetsCollection).Find(ctx, filter, &results)
 	if err != nil {
-		log.Error(ctx, "Error finding collection: %v", err)
+		log.Error(ctx, "error finding collection", err)
 		return nil, err
 	}
 	return results, nil
 }
 
+// AddDataSet stores one dataset in the connected database
 func (m *Mongo) AddDataSet(ctx context.Context, dataset models.DataMessage) error {
 	_, err := m.Connection.Collection(config.DatasetsCollection).InsertOne(ctx, dataset)
 	if err != nil {
-		log.Error(ctx, "Error inserting document into collection:", err)
+		log.Error(ctx, "error inserting document into collection:", err)
 		return err
 	}
 	return nil
@@ -65,10 +68,12 @@ func (m *Mongo) Checker(ctx context.Context, state *healthcheck.CheckState) erro
 	return m.healthClient.Checker(ctx, state)
 }
 
+// Close closes the connection to the database
 func (m *Mongo) Close(ctx context.Context) error {
 	return m.Connection.Close(ctx)
 }
 
+// IsConnected return the connection status to the db
 func (m *Mongo) IsConnected(ctx context.Context) bool {
 	if m.Connection == nil {
 		return false

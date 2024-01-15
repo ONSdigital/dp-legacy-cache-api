@@ -8,6 +8,7 @@ import (
 	"github.com/ONSdigital/log.go/v2/log"
 )
 
+// TODO: remove hello world handler
 const helloMessage = "Hello, World!"
 
 type HelloResponse struct {
