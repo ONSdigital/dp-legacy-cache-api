@@ -125,6 +125,36 @@ func TestRun(t *testing.T) {
 			})
 		})
 
+		Convey("Given that Checkers cannot be registered", func() {
+			// setup (run before each `Convey` at this scope / indentation):
+			errAddheckFail := errors.New("Error(s) registering checkers for healthcheck")
+			hcMockAddFail := &mock.HealthCheckerMock{
+				AddCheckFunc: func(name string, checker healthcheck.Checker) error { return errAddheckFail },
+				StartFunc:    func(ctx context.Context) {},
+			}
+			initMock := &mock.InitialiserMock{
+				DoGetHTTPServerFunc: funcDoGetHTTPServerNil,
+				DoGetHealthCheckFunc: func(cfg *config.Config, buildTime string, gitCommit string, version string) (service.HealthChecker, error) {
+					return hcMockAddFail, nil
+				},
+				DoGetMongoDBFunc: funcDoGetMongoDBOk,
+				// ADD CODE: add the checkers that you want to register here
+			}
+			svcErrors := make(chan error, 1)
+			svcList := service.NewServiceList(initMock)
+			_, err := service.Run(ctx, cfg, svcList, testBuildTime, testGitCommit, testVersion, svcErrors)
+			Convey("Then service Run fails, but all checks try to register", func() {
+				So(err, ShouldNotBeNil)
+				So(err.Error(), ShouldResemble, fmt.Sprintf("unable to register checkers: %s", errAddheckFail.Error()))
+				So(svcList.HealthCheck, ShouldBeTrue)
+				// ADD CODE: add code to confirm checkers exist
+				So(len(hcMockAddFail.AddCheckCalls()), ShouldEqual, 1) // ADD CODE: change the '0' to the number of checkers you have registered
+			})
+			Reset(func() {
+				// This reset is run after each `Convey` at the same scope (indentation)
+			})
+		})
+
 		Convey("Given that all dependencies are successfully initialised", func() {
 			// setup (run before each `Convey` at this scope / indentation):
 			initMock := &mock.InitialiserMock{

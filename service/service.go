@@ -135,7 +135,7 @@ func registerCheckers(ctx context.Context,
 	}
 
 	if hasErrors {
-		return errors.New("Error(s) registering checkers for health check")
+		return errors.New("Error(s) registering checkers for healthcheck")
 	}
 	return nil
 }
