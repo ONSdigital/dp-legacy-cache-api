@@ -10,25 +10,8 @@ basePath: "/v1"
 schemes:
   - http
 tags:
-  - name: "hello"
   - name: "private"
 paths:
-  /hello:
-    get:
-      tags:
-        - hello
-      summary: Example hello world endpoint
-      description: Returns an example payload.
-      produces:
-        - application/json
-      responses:
-        200:
-          description: OK
-          schema:
-            $ref: "#/definitions/HelloResponse"
-        500:
-          $ref: '#/responses/InternalError'
-
   /health:
     get:
       tags:
@@ -52,13 +35,6 @@ responses:
     description: "Failed to process the request due to an internal error"
 
 definitions:
-  HelloResponse:
-    type: object
-    properties:
-      message:
-        type: string
-        description: "Message returned by hello world endpoint"
-        example: "Hello, world!"
   Health:
     type: object
     properties:

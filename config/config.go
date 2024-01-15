@@ -7,14 +7,7 @@ import (
 	"github.com/kelseyhightower/envconfig"
 )
 
-const (
-	DatasetsCollection         = "DatasetsCollection"
-	ContactsCollection         = "ContactsCollection"
-	EditionsCollection         = "EditionsCollection"
-	InstanceCollection         = "InstanceCollection"
-	DimensionOptionsCollection = "DimensionOptionsCollection"
-	InstanceLockCollection     = "InstanceLockCollection"
-)
+const DatasetsCollection = "DatasetsCollection"
 
 type MongoConfig = mongodb.MongoDriverConfig
 
@@ -46,7 +39,7 @@ func Get() (*Config, error) {
 			Username:                      "",
 			Password:                      "",
 			Database:                      "datasets",
-			Collections:                   map[string]string{DatasetsCollection: "datasets", ContactsCollection: "contacts", EditionsCollection: "editions", InstanceCollection: "instances", DimensionOptionsCollection: "dimension.options", InstanceLockCollection: "instances_locks"},
+			Collections:                   map[string]string{DatasetsCollection: "datasets"},
 			ReplicaSet:                    "",
 			IsStrongReadConcernEnabled:    false,
 			IsWriteConcernMajorityEnabled: true,

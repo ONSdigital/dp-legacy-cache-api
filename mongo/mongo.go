@@ -39,7 +39,7 @@ func NewMongoStore(_ context.Context, cfg config.MongoConfig) (m *Mongo, err err
 	return m, nil
 }
 
-// GetDataSets reads all records in the connected database collection
+// GetDataSets retrieves all the data records from the Datasets collection in MongoDB.
 func (m *Mongo) GetDataSets(ctx context.Context) (values []models.DataMessage, err error) {
 	filter := bson.M{}
 
@@ -57,7 +57,7 @@ func (m *Mongo) GetDataSets(ctx context.Context) (values []models.DataMessage, e
 func (m *Mongo) AddDataSet(ctx context.Context, dataset models.DataMessage) error {
 	_, err := m.Connection.Collection(config.DatasetsCollection).InsertOne(ctx, dataset)
 	if err != nil {
-		log.Error(ctx, "error inserting document into collection:", err)
+		log.Error(ctx, "error inserting document into collection", err)
 		return err
 	}
 	return nil

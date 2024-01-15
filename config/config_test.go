@@ -33,7 +33,7 @@ func TestConfig(t *testing.T) {
 						Username:                      "",
 						Password:                      "",
 						Database:                      "datasets",
-						Collections:                   map[string]string{DatasetsCollection: "datasets", ContactsCollection: "contacts", EditionsCollection: "editions", InstanceCollection: "instances", DimensionOptionsCollection: "dimension.options", InstanceLockCollection: "instances_locks"},
+						Collections:                   map[string]string{DatasetsCollection: "datasets"},
 						ReplicaSet:                    "",
 						IsStrongReadConcernEnabled:    false,
 						IsWriteConcernMajorityEnabled: true,

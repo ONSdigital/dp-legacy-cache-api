@@ -31,9 +31,9 @@ func TestGetHTTPServer(t *testing.T) {
 		}
 		r := mux.NewRouter()
 		svcList := service.NewServiceList(newServiceMock)
-		Convey(" When GetHTTPServer is called", func() {
+		Convey("When GetHTTPServer is called", func() {
 			server := svcList.GetHTTPServer(cfg.BindAddr, r)
-			Convey("Then then mock server is returned and had been initialised with the correct bind address", func() {
+			Convey("Then the mock server is returned and has been initialised with the correct bind address", func() {
 				So(newServiceMock.DoGetHTTPServerCalls(), ShouldHaveLength, 1)
 				So(newServiceMock.DoGetHTTPServerCalls()[0].BindAddr, ShouldEqual, cfg.BindAddr)
 				So(server, ShouldEqual, serverMock)
@@ -90,7 +90,7 @@ func TestGetHTTPServer(t *testing.T) {
 		r := mux.NewRouter()
 		svcList := service.NewServiceList(newServiceMock)
 		svcErrors := make(chan error, 1)
-		Convey(" When GetHTTPServer is called", func() {
+		Convey("When GetHTTPServer is called", func() {
 			server := svcList.GetHTTPServer(cfg.BindAddr, r)
 			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 			go func() {
@@ -167,7 +167,7 @@ func TestGetMongoDB(t *testing.T) {
 		svcList := service.NewServiceList(newServiceMock)
 		Convey("When GetMongoDB is called", func() {
 			m, err := svcList.GetMongoDB(ctx, cfg)
-			Convey(" Then the mongo flag is set to true and the mongo data store is returned", func() {
+			Convey("Then the mongo flag is set to true and the mongo data store is returned", func() {
 				So(svcList.MongoDB, ShouldBeTrue)
 				So(m, ShouldEqual, mongoMock)
 				So(newServiceMock.DoGetMongoDBCalls(), ShouldHaveLength, 1)

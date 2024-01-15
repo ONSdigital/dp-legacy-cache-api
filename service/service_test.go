@@ -119,10 +119,6 @@ func TestRun(t *testing.T) {
 				So(svcList.MongoDB, ShouldBeTrue)
 				So(svcList.HealthCheck, ShouldBeFalse)
 			})
-
-			Reset(func() {
-				// This reset is run after each `Convey` at the same scope (indentation)
-			})
 		})
 
 		Convey("Given that Checkers cannot be registered", func() {
@@ -138,7 +134,6 @@ func TestRun(t *testing.T) {
 					return hcMockAddFail, nil
 				},
 				DoGetMongoDBFunc: funcDoGetMongoDBOk,
-				// ADD CODE: add the checkers that you want to register here
 			}
 			svcErrors := make(chan error, 1)
 			svcList := service.NewServiceList(initMock)
@@ -147,11 +142,7 @@ func TestRun(t *testing.T) {
 				So(err, ShouldNotBeNil)
 				So(err.Error(), ShouldResemble, fmt.Sprintf("unable to register checkers: %s", errAddheckFail.Error()))
 				So(svcList.HealthCheck, ShouldBeTrue)
-				// ADD CODE: add code to confirm checkers exist
-				So(len(hcMockAddFail.AddCheckCalls()), ShouldEqual, 1) // ADD CODE: change the '0' to the number of checkers you have registered
-			})
-			Reset(func() {
-				// This reset is run after each `Convey` at the same scope (indentation)
+				So(len(hcMockAddFail.AddCheckCalls()), ShouldEqual, 1)
 			})
 		})
 
@@ -182,10 +173,6 @@ func TestRun(t *testing.T) {
 				serverWg.Wait() // Wait for HTTP server go-routine to finish
 				So(len(serverMock.ListenAndServeCalls()), ShouldEqual, 1)
 			})
-
-			Reset(func() {
-				// This reset is run after each `Convey` at the same scope (indentation)
-			})
 		})
 
 		Convey("Given that all dependencies are successfully initialised but the http server fails", func() {
@@ -205,10 +192,6 @@ func TestRun(t *testing.T) {
 				sErr := <-svcErrors
 				So(sErr.Error(), ShouldResemble, fmt.Sprintf("failure in HTTP listen and serve: %s", errServer.Error()))
 				So(len(failingServerMock.ListenAndServeCalls()), ShouldEqual, 1)
-			})
-
-			Reset(func() {
-				// This reset is run after each `Convey` at the same scope (indentation)
 			})
 		})
 	})
