@@ -9,6 +9,7 @@ import (
 	"github.com/ONSdigital/log.go/v2/log"
 )
 
+// GetDataSets reads all messages from the datastore
 func (api *API) GetDataSets(ctx context.Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		log.Info(ctx, "calling get datasets handler")
@@ -30,6 +31,7 @@ func (api *API) GetDataSets(ctx context.Context) http.HandlerFunc {
 	}
 }
 
+// AddDataSets stores a message in the datastore
 func (api *API) AddDataSets(ctx context.Context) http.HandlerFunc {
 	log.Info(ctx, "api contains example endpoint, remove hello.go as soon as possible")
 

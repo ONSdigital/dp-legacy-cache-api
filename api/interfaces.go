@@ -12,7 +12,6 @@ import (
 // moq -out mock/bundler.go -pkg mock . DataBundler
 
 // DataStore defines the behaviour of a DataStore
-
 type DataStore interface {
 	Checker(ctx context.Context, state *healthcheck.CheckState) error
 	Close(ctx context.Context) error

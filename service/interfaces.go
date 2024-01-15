@@ -34,6 +34,7 @@ type HealthChecker interface {
 	AddCheck(name string, checker healthcheck.Checker) (err error)
 }
 
+// DataStore includes all store functions for the API package
 type DataStore interface {
 	api.DataStore
 }
