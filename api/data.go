@@ -11,11 +11,11 @@ import (
 
 func (api *API) GetDataSets(ctx context.Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		log.Info(ctx, "Calling get datasets handler")
+		log.Info(ctx, "calling get datasets handler")
 
 		results, err := api.dataStore.GetDataSets(ctx)
 		if err != nil {
-			log.Error(ctx, "Error retrieving datasets from db:", err)
+			log.Error(ctx, "error retrieving datasets from db", err)
 			return
 		}
 
@@ -23,7 +23,7 @@ func (api *API) GetDataSets(ctx context.Context) http.HandlerFunc {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		err = json.NewEncoder(w).Encode(results)
 		if err != nil {
-			log.Error(ctx, "Error encoding results to JSON: %v", err)
+			log.Error(ctx, "error encoding results to JSON", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
@@ -44,22 +44,22 @@ func (api *API) AddDataSets(ctx context.Context) http.HandlerFunc {
 			return
 		}
 
-		log.Info(ctx, "Received data - ", log.Data{"input:": input})
+		log.Info(ctx, "received data", log.Data{"input:": input})
 
 		err = api.dataStore.AddDataSet(ctx, input)
 		if err != nil {
-			log.Error(ctx, "failed to insert document: %w", err)
+			log.Error(ctx, "failed to insert document", err)
 			return
 		}
 
-		log.Info(ctx, "Document inserted successfully")
+		log.Info(ctx, "successfully inserted document")
 
 		// Respond with the inserted document and StatusCreated
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusCreated)
 		err = json.NewEncoder(w).Encode(input)
 		if err != nil {
-			log.Error(ctx, "Error encoding results to JSON: %v", err)
+			log.Error(ctx, "error encoding results to JSON", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
