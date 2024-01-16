@@ -13,7 +13,7 @@ VERSION ?= $(shell git tag --points-at HEAD | grep ^v | head -n 1)
 LDFLAGS = -ldflags "-X main.BuildTime=$(BUILD_TIME) -X main.GitCommit=$(GIT_COMMIT) -X main.Version=$(VERSION)"
 
 .PHONY: all
-all: delimiter-AUDIT audit delimiter-LINTERS lint delimiter-UNIT-TESTS test delimiter-COMPONENT_TESTS test-component delimiter-FINISH ## Runs multiple targets, audit, lint, test and test-component
+all: audit test build lint test-component ## Runs multiple targets, audit, lint, test and test-component
 
 .PHONY: audit
 audit: ## Runs checks for security vulnerabilities on dependencies (including transient ones)
@@ -32,10 +32,6 @@ debug: ## Used to run code locally in debug mode
 	go build -tags 'debug' $(LDFLAGS) -o $(BINPATH)/dp-legacy-cache-api
 	HUMAN_LOG=1 DEBUG=1 $(BINPATH)/dp-legacy-cache-api
 
-.PHONY: delimiter-%
-delimiter-%:
-	@echo '===================${GREEN} $* ${RESET}==================='
-
 .PHONY: fmt
 fmt: ## Run Go formatting on code
 	go fmt ./...
@@ -51,7 +47,7 @@ lint-local: ## Use locally to run linters against Go code
 
 .PHONY: test
 test: ## Runs unit tests including checks for race conditions and returns coverage
-	go test -race -cover ./...
+	go test -race -cover -count=1 ./...
 
 .PHONY: test-component
 test-component:
