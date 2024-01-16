@@ -9,9 +9,9 @@ import (
 	"github.com/ONSdigital/dp-legacy-cache-api/config"
 )
 
-// moq -out mock/initialiser.go -pkg mock . Initialiser
-// moq -out mock/server.go -pkg mock . HTTPServer
-// moq -out mock/healthCheck.go -pkg mock . HealthChecker
+//go:generate moq -out mock/initialiser.go -pkg mock . Initialiser
+//go:generate moq -out mock/server.go -pkg mock . HTTPServer
+//go:generate moq -out mock/healthCheck.go -pkg mock . HealthChecker
 
 // Initialiser defines the methods to initialise external services
 type Initialiser interface {
