@@ -38,7 +38,7 @@ func Get() (*Config, error) {
 			ClusterEndpoint:               "localhost:27017",
 			Username:                      "",
 			Password:                      "",
-			Database:                      "datasets",
+			Database:                      "test",
 			Collections:                   map[string]string{DatasetsCollection: "datasets"},
 			ReplicaSet:                    "",
 			IsStrongReadConcernEnabled:    false,
