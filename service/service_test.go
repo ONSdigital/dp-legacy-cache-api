@@ -167,7 +167,7 @@ func TestRun(t *testing.T) {
 			Convey("The checkers are registered and the healthcheck and http server started", func() {
 				So(len(hcMock.AddCheckCalls()), ShouldEqual, 1)
 				So(len(initMock.DoGetHTTPServerCalls()), ShouldEqual, 1)
-				So(initMock.DoGetHTTPServerCalls()[0].BindAddr, ShouldEqual, "localhost:29100")
+				So(initMock.DoGetHTTPServerCalls()[0].BindAddr, ShouldEqual, ":29100")
 				So(len(hcMock.StartCalls()), ShouldEqual, 1)
 				//!!! a call needed to stop the server, maybe ?
 				serverWg.Wait() // Wait for HTTP server go-routine to finish
