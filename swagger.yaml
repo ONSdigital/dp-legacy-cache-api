@@ -11,7 +11,27 @@ schemes:
   - http
 tags:
   - name: "private"
-paths:
+paths:          
+  /cache-times/{id}:
+    get:
+      tags:
+        - "cache times"
+      summary: "Returns a cache time"
+      description: "Returns a cache time for a given id"
+      produces:
+        - "application/json"
+      parameters:
+        - in: path
+          name: id
+          description: "Unique id of cache time"
+          type: string
+          required: true
+      responses:
+        200:
+          description: "Successfully returned a cache time for a given id"
+          schema:
+            $ref: "#/definitions/CacheTime"
+
   /health:
     get:
       tags:
@@ -35,6 +55,37 @@ responses:
     description: "Failed to process the request due to an internal error"
 
 definitions:
+  CacheTime:
+    type: object
+    required:
+      - id
+      - path
+      - etag
+    properties:
+      id:
+        $ref: "#/definitions/CacheTimeID"
+      path:
+        description: "Path for which caching is set"
+        type: string
+        example: "admin"
+      etag:
+        description: "ETag for cache validation"
+        type: string
+        example: "etag_example"
+      collection_id:
+        description: "Collection ID - used for grouping and filtering of cache-time objects"
+        type: integer
+        format: int32
+        example: 123
+      release_time:
+        description: "Release time in ISO-8601 format"
+        type: string
+        format: date-time
+        example: "2024-01-15T12:00:00Z"
+  CacheTimeID:
+    description: "Unique identifier for CacheTime, represented as an MD5 hash of the path"
+    type: string
+    example: "1b2b3c4d5e6f7g8h9i0j"
   Health:
     type: object
     properties:

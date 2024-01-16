@@ -23,6 +23,7 @@ func TestSetup(t *testing.T) {
 		Convey("When created the following routes should have been added", func() {
 			So(hasRoute(cacheAPI.Router, "/mongocheck", "POST"), ShouldBeTrue)
 			So(hasRoute(cacheAPI.Router, "/mongocheck", "GET"), ShouldBeTrue)
+			So(hasRoute(cacheAPI.Router, "/v1/cache-times/{id}", "GET"), ShouldBeTrue)
 		})
 	})
 }
@@ -31,4 +32,8 @@ func hasRoute(r *mux.Router, path, method string) bool {
 	req := httptest.NewRequest(method, path, http.NoBody)
 	match := &mux.RouteMatch{}
 	return r.Match(req, match)
+}
+
+func setupAPIWithStore(ctx context.Context, dataStore api.DataStore) *api.API {
+	return api.Setup(ctx, mux.NewRouter(), dataStore)
 }

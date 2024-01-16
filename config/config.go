@@ -7,7 +7,7 @@ import (
 	"github.com/kelseyhightower/envconfig"
 )
 
-const DatasetsCollection = "DatasetsCollection"
+const CacheTimesCollection = "CacheTimesCollection"
 
 type MongoConfig = mongodb.MongoDriverConfig
 
@@ -39,7 +39,7 @@ func Get() (*Config, error) {
 			Username:                      "",
 			Password:                      "",
 			Database:                      "test",
-			Collections:                   map[string]string{DatasetsCollection: "datasets"},
+			Collections:                   map[string]string{CacheTimesCollection: "cachetimes"},
 			ReplicaSet:                    "",
 			IsStrongReadConcernEnabled:    false,
 			IsWriteConcernMajorityEnabled: true,

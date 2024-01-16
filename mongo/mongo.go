@@ -22,7 +22,6 @@ type Mongo struct {
 // NewMongoStore creates a connection to mongo database
 func NewMongoStore(_ context.Context, cfg config.MongoConfig) (m *Mongo, err error) {
 	m = &Mongo{MongoDriverConfig: cfg}
-
 	m.Connection, err = mongoDriver.Open(&m.MongoDriverConfig)
 
 	if err != nil {
@@ -30,7 +29,7 @@ func NewMongoStore(_ context.Context, cfg config.MongoConfig) (m *Mongo, err err
 	}
 	databaseCollectionBuilder := map[mongoHealth.Database][]mongoHealth.Collection{
 		mongoHealth.Database(m.Database): {
-			mongoHealth.Collection(m.ActualCollectionName(config.DatasetsCollection)),
+			mongoHealth.Collection(m.ActualCollectionName(config.CacheTimesCollection)),
 		},
 	}
 
@@ -45,7 +44,7 @@ func (m *Mongo) GetDataSets(ctx context.Context) (values []models.DataMessage, e
 
 	var results []models.DataMessage
 
-	_, err = m.Connection.Collection(config.DatasetsCollection).Find(ctx, filter, &results)
+	_, err = m.Connection.Collection(config.CacheTimesCollection).Find(ctx, filter, &results)
 	if err != nil {
 		log.Error(ctx, "error finding collection", err)
 		return nil, err
@@ -55,7 +54,7 @@ func (m *Mongo) GetDataSets(ctx context.Context) (values []models.DataMessage, e
 
 // AddDataSet stores one dataset in the connected database
 func (m *Mongo) AddDataSet(ctx context.Context, dataset models.DataMessage) error {
-	_, err := m.Connection.Collection(config.DatasetsCollection).InsertOne(ctx, dataset)
+	_, err := m.Connection.Collection(config.CacheTimesCollection).InsertOne(ctx, dataset)
 	if err != nil {
 		log.Error(ctx, "error inserting document into collection", err)
 		return err
@@ -82,4 +81,18 @@ func (m *Mongo) IsConnected(ctx context.Context) bool {
 	// Pinging the MongoDB server
 	err := m.Connection.Ping(ctx, 5)
 	return err == nil
+}
+
+// GetCacheTime returns a cache time with its given id
+func (m *Mongo) GetCacheTime(ctx context.Context, id string) (*models.CacheTime, error) {
+	filter := bson.M{"_id": id}
+	var result models.CacheTime
+
+	err := m.Connection.Collection(m.ActualCollectionName(config.CacheTimesCollection)).FindOne(ctx, filter, &result)
+	if err != nil {
+		// TODO: need to differentiate between 404 not found err and internal server error.
+		log.Error(ctx, "error finding dataset", err)
+		return nil, err
+	}
+	return &result, nil
 }

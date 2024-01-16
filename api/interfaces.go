@@ -18,4 +18,5 @@ type DataStore interface {
 	IsConnected(ctx context.Context) bool
 	GetDataSets(ctx context.Context) ([]models.DataMessage, error)
 	AddDataSet(ctx context.Context, dataset models.DataMessage) error
+	GetCacheTime(ctx context.Context, id string) (*models.CacheTime, error)
 }

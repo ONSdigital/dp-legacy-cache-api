@@ -30,6 +30,9 @@ var _ api.DataStore = &DataStoreMock{}
 //			CloseFunc: func(ctx context.Context) error {
 //				panic("mock out the Close method")
 //			},
+//			GetCacheTimeFunc: func(ctx context.Context, id string) (*models.CacheTime, error) {
+//				panic("mock out the GetCacheTime method")
+//			},
 //			GetDataSetsFunc: func(ctx context.Context) ([]models.DataMessage, error) {
 //				panic("mock out the GetDataSets method")
 //			},
@@ -51,6 +54,9 @@ type DataStoreMock struct {
 
 	// CloseFunc mocks the Close method.
 	CloseFunc func(ctx context.Context) error
+
+	// GetCacheTimeFunc mocks the GetCacheTime method.
+	GetCacheTimeFunc func(ctx context.Context, id string) (*models.CacheTime, error)
 
 	// GetDataSetsFunc mocks the GetDataSets method.
 	GetDataSetsFunc func(ctx context.Context) ([]models.DataMessage, error)
@@ -79,6 +85,13 @@ type DataStoreMock struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 		}
+		// GetCacheTime holds details about calls to the GetCacheTime method.
+		GetCacheTime []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// ID is the id argument value.
+			ID string
+		}
 		// GetDataSets holds details about calls to the GetDataSets method.
 		GetDataSets []struct {
 			// Ctx is the ctx argument value.
@@ -90,11 +103,12 @@ type DataStoreMock struct {
 			Ctx context.Context
 		}
 	}
-	lockAddDataSet  sync.RWMutex
-	lockChecker     sync.RWMutex
-	lockClose       sync.RWMutex
-	lockGetDataSets sync.RWMutex
-	lockIsConnected sync.RWMutex
+	lockAddDataSet   sync.RWMutex
+	lockChecker      sync.RWMutex
+	lockClose        sync.RWMutex
+	lockGetCacheTime sync.RWMutex
+	lockGetDataSets  sync.RWMutex
+	lockIsConnected  sync.RWMutex
 }
 
 // AddDataSet calls AddDataSetFunc.
@@ -198,6 +212,42 @@ func (mock *DataStoreMock) CloseCalls() []struct {
 	mock.lockClose.RLock()
 	calls = mock.calls.Close
 	mock.lockClose.RUnlock()
+	return calls
+}
+
+// GetCacheTime calls GetCacheTimeFunc.
+func (mock *DataStoreMock) GetCacheTime(ctx context.Context, id string) (*models.CacheTime, error) {
+	if mock.GetCacheTimeFunc == nil {
+		panic("DataStoreMock.GetCacheTimeFunc: method is nil but DataStore.GetCacheTime was just called")
+	}
+	callInfo := struct {
+		Ctx context.Context
+		ID  string
+	}{
+		Ctx: ctx,
+		ID:  id,
+	}
+	mock.lockGetCacheTime.Lock()
+	mock.calls.GetCacheTime = append(mock.calls.GetCacheTime, callInfo)
+	mock.lockGetCacheTime.Unlock()
+	return mock.GetCacheTimeFunc(ctx, id)
+}
+
+// GetCacheTimeCalls gets all the calls that were made to GetCacheTime.
+// Check the length with:
+//
+//	len(mockedDataStore.GetCacheTimeCalls())
+func (mock *DataStoreMock) GetCacheTimeCalls() []struct {
+	Ctx context.Context
+	ID  string
+} {
+	var calls []struct {
+		Ctx context.Context
+		ID  string
+	}
+	mock.lockGetCacheTime.RLock()
+	calls = mock.calls.GetCacheTime
+	mock.lockGetCacheTime.RUnlock()
 	return calls
 }
 

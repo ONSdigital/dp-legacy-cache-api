@@ -7,6 +7,7 @@ import (
 
 	"github.com/ONSdigital/dp-legacy-cache-api/models"
 	"github.com/ONSdigital/log.go/v2/log"
+	"github.com/gorilla/mux"
 )
 
 // GetDataSets reads all messages from the datastore
@@ -36,7 +37,6 @@ func (api *API) AddDataSets(ctx context.Context) http.HandlerFunc {
 	log.Info(ctx, "calling add datsets handler")
 
 	return func(w http.ResponseWriter, req *http.Request) {
-		// Deconstruct json into our models.DataMessage struct
 		var docToInsert models.DataMessage
 		err := json.NewDecoder(req.Body).Decode(&docToInsert)
 
@@ -65,5 +65,26 @@ func (api *API) AddDataSets(ctx context.Context) http.HandlerFunc {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
+	}
+}
+
+// GetCacheTime retrieves cache time data for a given ID and writes it to the HTTP response.
+func (api *API) GetCacheTime(ctx context.Context, w http.ResponseWriter, req *http.Request) {
+	log.Info(ctx, "calling get cache time handler")
+
+	vars := mux.Vars(req)
+	id := vars["id"]
+
+	cacheTime, err := api.dataStore.GetCacheTime(ctx, id)
+	if err != nil {
+		log.Error(ctx, "error retrieving cache time from datastore", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	if err := json.NewEncoder(w).Encode(cacheTime); err != nil {
+		log.Error(ctx, "error encoding results to JSON", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
 }
