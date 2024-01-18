@@ -31,7 +31,28 @@ paths:
           description: "Successfully returned a cache time for a given id"
           schema:
             $ref: "#/definitions/CacheTime"
-
+    put:
+      tags:
+        - "cache times"
+      summary: "Updates or creates a cache time"
+      description: "Updates a cache time if it exists or creates a new one for a given id"
+      consumes:
+        - "application/json"
+      parameters:
+        - in: path
+          name: id
+          description: "Unique id of cache time"
+          type: string
+          required: true
+        - in: body
+          name: body
+          description: "Cache time object that needs to be created or updated (without id)"
+          required: true
+          schema:
+            $ref: "#/definitions/CacheTimePutRequest"
+      responses:
+        204:
+          description: "Cache time successfully updated or created"
   /health:
     get:
       tags:
@@ -82,6 +103,30 @@ definitions:
         type: string
         format: date-time
         example: "2024-01-15T12:00:00Z"
+  CacheTimePutRequest:
+    type: object
+    required:
+      - path
+      - etag
+    properties:
+      path:
+        description: "Path for which caching is set"
+        type: string
+        example: "admin"
+      etag:
+        description: "ETag for cache validation"
+        type: string
+        example: "etag_example"
+      collection_id:
+        description: "Collection ID - used for grouping and filtering of cache-time objects"
+        type: integer
+        format: int32
+        example: 123
+      release_time:
+        description: "Release time in ISO-8601 format"
+        type: string
+        format: date-time
+        example: "2024-01-15T12:00:00Z"      
   CacheTimeID:
     description: "Unique identifier for CacheTime, represented as an MD5 hash of the path"
     type: string

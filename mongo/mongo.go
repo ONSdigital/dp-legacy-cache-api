@@ -96,3 +96,15 @@ func (m *Mongo) GetCacheTime(ctx context.Context, id string) (*models.CacheTime,
 	}
 	return &result, nil
 }
+
+// UpsertCacheTime adds or overrides an existing cache time
+func (m *Mongo) UpsertCacheTime(ctx context.Context, cacheTime *models.CacheTime) (err error) {
+	update := bson.M{
+		"$set": cacheTime,
+	}
+	selector := bson.M{"_id": cacheTime.ID}
+
+	_, err = m.Connection.Collection(m.ActualCollectionName(config.CacheTimesCollection)).UpsertOne(ctx, selector, update)
+
+	return err
+}

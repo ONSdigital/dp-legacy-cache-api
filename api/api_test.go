@@ -24,6 +24,7 @@ func TestSetup(t *testing.T) {
 			So(hasRoute(cacheAPI.Router, "/mongocheck", "POST"), ShouldBeTrue)
 			So(hasRoute(cacheAPI.Router, "/mongocheck", "GET"), ShouldBeTrue)
 			So(hasRoute(cacheAPI.Router, "/v1/cache-times/{id}", "GET"), ShouldBeTrue)
+			So(hasRoute(cacheAPI.Router, "/v1/cache-times/{id}", "PUT"), ShouldBeTrue)
 		})
 	})
 }

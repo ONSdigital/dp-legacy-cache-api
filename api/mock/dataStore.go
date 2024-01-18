@@ -39,6 +39,9 @@ var _ api.DataStore = &DataStoreMock{}
 //			IsConnectedFunc: func(ctx context.Context) bool {
 //				panic("mock out the IsConnected method")
 //			},
+//			UpsertCacheTimeFunc: func(ctx context.Context, cacheTime *models.CacheTime) error {
+//				panic("mock out the UpsertCacheTime method")
+//			},
 //		}
 //
 //		// use mockedDataStore in code that requires api.DataStore
@@ -63,6 +66,9 @@ type DataStoreMock struct {
 
 	// IsConnectedFunc mocks the IsConnected method.
 	IsConnectedFunc func(ctx context.Context) bool
+
+	// UpsertCacheTimeFunc mocks the UpsertCacheTime method.
+	UpsertCacheTimeFunc func(ctx context.Context, cacheTime *models.CacheTime) error
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -102,13 +108,21 @@ type DataStoreMock struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 		}
+		// UpsertCacheTime holds details about calls to the UpsertCacheTime method.
+		UpsertCacheTime []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// CacheTime is the cacheTime argument value.
+			CacheTime *models.CacheTime
+		}
 	}
-	lockAddDataSet   sync.RWMutex
-	lockChecker      sync.RWMutex
-	lockClose        sync.RWMutex
-	lockGetCacheTime sync.RWMutex
-	lockGetDataSets  sync.RWMutex
-	lockIsConnected  sync.RWMutex
+	lockAddDataSet      sync.RWMutex
+	lockChecker         sync.RWMutex
+	lockClose           sync.RWMutex
+	lockGetCacheTime    sync.RWMutex
+	lockGetDataSets     sync.RWMutex
+	lockIsConnected     sync.RWMutex
+	lockUpsertCacheTime sync.RWMutex
 }
 
 // AddDataSet calls AddDataSetFunc.
@@ -312,5 +326,41 @@ func (mock *DataStoreMock) IsConnectedCalls() []struct {
 	mock.lockIsConnected.RLock()
 	calls = mock.calls.IsConnected
 	mock.lockIsConnected.RUnlock()
+	return calls
+}
+
+// UpsertCacheTime calls UpsertCacheTimeFunc.
+func (mock *DataStoreMock) UpsertCacheTime(ctx context.Context, cacheTime *models.CacheTime) error {
+	if mock.UpsertCacheTimeFunc == nil {
+		panic("DataStoreMock.UpsertCacheTimeFunc: method is nil but DataStore.UpsertCacheTime was just called")
+	}
+	callInfo := struct {
+		Ctx       context.Context
+		CacheTime *models.CacheTime
+	}{
+		Ctx:       ctx,
+		CacheTime: cacheTime,
+	}
+	mock.lockUpsertCacheTime.Lock()
+	mock.calls.UpsertCacheTime = append(mock.calls.UpsertCacheTime, callInfo)
+	mock.lockUpsertCacheTime.Unlock()
+	return mock.UpsertCacheTimeFunc(ctx, cacheTime)
+}
+
+// UpsertCacheTimeCalls gets all the calls that were made to UpsertCacheTime.
+// Check the length with:
+//
+//	len(mockedDataStore.UpsertCacheTimeCalls())
+func (mock *DataStoreMock) UpsertCacheTimeCalls() []struct {
+	Ctx       context.Context
+	CacheTime *models.CacheTime
+} {
+	var calls []struct {
+		Ctx       context.Context
+		CacheTime *models.CacheTime
+	}
+	mock.lockUpsertCacheTime.RLock()
+	calls = mock.calls.UpsertCacheTime
+	mock.lockUpsertCacheTime.RUnlock()
 	return calls
 }
