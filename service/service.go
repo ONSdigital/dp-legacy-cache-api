@@ -22,6 +22,7 @@ type Service struct {
 }
 
 // Run the service
+// (svc *Service)
 func Run(ctx context.Context, cfg *config.Config, serviceList *ExternalServiceList, buildTime, gitCommit, version string, svcErrors chan error) (*Service, error) {
 	log.Info(ctx, "running service")
 
@@ -29,6 +30,9 @@ func Run(ctx context.Context, cfg *config.Config, serviceList *ExternalServiceLi
 
 	// Get HTTP Server and ... // TODO: Add any middleware that your service requires
 	router := mux.NewRouter()
+
+	// m := service.createMiddleware(cfg)
+	// httpServer := serviceList.GetHTTPServer(cfg.BindAddr, m.Then(router))
 
 	httpServer := serviceList.GetHTTPServer(cfg.BindAddr, router)
 
@@ -139,3 +143,38 @@ func registerCheckers(ctx context.Context,
 	}
 	return nil
 }
+
+// CreateMiddleware creates an Alice middleware chain of handlers
+// to forward collectionID from cookie from header
+// func (svc *Service) createMiddleware(cfg *config.Config) alice.Chain {
+// 	// healthcheck
+// 	healthcheckHandler := newMiddleware(svc.healthCheck.Handler, "/health")
+// 	middleware := alice.New(healthcheckHandler)
+
+// 	// Only add the identity middleware when running in publishing.
+// 	// if cfg.EnablePrivateEndpoints {
+// 	// 	middleware = middleware.Append(dphandlers.IdentityWithHTTPClient(svc.identityClient))
+// 	// }
+
+// 	// collection ID
+// 	middleware = middleware.Append(dphandlers.CheckHeader(dphandlers.CollectionID))
+
+// 	return middleware
+// }
+
+// newMiddleware creates a new http.Handler to intercept /health requests.
+// func newMiddleware(healthcheckHandler func(http.ResponseWriter, *http.Request), path string) func(http.Handler) http.Handler {
+// 	return func(h http.Handler) http.Handler {
+// 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+// 			if req.Method == "GET" && req.URL.Path == path {
+// 				healthcheckHandler(w, req)
+// 				return
+// 			} else if req.Method == "GET" && req.URL.Path == "/healthcheck" {
+// 				http.NotFound(w, req)
+// 				return
+// 			}
+
+// 			h.ServeHTTP(w, req)
+// 		})
+// 	}
+// }

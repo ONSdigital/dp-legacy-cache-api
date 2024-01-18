@@ -37,18 +37,21 @@ func Setup(ctx context.Context, r *mux.Router, dataStore DataStore) *API {
 	// )
 
 	// GetPermissionsRequestBuilder for authorising general CMD access (cases where we don't have a collection ID & dataset ID).
-	permissionsRequestBuilder := auth.NewPermissionsRequestBuilder("http://localhost:8082")
 
-	permissions := auth.NewHandler(
-		permissionsRequestBuilder,
-		auth.DefaultPermissionsClient(),
-		auth.DefaultPermissionsVerifier(),
-	)
+	// permissionsRequestBuilder := auth.NewPermissionsRequestBuilder("http://localhost:8082")
 
-	//r.HandleFunc("/datasets", permissions.Require(read, getDatasetsHandlerFunc)).Methods("GET")
+	// permissions := auth.NewHandler(
+	// 	permissionsRequestBuilder,
+	// 	auth.DefaultPermissionsClient(),
+	// 	auth.DefaultPermissionsVerifier(),
+	// )
 
-	r.HandleFunc("/mongocheck", permissions.Require(update, api.AddDataSets(ctx))).Methods("POST")
-	r.HandleFunc("/mongocheck", permissions.Require(read, api.GetDataSets(ctx))).Methods("GET")
+	// r.HandleFunc("/mongocheck", permissions.Require(update, api.AddDataSets(ctx))).Methods("POST")
+	// r.HandleFunc("/mongocheck", permissions.Require(read, api.GetDataSets(ctx))).Methods("GET")
+
+	// r.Path("/mongocheck").Methods("POST").HandlerFunc(handlers.CheckIdentity(api.AddDataSets))
+	// r.Path("/mongocheck").Methods("GET").HandlerFunc(handlers.CheckIdentity(api.GetDataSets))
+
 	return api
 }
 
