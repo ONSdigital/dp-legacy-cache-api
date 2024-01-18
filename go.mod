@@ -18,8 +18,15 @@ require (
 )
 
 require (
+	github.com/ONSdigital/dp-api-clients-go v1.43.0 // indirect
+	github.com/aws/aws-sdk-go v1.48.9 // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
+)
+
+require (
 	github.com/ONSdigital/dp-api-clients-go/v2 v2.254.1 // indirect
 	github.com/ONSdigital/dp-mongodb-in-memory v1.7.0 // indirect
+	github.com/ONSdigital/dp-net v1.5.0
 	github.com/chromedp/cdproto v0.0.0-20231205062650-00455a960d61 // indirect
 	github.com/chromedp/chromedp v0.9.3 // indirect
 	github.com/chromedp/sysutil v1.0.0 // indirect

@@ -18,6 +18,8 @@ type Config struct {
 	HealthCheckInterval        time.Duration `envconfig:"HEALTHCHECK_INTERVAL"`
 	HealthCheckCriticalTimeout time.Duration `envconfig:"HEALTHCHECK_CRITICAL_TIMEOUT"`
 	MongoConfig
+	ZebedeeURL             string
+	EnablePrivateEndpoints bool
 }
 
 var cfg *Config
@@ -30,6 +32,8 @@ func Get() (*Config, error) {
 	}
 
 	cfg = &Config{
+		ZebedeeURL:                 "http://localhost:8082", //`envconfig:"ZEBEDEE_URL"`,
+		EnablePrivateEndpoints:     true,
 		BindAddr:                   ":29100",
 		GracefulShutdownTimeout:    5 * time.Second,
 		HealthCheckInterval:        30 * time.Second,

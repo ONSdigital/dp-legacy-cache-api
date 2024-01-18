@@ -48,7 +48,7 @@ func NewComponent() (*Component, error) {
 	}
 
 	c.svcList = service.NewServiceList(initMock)
-
+	c.svc = service.New(c.Config, c.svcList)
 	c.apiFeature = componenttest.NewAPIFeature(c.InitialiseService)
 
 	return c, nil
@@ -69,7 +69,8 @@ func (c *Component) Close() error {
 
 func (c *Component) InitialiseService() (http.Handler, error) {
 	var err error
-	c.svc, err = service.Run(context.Background(), c.Config, c.svcList, "1", "", "", c.errorChan)
+
+	_, err = c.svc.Run(context.Background(), c.Config, c.svcList, "1", "", "", c.errorChan)
 	if err != nil {
 		return nil, err
 	}

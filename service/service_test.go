@@ -94,7 +94,8 @@ func TestRun(t *testing.T) {
 			}
 			svcErrors := make(chan error, 1)
 			svcList := service.NewServiceList(initMock)
-			_, err := service.Run(ctx, cfg, svcList, testBuildTime, testGitCommit, testVersion, svcErrors)
+			cacheService := service.New(cfg, svcList)
+			_, err := cacheService.Run(ctx, cfg, svcList, testBuildTime, testGitCommit, testVersion, svcErrors)
 
 			Convey("Then service Run fails with the same error and the flag is not set. No further initialisations are attempted", func() {
 				So(err, ShouldResemble, errMongoDB)
@@ -112,7 +113,8 @@ func TestRun(t *testing.T) {
 			}
 			svcErrors := make(chan error, 1)
 			svcList := service.NewServiceList(initMock)
-			_, err := service.Run(ctx, cfg, svcList, testBuildTime, testGitCommit, testVersion, svcErrors)
+			cacheService := service.New(cfg, svcList)
+			_, err := cacheService.Run(ctx, cfg, svcList, testBuildTime, testGitCommit, testVersion, svcErrors)
 
 			Convey("Then service Run fails with the same error and the flag is not set", func() {
 				So(err, ShouldResemble, errHealthcheck)
@@ -137,7 +139,9 @@ func TestRun(t *testing.T) {
 			}
 			svcErrors := make(chan error, 1)
 			svcList := service.NewServiceList(initMock)
-			_, err := service.Run(ctx, cfg, svcList, testBuildTime, testGitCommit, testVersion, svcErrors)
+			cacheService := service.New(cfg, svcList)
+			_, err := cacheService.Run(ctx, cfg, svcList, testBuildTime, testGitCommit, testVersion, svcErrors)
+
 			Convey("Then service Run fails, but all checks try to register", func() {
 				So(err, ShouldNotBeNil)
 				So(err.Error(), ShouldResemble, fmt.Sprintf("unable to register checkers: %s", errAddheckFail.Error()))
@@ -155,8 +159,9 @@ func TestRun(t *testing.T) {
 			}
 			svcErrors := make(chan error, 1)
 			svcList := service.NewServiceList(initMock)
+			cacheService := service.New(cfg, svcList)
 			serverWg.Add(1)
-			_, err := service.Run(ctx, cfg, svcList, testBuildTime, testGitCommit, testVersion, svcErrors)
+			_, err := cacheService.Run(ctx, cfg, svcList, testBuildTime, testGitCommit, testVersion, svcErrors)
 
 			Convey("Then service Run succeeds and all the flags are set", func() {
 				So(err, ShouldBeNil)
@@ -184,8 +189,9 @@ func TestRun(t *testing.T) {
 			}
 			svcErrors := make(chan error, 1)
 			svcList := service.NewServiceList(initMock)
+			cacheService := service.New(cfg, svcList)
 			serverWg.Add(1)
-			_, err := service.Run(ctx, cfg, svcList, testBuildTime, testGitCommit, testVersion, svcErrors)
+			_, err := cacheService.Run(ctx, cfg, svcList, testBuildTime, testGitCommit, testVersion, svcErrors)
 			So(err, ShouldBeNil)
 
 			Convey("Then the error is returned in the error channel", func() {
@@ -248,7 +254,9 @@ func TestClose(t *testing.T) {
 
 			svcErrors := make(chan error, 1)
 			svcList := service.NewServiceList(initMock)
-			svc, err = service.Run(ctx, cfg, svcList, testBuildTime, testGitCommit, testVersion, svcErrors)
+			cacheService := service.New(cfg, svcList)
+			svc, err = cacheService.Run(ctx, cfg, svcList, testBuildTime, testGitCommit, testVersion, svcErrors)
+
 			So(err, ShouldBeNil)
 
 			err = svc.Close(context.Background())
@@ -278,7 +286,8 @@ func TestClose(t *testing.T) {
 
 			svcErrors := make(chan error, 1)
 			svcList := service.NewServiceList(initMock)
-			svc, err = service.Run(ctx, cfg, svcList, testBuildTime, testGitCommit, testVersion, svcErrors)
+			cacheService := service.New(cfg, svcList)
+			svc, err = cacheService.Run(ctx, cfg, svcList, testBuildTime, testGitCommit, testVersion, svcErrors)
 			So(err, ShouldBeNil)
 
 			err = svc.Close(context.Background())

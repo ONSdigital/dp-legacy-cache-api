@@ -49,7 +49,8 @@ func run(ctx context.Context) error {
 		return errors.Wrap(err, "error getting configuration")
 	}
 	// Start service
-	svc, err := service.Run(ctx, cfg, svcList, BuildTime, GitCommit, Version, svcErrors)
+	cacheService := service.New(cfg, svcList)
+	_, err = cacheService.Run(ctx, cfg, svcList, BuildTime, GitCommit, Version, svcErrors)
 	if err != nil {
 		return errors.Wrap(err, "running service failed")
 	}
@@ -64,5 +65,5 @@ func run(ctx context.Context) error {
 	case sig := <-signals:
 		log.Info(ctx, "os signal received", log.Data{"signal": sig})
 	}
-	return svc.Close(ctx)
+	return cacheService.Close(ctx)
 }

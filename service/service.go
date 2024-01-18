@@ -2,27 +2,41 @@ package service
 
 import (
 	"context"
+	"net/http"
 
+	clientsidentity "github.com/ONSdigital/dp-api-clients-go/v2/identity"
 	"github.com/ONSdigital/dp-legacy-cache-api/api"
 	"github.com/ONSdigital/dp-legacy-cache-api/config"
+	dphandlers "github.com/ONSdigital/dp-net/handlers"
 	"github.com/ONSdigital/log.go/v2/log"
 	"github.com/gorilla/mux"
+	"github.com/justinas/alice"
 	"github.com/pkg/errors"
 )
 
 // Service contains all the configs, server and clients to run the API
 type Service struct {
-	Config      *config.Config
-	Server      HTTPServer
-	Router      *mux.Router
-	API         *api.API
-	ServiceList *ExternalServiceList
-	HealthCheck HealthChecker
-	mongoDB     DataStore
+	Config         *config.Config
+	Server         HTTPServer
+	Router         *mux.Router
+	API            *api.API
+	identityClient *clientsidentity.Client
+	ServiceList    *ExternalServiceList
+	HealthCheck    HealthChecker
+	mongoDB        DataStore
+}
+
+// New creates a new service instance
+func New(cfg *config.Config, serviceList *ExternalServiceList) *Service {
+	svc := &Service{
+		Config:      cfg,
+		ServiceList: serviceList,
+	}
+	return svc
 }
 
 // Run the service
-func Run(ctx context.Context, cfg *config.Config, serviceList *ExternalServiceList, buildTime, gitCommit, version string, svcErrors chan error) (*Service, error) {
+func (svc *Service) Run(ctx context.Context, cfg *config.Config, serviceList *ExternalServiceList, buildTime, gitCommit, version string, svcErrors chan error) (*Service, error) {
 	log.Info(ctx, "running service")
 
 	log.Info(ctx, "using service configuration", log.Data{"config": cfg})
@@ -38,10 +52,19 @@ func Run(ctx context.Context, cfg *config.Config, serviceList *ExternalServiceLi
 		return nil, err
 	}
 
+	// Get Identity Client (only if private endpoints are enabled)
+	if svc.Config.EnablePrivateEndpoints {
+		svc.identityClient = clientsidentity.New(svc.Config.ZebedeeURL)
+	}
+
+	m := svc.createMiddleware(svc.Config)
+	svc.Server = svc.ServiceList.GetHTTPServer(svc.Config.BindAddr, m.Then(router))
+
 	// Setup the API
 	cacheAPI := api.Setup(ctx, router, mongoDB)
 
 	hc, err := serviceList.GetHealthCheck(cfg, buildTime, gitCommit, version)
+
 	if err != nil {
 		log.Fatal(ctx, "could not instantiate healthcheck", err)
 		return nil, err
@@ -67,8 +90,9 @@ func Run(ctx context.Context, cfg *config.Config, serviceList *ExternalServiceLi
 		API:         cacheAPI,
 		HealthCheck: hc,
 		ServiceList: serviceList,
-		Server:      httpServer,
-		mongoDB:     mongoDB,
+		// IdentityClient ,
+		Server:  httpServer,
+		mongoDB: mongoDB,
 	}, nil
 }
 
@@ -138,4 +162,39 @@ func registerCheckers(ctx context.Context,
 		return errors.New("Error(s) registering checkers for healthcheck")
 	}
 	return nil
+}
+
+// CreateMiddleware creates an Alice middleware chain of handlers
+// to forward collectionID from cookie from header
+func (svc *Service) createMiddleware(cfg *config.Config) alice.Chain {
+	// healthcheck
+	healthcheckHandler := newMiddleware(svc.HealthCheck.Handler, "/health")
+	middleware := alice.New(healthcheckHandler)
+
+	// Only add the identity middleware when running in publishing.
+	if cfg.EnablePrivateEndpoints {
+		middleware = middleware.Append(dphandlers.IdentityWithHTTPClient(svc.identityClient))
+	}
+
+	// collection ID
+	middleware = middleware.Append(dphandlers.CheckHeader(dphandlers.CollectionID))
+
+	return middleware
+}
+
+// newMiddleware creates a new http.Handler to intercept /health requests.
+func newMiddleware(healthcheckHandler func(http.ResponseWriter, *http.Request), path string) func(http.Handler) http.Handler {
+	return func(h http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			if req.Method == "GET" && req.URL.Path == path {
+				healthcheckHandler(w, req)
+				return
+			} else if req.Method == "GET" && req.URL.Path == "/healthcheck" {
+				http.NotFound(w, req)
+				return
+			}
+
+			h.ServeHTTP(w, req)
+		})
+	}
 }
