@@ -5,9 +5,13 @@ import (
 	"net/http"
 
 	clientsidentity "github.com/ONSdigital/dp-api-clients-go/v2/identity"
+	"github.com/ONSdigital/dp-authorisation/auth"
 	"github.com/ONSdigital/dp-legacy-cache-api/api"
 	"github.com/ONSdigital/dp-legacy-cache-api/config"
-	dphandlers "github.com/ONSdigital/dp-net/handlers"
+
+	// dphandlers "github.com/ONSdigital/dp-net/handlers"
+	dphandlers "github.com/ONSdigital/dp-net/v2/handlers"
+	dphttp "github.com/ONSdigital/dp-net/v2/http"
 	"github.com/ONSdigital/log.go/v2/log"
 	"github.com/gorilla/mux"
 	"github.com/justinas/alice"
@@ -20,7 +24,7 @@ type Service struct {
 	Server         HTTPServer
 	Router         *mux.Router
 	API            *api.API
-	identityClient *clientsidentity.Client
+	IdentityClient *clientsidentity.Client
 	ServiceList    *ExternalServiceList
 	HealthCheck    HealthChecker
 	mongoDB        DataStore
@@ -36,64 +40,61 @@ func New(cfg *config.Config, serviceList *ExternalServiceList) *Service {
 }
 
 // Run the service
-func (svc *Service) Run(ctx context.Context, cfg *config.Config, serviceList *ExternalServiceList, buildTime, gitCommit, version string, svcErrors chan error) (*Service, error) {
+func (svc *Service) Run(ctx context.Context, cfg *config.Config, serviceList *ExternalServiceList, buildTime, gitCommit, version string, svcErrors chan error) error {
+	var err error
 	log.Info(ctx, "running service")
-
 	log.Info(ctx, "using service configuration", log.Data{"config": cfg})
 
 	// Get HTTP Server and ... // TODO: Add any middleware that your service requires
 	router := mux.NewRouter()
 
-	httpServer := serviceList.GetHTTPServer(cfg.BindAddr, router)
+	svc.Server = serviceList.GetHTTPServer(cfg.BindAddr, router)
 
-	mongoDB, err := serviceList.GetMongoDB(ctx, cfg)
+	svc.mongoDB, err = serviceList.GetMongoDB(ctx, cfg)
 	if err != nil {
 		log.Fatal(ctx, "failed to initialise mongo DB", err)
-		return nil, err
+		return err
+	}
+
+	svc.HealthCheck, err = serviceList.GetHealthCheck(cfg, buildTime, gitCommit, version)
+
+	if err != nil {
+		log.Fatal(ctx, "could not instantiate healthcheck", err)
+		return err
+	}
+
+	if err = registerCheckers(ctx, svc.HealthCheck, svc.mongoDB); err != nil {
+		log.Fatal(ctx, "could not instantiate healthcheck", errors.Wrap(err, "unable to register checkers"))
+		return err
 	}
 
 	// Get Identity Client (only if private endpoints are enabled)
-	if svc.Config.EnablePrivateEndpoints {
-		svc.identityClient = clientsidentity.New(svc.Config.ZebedeeURL)
-	}
+	//if svc.Config.EnablePrivateEndpoints {
+	svc.IdentityClient = clientsidentity.New(svc.Config.ZebedeeURL)
+	//}
 
 	m := svc.createMiddleware(svc.Config)
 	svc.Server = svc.ServiceList.GetHTTPServer(svc.Config.BindAddr, m.Then(router))
 
+	// Create Dataset API
+	// urlBuilder := url.NewBuilder(svc.Config.WebsiteURL)
+	datasetPermissions, permissions := getAuthorisationHandlers(ctx, svc.Config)
+	// svc.API = api.Setup(ctx, svc.config, r, ds, urlBuilder, downloadGenerators, datasetPermissions, permissions)
+
 	// Setup the API
-	cacheAPI := api.Setup(ctx, router, mongoDB)
+	svc.API = api.Setup(ctx, router, svc.mongoDB, datasetPermissions, permissions)
 
-	hc, err := serviceList.GetHealthCheck(cfg, buildTime, gitCommit, version)
-
-	if err != nil {
-		log.Fatal(ctx, "could not instantiate healthcheck", err)
-		return nil, err
-	}
-
-	if err := registerCheckers(ctx, hc, mongoDB); err != nil {
-		return nil, errors.Wrap(err, "unable to register checkers")
-	}
-
-	router.StrictSlash(true).Path("/health").HandlerFunc(hc.Handler)
-	hc.Start(ctx)
+	router.StrictSlash(true).Path("/health").HandlerFunc(svc.HealthCheck.Handler)
+	svc.HealthCheck.Start(ctx)
 
 	// Run the HTTP server in a new go-routine
 	go func() {
-		if err := httpServer.ListenAndServe(); err != nil {
+		if err = svc.Server.ListenAndServe(); err != nil {
 			svcErrors <- errors.Wrap(err, "failure in HTTP listen and serve")
 		}
 	}()
 
-	return &Service{
-		Config:      cfg,
-		Router:      router,
-		API:         cacheAPI,
-		HealthCheck: hc,
-		ServiceList: serviceList,
-		// IdentityClient ,
-		Server:  httpServer,
-		mongoDB: mongoDB,
-	}, nil
+	return nil
 }
 
 // Close gracefully shuts the service down in the required order, with timeout
@@ -173,7 +174,7 @@ func (svc *Service) createMiddleware(cfg *config.Config) alice.Chain {
 
 	// Only add the identity middleware when running in publishing.
 	if cfg.EnablePrivateEndpoints {
-		middleware = middleware.Append(dphandlers.IdentityWithHTTPClient(svc.identityClient))
+		middleware = middleware.Append(dphandlers.IdentityWithHTTPClient(svc.IdentityClient))
 	}
 
 	// collection ID
@@ -197,4 +198,32 @@ func newMiddleware(healthcheckHandler func(http.ResponseWriter, *http.Request), 
 			h.ServeHTTP(w, req)
 		})
 	}
+}
+
+func getAuthorisationHandlers(ctx context.Context, cfg *config.Config) (datasetPermissions, permissions api.AuthHandler) {
+	// if !cfg.EnablePermissionsAuth {
+	// 	log.Info(ctx, "feature flag not enabled defaulting to nop auth impl", log.Data{"feature": "ENABLE_PERMISSIONS_AUTH"})
+	// 	return &auth.NopHandler{}, &auth.NopHandler{}
+	// }
+
+	log.Info(ctx, "feature flag enabled", log.Data{"feature": "ENABLE_PERMISSIONS_AUTH"})
+
+	authClient := auth.NewPermissionsClient(dphttp.NewClient())
+	authVerifier := auth.DefaultPermissionsVerifier()
+
+	// for checking caller permissions when we have a datasetID, collection ID and user/service token
+	datasetPermissions = auth.NewHandler(
+		auth.NewDatasetPermissionsRequestBuilder(cfg.ZebedeeURL, "dataset_id", mux.Vars),
+		authClient,
+		authVerifier,
+	)
+
+	// for checking caller permissions when we only have a user/service token
+	permissions = auth.NewHandler(
+		auth.NewPermissionsRequestBuilder(cfg.ZebedeeURL),
+		authClient,
+		authVerifier,
+	)
+
+	return datasetPermissions, permissions
 }
