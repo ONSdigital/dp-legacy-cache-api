@@ -50,7 +50,7 @@ func run(ctx context.Context) error {
 	}
 	// Start service
 	cacheService := service.New(cfg, svcList)
-	_, err = cacheService.Run(ctx, cfg, svcList, BuildTime, GitCommit, Version, svcErrors)
+	err = cacheService.Run(ctx, cfg, svcList, BuildTime, GitCommit, Version, svcErrors)
 	if err != nil {
 		return errors.Wrap(err, "running service failed")
 	}

@@ -70,7 +70,7 @@ func (c *Component) Close() error {
 func (c *Component) InitialiseService() (http.Handler, error) {
 	var err error
 
-	_, err = c.svc.Run(context.Background(), c.Config, c.svcList, "1", "", "", c.errorChan)
+	err = c.svc.Run(context.Background(), c.Config, c.svcList, "1", "", "", c.errorChan)
 	if err != nil {
 		return nil, err
 	}
