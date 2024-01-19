@@ -48,7 +48,7 @@ func Setup(ctx context.Context, router *mux.Router, dataStore DataStore, dataset
 
 	router.Path("/mongocheck").Methods("POST").HandlerFunc(dphandlers.CheckIdentity(api.AddDataSets(ctx)))
 	router.Path("/mongocheck").Methods("GET").HandlerFunc(dphandlers.CheckIdentity(api.GetDataSets(ctx)))
-	router.Path("/v1/cache-times/{id}").Methods("GET").HandlerFunc(api.isAuthenticated(func(w http.ResponseWriter, req *http.Request) { api.GetCacheTime(ctx, w, req) }))
+	router.Path("/v1/cache-times/{id}").Methods("GET").HandlerFunc(api.isAuthenticated(api.isAuthorised(readPermission, func(w http.ResponseWriter, req *http.Request) { api.GetCacheTime(ctx, w, req) })))
 
 	return api
 }
