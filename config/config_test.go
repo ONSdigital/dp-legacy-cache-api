@@ -32,7 +32,7 @@ func TestConfig(t *testing.T) {
 						ClusterEndpoint:               "localhost:27017",
 						Username:                      "",
 						Password:                      "",
-						Database:                      "test",
+						Database:                      "cache",
 						Collections:                   map[string]string{CacheTimesCollection: "cachetimes"},
 						ReplicaSet:                    "",
 						IsStrongReadConcernEnabled:    false,
