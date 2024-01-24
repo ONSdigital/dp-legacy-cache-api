@@ -3,8 +3,10 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 
+	errs "github.com/ONSdigital/dp-legacy-cache-api/apierrors"
 	"github.com/ONSdigital/dp-legacy-cache-api/models"
 	"github.com/ONSdigital/log.go/v2/log"
 	"github.com/gorilla/mux"
@@ -99,20 +101,24 @@ func (api *API) CreateOrUpdateCacheTime(ctx context.Context, w http.ResponseWrit
 // GetCacheTime retrieves a cache time for a given ID and writes it to the HTTP response.
 func (api *API) GetCacheTime(ctx context.Context, w http.ResponseWriter, req *http.Request) {
 	log.Info(ctx, "calling get cache time handler")
-
 	vars := mux.Vars(req)
 	id := vars["id"]
 
 	cacheTime, err := api.dataStore.GetCacheTime(ctx, id)
 	if err != nil {
-		log.Error(ctx, "error retrieving cache time from datastore", err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		if errors.Is(err, errs.ErrCacheTimeNotFound) {
+			log.Info(ctx, "getCacheTime endpoint: api.dataStore.GetCacheTime document not found")
+			http.Error(w, err.Error(), http.StatusNotFound)
+		} else {
+			log.Error(ctx, "getCacheTime endpoint: api.dataStore.GetCacheTime internal server error", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 		return
 	}
-
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	if err := json.NewEncoder(w).Encode(cacheTime); err != nil {
 		log.Error(ctx, "error encoding results to JSON", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
 	}
 }

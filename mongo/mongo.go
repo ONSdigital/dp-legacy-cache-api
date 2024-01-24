@@ -2,8 +2,10 @@ package mongo
 
 import (
 	"context"
+	"errors"
 
 	"github.com/ONSdigital/dp-healthcheck/healthcheck"
+	errs "github.com/ONSdigital/dp-legacy-cache-api/apierrors"
 	"github.com/ONSdigital/dp-legacy-cache-api/config"
 	"github.com/ONSdigital/dp-legacy-cache-api/models"
 	mongoHealth "github.com/ONSdigital/dp-mongodb/v3/health"
@@ -90,9 +92,12 @@ func (m *Mongo) GetCacheTime(ctx context.Context, id string) (*models.CacheTime,
 
 	err := m.Connection.Collection(m.ActualCollectionName(config.CacheTimesCollection)).FindOne(ctx, filter, &result)
 	if err != nil {
-		// TODO: need to differentiate between 404 not found err and internal server error.
-		log.Error(ctx, "error finding dataset", err)
-		return nil, err
+		if errors.Is(err, mongoDriver.ErrNoDocumentFound) {
+			log.Info(ctx, "api.dataStore.GetCacheTime document not found")
+			return nil, errs.ErrCacheTimeNotFound
+		}
+		log.Error(ctx, "error targetting api.dataStore.GetCacheTime", err)
+		return nil, errs.ErrDataStore
 	}
 	return &result, nil
 }

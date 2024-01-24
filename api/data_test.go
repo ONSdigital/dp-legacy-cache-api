@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/ONSdigital/dp-legacy-cache-api/api/mock"
+	errs "github.com/ONSdigital/dp-legacy-cache-api/apierrors"
 	"github.com/ONSdigital/dp-legacy-cache-api/models"
 	. "github.com/smartystreets/goconvey/convey"
 )
@@ -62,6 +63,37 @@ func TestGetCacheTimeEndpoint(t *testing.T) {
 				So(cacheTime, ShouldEqual, expectedCacheTime)
 			})
 		})
+	})
+}
+
+func TestGetCacheTimeReturnsError(t *testing.T) {
+	Convey("When a non-existent cache time is requested with its ID", t, func() {
+		var nonExistentCacheID = "abcdef0a1b2c3d4e5f67890123456789"
+		ctx := context.Background()
+		r := httptest.NewRequest(http.MethodGet, baseURL+nonExistentCacheID, http.NoBody)
+		w := httptest.NewRecorder()
+		mockedDataStore := &mock.DataStoreMock{
+			GetCacheTimeFunc: func(ctx context.Context, id string) (*models.CacheTime, error) {
+				return nil, errs.ErrCacheTimeNotFound
+			},
+		}
+		dataStoreAPI := setupAPIWithStore(ctx, mockedDataStore)
+		dataStoreAPI.Router.ServeHTTP(w, r)
+		So(w.Code, ShouldEqual, http.StatusNotFound)
+	})
+	Convey("When the api cannot connect to datastore return an internal server error", t, func() {
+		ctx := context.Background()
+		r := httptest.NewRequest(http.MethodGet, baseURL+testCacheID, http.NoBody)
+		w := httptest.NewRecorder()
+		mockedDataStore := &mock.DataStoreMock{
+			GetCacheTimeFunc: func(ctx context.Context, id string) (*models.CacheTime, error) {
+				return nil, errs.ErrDataStore
+			},
+		}
+
+		dataStoreAPI := setupAPIWithStore(ctx, mockedDataStore)
+		dataStoreAPI.Router.ServeHTTP(w, r)
+		So(w.Code, ShouldEqual, http.StatusInternalServerError)
 	})
 }
 
