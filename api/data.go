@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/ONSdigital/dp-legacy-cache-api/models"
@@ -114,5 +115,18 @@ func (api *API) GetCacheTime(ctx context.Context, w http.ResponseWriter, req *ht
 	if err := json.NewEncoder(w).Encode(cacheTime); err != nil {
 		log.Error(ctx, "error encoding results to JSON", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	}
+}
+
+
+func isValidCacheTime(cacheTime *models.CacheTime) (bool, error) {
+	if cacheTime.ID == "" {
+		return false, errors.New("ID field missing")
+	}
+	if cacheTime.ETag == "" {
+		return false, errors.New("Etag field missing")
+	}
+	if cacheTime.Path == "" {
+		return false, errors.New("Path field missing")
 	}
 }
