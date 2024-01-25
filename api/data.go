@@ -68,7 +68,35 @@ func (api *API) AddDataSets(ctx context.Context) http.HandlerFunc {
 	}
 }
 
-// GetCacheTime retrieves cache time data for a given ID and writes it to the HTTP response.
+// CreateOrUpdateCacheTime handles the creation or update of a cache time
+func (api *API) CreateOrUpdateCacheTime(ctx context.Context, w http.ResponseWriter, req *http.Request) {
+	log.Info(ctx, "calling create or update cache time handler")
+
+	vars := mux.Vars(req)
+	id := vars["id"]
+
+	var docToInsertOrUpdate = &models.CacheTime{
+		ID: id,
+	}
+
+	err := json.NewDecoder(req.Body).Decode(&docToInsertOrUpdate)
+	if err != nil {
+		log.Error(ctx, "error decoding request body", err)
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+
+	err = api.dataStore.UpsertCacheTime(ctx, docToInsertOrUpdate)
+	if err != nil {
+		log.Error(ctx, "error upserting document", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+// GetCacheTime retrieves a cache time for a given ID and writes it to the HTTP response.
 func (api *API) GetCacheTime(ctx context.Context, w http.ResponseWriter, req *http.Request) {
 	log.Info(ctx, "calling get cache time handler")
 
