@@ -23,10 +23,10 @@ type API struct {
 }
 
 var (
-	createPermission = auth.Permissions{Create: true}
-	readPermission   = auth.Permissions{Read: true}
-	updatePermission = auth.Permissions{Update: true}
-	deletePermission = auth.Permissions{Delete: true}
+	createPermission       = auth.Permissions{Create: true}
+	readPermission         = auth.Permissions{Read: true}
+	updateCreatePermission = auth.Permissions{Update: true, Create: true}
+	deletePermission       = auth.Permissions{Delete: true}
 )
 
 // Setup function sets up the api and returns an api
@@ -46,19 +46,31 @@ func Setup(ctx context.Context, router *mux.Router, dataStore DataStore, dataset
 	// 	api.GetCacheTime(ctx, w, req)
 	// }).Methods(http.MethodGet)
 
-	router.Path("/mongocheck").Methods("POST").HandlerFunc(dphandlers.CheckIdentity(api.AddDataSets(ctx)))
-	router.Path("/mongocheck").Methods("GET").HandlerFunc(dphandlers.CheckIdentity(api.GetDataSets(ctx)))
-	router.Path("/v1/cache-times/{id}").Methods("GET").HandlerFunc(api.isAuthenticated(api.isAuthorised(readPermission, func(w http.ResponseWriter, req *http.Request) { api.GetCacheTime(ctx, w, req) })))
+	router.Path("/mongocheck").Methods("POST").HandlerFunc(api.AddDataSets(ctx))
+	router.Path("/mongocheck").Methods("GET").HandlerFunc(api.GetDataSets(ctx))
+	// router.Path("/v1/cache-times/{id}").Methods("GET").HandlerFunc(api.isAuthenticated(api.isAuthorised(readPermission, func(w http.ResponseWriter, req *http.Request) { api.GetCacheTime(ctx, w, req) })))
+	// router.Path("/mongocheck").Methods("GET").HandlerFunc(api.isAuthenticated(api.isAuthorised(deletePermission, func(w http.ResponseWriter, req *http.Request) { api.GetDataSets(ctx) })))
+	// router.Path("/mongocheck").Methods("PUT").HandlerFunc(api.isAuthenticated(api.isAuthorised(updateCreatePermission, func(w http.ResponseWriter, req *http.Request) { api.AddDataSets(ctx) })))
+	// router.Path("/mongocheck").Methods("PUT").HandlerFunc(api.isAuthenticated(api.isAuthorised(updatePermission, func(w http.ResponseWriter, req *http.Request) { api.GetDataSets(ctx) })))
 
+	// api.get(
+	// 	"/v1/cache-times/{id}",
+	// 	api.isAuthenticated(
+	// 		api.isAuthorised(readPermission,
+	// 			func(w http.ResponseWriter, req *http.Request) { api.GetCacheTime(ctx, w, req) })))
+
+	// api.put(
+	// 	"/mongocheck",
+	// 	api.isAuthenticated(
+	// 		api.isAuthorised(updateCreatePermission,
+	// 			func(w http.ResponseWriter, req *http.Request) { api.AddDataSets(ctx) })))
+	// api.get(
+	// 	"/mongocheck",
+	// 	api.isAuthenticated(
+	// 		api.isAuthorised(updateCreatePermission,
+	// 			func(w http.ResponseWriter, req *http.Request) { api.GetDataSets(ctx) })))
 	return api
 }
-
-// api.put(
-// 	"/instances/{instance_id}",
-// 	api.isAuthenticated(
-// 		api.isAuthorised(updatePermission,
-// 			api.isInstancePublished(instanceAPI.Update))),
-// )
 
 // isAuthenticated wraps a http handler func in another http handler func that checks the caller is authenticated to
 // perform the requested action. handler is the http.HandlerFunc to wrap in an
@@ -72,4 +84,19 @@ func (api *API) isAuthenticated(handler http.HandlerFunc) http.HandlerFunc {
 // apply the check to. The wrapped handler is only called if the caller has the required permissions.
 func (api *API) isAuthorised(required auth.Permissions, handler http.HandlerFunc) http.HandlerFunc {
 	return api.permissions.Require(required, handler)
+}
+
+// get registers a GET http.HandlerFunc.
+func (api *API) get(path string, handler http.HandlerFunc) {
+	api.Router.HandleFunc(path, handler).Methods(http.MethodGet)
+}
+
+// put registers a PUT http.HandlerFunc.
+func (api *API) put(path string, handler http.HandlerFunc) {
+	api.Router.HandleFunc(path, handler).Methods(http.MethodPut)
+}
+
+// post registers a POST http.HandlerFunc.
+func (api *API) post(path string, handler http.HandlerFunc) {
+	api.Router.HandleFunc(path, handler).Methods(http.MethodPost)
 }
