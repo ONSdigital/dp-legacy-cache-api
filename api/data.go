@@ -99,12 +99,13 @@ func (api *API) CreateOrUpdateCacheTime(ctx context.Context, w http.ResponseWrit
 	fmt.Println(docToInsertOrUpdate)
 	// Validate request body
 	validErrs := isValidCacheTime(docToInsertOrUpdate)
-	if len(validErrs) != 0 {
+	if validErrs != nil {
 		errMsg := "Validation Errors: "
 		for _, vErr := range validErrs {
 			errMsg += vErr.Error() + "; "
 		}
-		log.Error(ctx, errMsg, errors.New("Error"))
+		combinedError := errors.New(errMsg)
+		log.Error(ctx, errMsg, combinedError)
 		http.Error(w, errMsg, http.StatusBadRequest)
 		return
 	}
@@ -144,12 +145,15 @@ func isValidCacheTime(cacheTime *models.CacheTime) []error {
 	errs := []error{}
 
 	if cacheTime.ETag == "" {
-		errs = append(errs, errors.New("Etag field missing"))
+		errs = append(errs, errors.New("etag field missing"))
 	}
 	if cacheTime.Path == "" {
-		errs = append(errs, errors.New("Path field missing"))
+		errs = append(errs, errors.New("path field missing"))
 	}
-
+	// Return nil if no errors were found
+    if len(errs) == 0 {
+        return nil
+    }
 	return errs
 }
 
