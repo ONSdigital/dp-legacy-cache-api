@@ -46,39 +46,47 @@ func Setup(ctx context.Context, router *mux.Router, dataStore DataStore, dataset
 	// 	api.GetCacheTime(ctx, w, req)
 	// }).Methods(http.MethodGet)
 
-	router.Path("/mongocheck").Methods("POST").HandlerFunc(api.AddDataSets(ctx))
-	router.Path("/mongocheck").Methods("GET").HandlerFunc(api.GetDataSets(ctx))
+// 	router.Path("/mongocheck").Methods("POST").HandlerFunc(api.AddDataSets(ctx))
+// 	router.Path("/mongocheck").Methods("GET").HandlerFunc(api.GetDataSets(ctx))
 	// router.Path("/v1/cache-times/{id}").Methods("GET").HandlerFunc(api.isAuthenticated(api.isAuthorised(readPermission, func(w http.ResponseWriter, req *http.Request) { api.GetCacheTime(ctx, w, req) })))
 	// router.Path("/mongocheck").Methods("GET").HandlerFunc(api.isAuthenticated(api.isAuthorised(deletePermission, func(w http.ResponseWriter, req *http.Request) { api.GetDataSets(ctx) })))
 	// router.Path("/mongocheck").Methods("PUT").HandlerFunc(api.isAuthenticated(api.isAuthorised(updateCreatePermission, func(w http.ResponseWriter, req *http.Request) { api.AddDataSets(ctx) })))
 	// router.Path("/mongocheck").Methods("PUT").HandlerFunc(api.isAuthenticated(api.isAuthorised(updatePermission, func(w http.ResponseWriter, req *http.Request) { api.GetDataSets(ctx) })))
 
-	// api.get(
-	// 	"/v1/cache-times/{id}",
-	// 	api.isAuthenticated(
-	// 		api.isAuthorised(readPermission,
-	// 			func(w http.ResponseWriter, req *http.Request) { api.GetCacheTime(ctx, w, req) })))
+	api.get(
+		"/v1/cache-times/{id}",
+		api.isAuthenticated(
+			api.isAuthorised(readPermission,
+				func(w http.ResponseWriter, req *http.Request) { api.GetCacheTime(ctx, w, req) })))
 
-	// api.put(
-	// 	"/mongocheck",
-	// 	api.isAuthenticated(
-	// 		api.isAuthorised(updateCreatePermission,
-	// 			func(w http.ResponseWriter, req *http.Request) { api.AddDataSets(ctx) })))
-	// api.get(
-	// 	"/mongocheck",
-	// 	api.isAuthenticated(
-	// 		api.isAuthorised(updateCreatePermission,
-	// 			func(w http.ResponseWriter, req *http.Request) { api.GetDataSets(ctx) })))
+	api.put(
+		"/v1/cache-times/{id}",
+		api.isAuthenticated(updateCreatePermission
+			api.isAuthorised(readPermission,
+				func(w http.ResponseWriter, req *http.Request) { api.GetCacheTime(ctx, w, req) })))
 
-	r.HandleFunc("/mongocheck", api.AddDataSets(ctx)).Methods("POST")
-    	r.HandleFunc("/mongocheck", api.GetDataSets(ctx)).Methods("GET")
+	api.post(
+		"/mongocheck",
+		api.isAuthenticated(
+			api.isAuthorised(updatePermission,
+				func(w http.ResponseWriter, req *http.Request) { api.AddDataSets(ctx) })))
 
-    	r.HandleFunc("/v1/cache-times/{id}", func(w http.ResponseWriter, req *http.Request) {
-    		api.GetCacheTime(ctx, w, req)
-    	}).Methods(http.MethodGet)
-    	r.HandleFunc("/v1/cache-times/{id}", func(w http.ResponseWriter, req *http.Request) {
-    		api.CreateOrUpdateCacheTime(ctx, w, req)
-    	}).Methods(http.MethodPut)
+	api.get(
+		"/mongocheck",
+		api.isAuthenticated(
+			api.isAuthorised(readPermission,
+				func(w http.ResponseWriter, req *http.Request) { api.GetDataSets(ctx) })))
+
+// 	r.HandleFunc("/mongocheck", api.AddDataSets(ctx)).Methods("POST")
+//     r.HandleFunc("/mongocheck", api.GetDataSets(ctx)).Methods("GET")
+//
+//     r.HandleFunc("/v1/cache-times/{id}", func(w http.ResponseWriter, req *http.Request) {
+//         api.GetCacheTime(ctx, w, req)
+//     }).Methods(http.MethodGet)
+//
+//     r.HandleFunc("/v1/cache-times/{id}", func(w http.ResponseWriter, req *http.Request) {
+//         api.CreateOrUpdateCacheTime(ctx, w, req)
+//     }).Methods(http.MethodPut)
 
 	return api
 }
