@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/ONSdigital/dp-legacy-cache-api/models"
@@ -80,10 +81,31 @@ func (api *API) CreateOrUpdateCacheTime(ctx context.Context, w http.ResponseWrit
 		ID: id,
 	}
 
+	// Check request body not empty
+	if req.ContentLength == 0 {
+		log.Error(ctx, "empty request body", http.ErrContentLength) // TO-DO: confirm ErrContentLength is correct implementation
+		http.Error(w, "Bad Request: Empty Request Body", http.StatusBadRequest)
+		return
+	}
+
 	err := json.NewDecoder(req.Body).Decode(&docToInsertOrUpdate)
+
 	if err != nil {
 		log.Error(ctx, "error decoding request body", err)
 		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+
+	fmt.Println(docToInsertOrUpdate)
+	// Validate request body
+	validErrs := isValidCacheTime(docToInsertOrUpdate)
+	if len(validErrs) != 0 {
+		errMsg := "Validation Errors: "
+		for _, vErr := range validErrs {
+			errMsg += vErr.Error() + "; "
+		}
+		log.Error(ctx, errMsg, errors.New("Error"))
+		http.Error(w, errMsg, http.StatusBadRequest)
 		return
 	}
 
@@ -118,15 +140,31 @@ func (api *API) GetCacheTime(ctx context.Context, w http.ResponseWriter, req *ht
 	}
 }
 
+func isValidCacheTime(cacheTime *models.CacheTime) []error {
+	errs := []error{}
 
-func isValidCacheTime(cacheTime *models.CacheTime) (bool, error) {
-	if cacheTime.ID == "" {
-		return false, errors.New("ID field missing")
-	}
 	if cacheTime.ETag == "" {
-		return false, errors.New("Etag field missing")
+		errs = append(errs, errors.New("Etag field missing"))
 	}
 	if cacheTime.Path == "" {
-		return false, errors.New("Path field missing")
+		errs = append(errs, errors.New("Path field missing"))
 	}
+
+	return errs
 }
+
+// func CreateDataset(reader io.Reader) (*Dataset, error) {
+// 	b, err := io.ReadAll(reader)
+// 	if err != nil {
+// 		return nil, errs.ErrUnableToReadMessage
+// 	}
+
+// 	var dataset Dataset
+
+// 	err = json.Unmarshal(b, &dataset)
+// 	if err != nil {
+// 		return nil, errs.ErrUnableToParseJSON
+// 	}
+
+// 	return &dataset, nil
+// }
