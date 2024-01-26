@@ -39,9 +39,8 @@ func TestGetCacheTimeEndpoint(t *testing.T) {
 				}
 			},
 		}
-		datasetPermissions := getAuthorisationHandlerMock()
-		permissions := getAuthorisationHandlerMock()
-		dataStoreAPI := setupAPIWithStore(ctx, dataStoreMock, datasetPermissions, permissions)
+
+		dataStoreAPI := setupAPIWithStore(ctx, dataStoreMock)
 
 		Convey("When an existing cache time is requested with its ID", func() {
 			request := httptest.NewRequest(http.MethodGet, baseURL+testCacheID, http.NoBody)

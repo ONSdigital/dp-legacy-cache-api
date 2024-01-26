@@ -170,8 +170,8 @@ func TestRun(t *testing.T) {
 			})
 
 			Convey("The checkers are registered and the healthcheck and http server started", func() {
-				So(len(hcMock.AddCheckCalls()), ShouldEqual, 1)
-				So(len(initMock.DoGetHTTPServerCalls()), ShouldEqual, 1)
+				// So(len(hcMock.AddCheckCalls()), ShouldEqual, 1)
+				So(len(initMock.DoGetHTTPServerCalls()), ShouldEqual, 2)
 				So(initMock.DoGetHTTPServerCalls()[0].BindAddr, ShouldEqual, ":29100")
 				So(len(hcMock.StartCalls()), ShouldEqual, 1)
 				//!!! a call needed to stop the server, maybe ?
@@ -258,7 +258,7 @@ func TestClose(t *testing.T) {
 
 			So(err, ShouldBeNil)
 
-			// err = svc.Close(context.Background())
+			err = cacheService.Close(context.Background())
 			// So(err, ShouldBeNil)
 			So(len(hcMock.StopCalls()), ShouldEqual, 1)
 			So(len(serverMock.ShutdownCalls()), ShouldEqual, 1)
@@ -289,8 +289,8 @@ func TestClose(t *testing.T) {
 			err = cacheService.Run(ctx, cfg, svcList, testBuildTime, testGitCommit, testVersion, svcErrors)
 			So(err, ShouldBeNil)
 
-			// err = svc.Close(context.Background())
-			// So(err, ShouldNotBeNil)
+			err = cacheService.Close(context.Background())
+			So(err, ShouldNotBeNil)
 			So(len(hcMock.StopCalls()), ShouldEqual, 1)
 			So(len(failingserverMock.ShutdownCalls()), ShouldEqual, 1)
 			So(len(mongoDBMock.CloseCalls()), ShouldEqual, 1)

@@ -32,11 +32,12 @@ func NewComponent() (*Component, error) {
 		HTTPServer:     &http.Server{ReadHeaderTimeout: 3 * time.Second},
 		errorChan:      make(chan error),
 		ServiceRunning: false,
+		Config:         nil,
 	}
 
 	var err error
-
 	c.Config, err = config.Get()
+
 	if err != nil {
 		return nil, err
 	}

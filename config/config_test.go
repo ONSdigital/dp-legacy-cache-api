@@ -25,7 +25,6 @@ func TestConfig(t *testing.T) {
 				So(err, ShouldBeNil)
 				So(configuration, ShouldResemble, &Config{
 					ZebedeeURL:                 "http://localhost:8082",
-					EnablePrivateEndpoints:     false,
 					BindAddr:                   ":29100",
 					GracefulShutdownTimeout:    5 * time.Second,
 					HealthCheckInterval:        30 * time.Second,
