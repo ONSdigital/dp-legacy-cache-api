@@ -9,6 +9,7 @@ import (
 
 	"github.com/ONSdigital/dp-legacy-cache-api/models"
 	"github.com/ONSdigital/log.go/v2/log"
+	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 )
 
@@ -102,10 +103,18 @@ func (api *API) CreateOrUpdateCacheTime(ctx context.Context, w http.ResponseWrit
 	if validErrs != nil {
 		errMsg := "Validation Errors: "
 		for _, vErr := range validErrs {
+			// Construct a single error message string from all validation errors
 			errMsg += vErr.Error() + "; "
 		}
+
+		// Create an error object from the concatenated error message
 		combinedError := errors.New(errMsg)
+
+		// Log the error along with the context and the error object
 		log.Error(ctx, errMsg, combinedError)
+
+		// Send an appropriate HTTP response back to the client
+		// The status code 400 Bad Request is typically used for validation errors
 		http.Error(w, errMsg, http.StatusBadRequest)
 		return
 	}
@@ -143,17 +152,14 @@ func (api *API) GetCacheTime(ctx context.Context, w http.ResponseWriter, req *ht
 
 func isValidCacheTime(cacheTime *models.CacheTime) []error {
 	errs := []error{}
-
-	if cacheTime.ETag == "" {
-		errs = append(errs, errors.New("etag field missing"))
+	var validate *validator.Validate = validator.New()
+	err := validate.Struct(cacheTime)
+	if err != nil {
+		// Use the FieldError interface to get detailed information
+		for _, err := range err.(validator.ValidationErrors) {
+			errs = append(errs, errors.New(err.StructNamespace()+" "+err.Tag()))
+		}
 	}
-	if cacheTime.Path == "" {
-		errs = append(errs, errors.New("path field missing"))
-	}
-	// Return nil if no errors were found
-    if len(errs) == 0 {
-        return nil
-    }
 	return errs
 }
 
