@@ -38,30 +38,6 @@ func NewMongoStore(_ context.Context, cfg config.MongoConfig) (m *Mongo, err err
 	return m, nil
 }
 
-// GetDataSets retrieves all the data records from the Datasets collection in MongoDB.
-func (m *Mongo) GetDataSets(ctx context.Context) (values []models.DataMessage, err error) {
-	filter := bson.M{}
-
-	var results []models.DataMessage
-
-	_, err = m.Connection.Collection(config.CacheTimesCollection).Find(ctx, filter, &results)
-	if err != nil {
-		log.Error(ctx, "error finding collection", err)
-		return nil, err
-	}
-	return results, nil
-}
-
-// AddDataSet stores one dataset in the connected database
-func (m *Mongo) AddDataSet(ctx context.Context, dataset models.DataMessage) error {
-	_, err := m.Connection.Collection(config.CacheTimesCollection).InsertOne(ctx, dataset)
-	if err != nil {
-		log.Error(ctx, "error inserting document into collection", err)
-		return err
-	}
-	return nil
-}
-
 // Checker is called by the healthcheck library to check the health state of this mongoDB instance
 func (m *Mongo) Checker(ctx context.Context, state *healthcheck.CheckState) error {
 	return m.healthClient.Checker(ctx, state)

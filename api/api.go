@@ -20,9 +20,6 @@ func Setup(ctx context.Context, r *mux.Router, dataStore DataStore) *API {
 		dataStore: dataStore,
 	}
 
-	r.HandleFunc("/mongocheck", api.AddDataSets(ctx)).Methods("POST")
-	r.HandleFunc("/mongocheck", api.GetDataSets(ctx)).Methods("GET")
-
 	r.HandleFunc("/v1/cache-times/{id}", func(w http.ResponseWriter, req *http.Request) {
 		api.GetCacheTime(ctx, w, req)
 	}).Methods(http.MethodGet)

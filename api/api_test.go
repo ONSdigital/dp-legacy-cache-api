@@ -21,8 +21,6 @@ func TestSetup(t *testing.T) {
 		cacheAPI := api.Setup(ctx, router, mockMongoDB)
 
 		Convey("When created the following routes should have been added", func() {
-			So(hasRoute(cacheAPI.Router, "/mongocheck", "POST"), ShouldBeTrue)
-			So(hasRoute(cacheAPI.Router, "/mongocheck", "GET"), ShouldBeTrue)
 			So(hasRoute(cacheAPI.Router, "/v1/cache-times/{id}", "GET"), ShouldBeTrue)
 			So(hasRoute(cacheAPI.Router, "/v1/cache-times/{id}", "PUT"), ShouldBeTrue)
 		})
