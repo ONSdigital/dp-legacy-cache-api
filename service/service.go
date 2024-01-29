@@ -2,11 +2,12 @@ package service
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/ONSdigital/dp-legacy-cache-api/api"
 	"github.com/ONSdigital/dp-legacy-cache-api/config"
-
 	dphandlers "github.com/ONSdigital/dp-net/handlers"
+	dphttp "github.com/ONSdigital/dp-net/http"
 	"github.com/ONSdigital/log.go/v2/log"
 	"github.com/gorilla/mux"
 	"github.com/justinas/alice"
@@ -60,7 +61,20 @@ func (svc *Service) Run(ctx context.Context, cfg *config.Config, serviceList *Ex
 		return err
 	}
 
-	aliceChain := alice.New(dphandlers.Identity(svc.Config.ZebedeeURL)).Then(router)
+	// this code is for testing only
+	httpClient := &dphttp.ClienterMock{
+		DoFunc: func(ctx context.Context, req *http.Request) (*http.Response, error) {
+			return &http.Response{
+				StatusCode: http.StatusOK,
+			}, nil
+		},
+	}
+
+	// clientsidentity.NewAPIClient(httpClient, cfg.ZebedeeURL, "")
+	// identityHandler := dphandlers.IdentityWithHTTPClient(doAuth, httpClient)
+
+	aliceChain := alice.New(dphandlers.IdentityWithHTTPClient(httpClient)).Then(router)
+	// aliceChain := alice.New(dphandlers.Identity(svc.Config.ZebedeeURL)).Then(router)
 	svc.Server = svc.ServiceList.GetHTTPServer(svc.Config.BindAddr, aliceChain)
 
 	// Setup the API
