@@ -5,6 +5,8 @@ REST API for managing cache control information for pages within the legacy CMS
 * Ensure Docker is installed on your local machine, installation steps can be found here https://docs.docker.com/desktop/install/mac-install/
 * Run `docker run --name mongo-test -p 27017:27017 -d mongo`. This command starts a new container named mongo-test using the official MongoDB image, mapping port 27017 of the host to port 27017 of the container, and runs it in the background.
 * Run `make debug` to run application on http://localhost:29100
+* Populate mongo-db with `curl -X PUT -i -H "Content-Type: application/json" -d '{ "path": "newcachetimepath", "etag": "newcachetimeetag", "collection_id": 1234, "release_time": "2023-12-12T00:00:00.000Z" }' http://localhost:29100/v1/cache-times/123` (terminal output should be 204)
+* Hitting `localhost:29100/health` should return `"status": "OK"` (it may take ~10s for the PUT complete)
 * Run `make help` to see full list of make targets
 
 ### Dependencies
