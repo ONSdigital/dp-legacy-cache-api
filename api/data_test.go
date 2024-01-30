@@ -19,7 +19,7 @@ var testCacheID = "testCacheID"
 var baseURL = "http://localhost:29100/v1/cache-times/"
 var staticTime = time.Date(2024, time.January, 1, 0, 0, 0, 0, time.UTC)
 
-func TestGetCacheTimeEndpoint(t *testing.T) {
+func TestGetCacheTimeEndpointReturns401WhenTokenIsMisssing(t *testing.T) {
 	Convey("Given a GetCacheTime handler", t, func() {
 		ctx := context.Background()
 		dataStoreMock := &mock.DataStoreMock{
@@ -40,6 +40,41 @@ func TestGetCacheTimeEndpoint(t *testing.T) {
 		}
 
 		dataStoreAPI := setupAPIWithStore(ctx, dataStoreMock)
+
+		Convey("When an existing cache time is requested with its ID", func() {
+			request := httptest.NewRequest(http.MethodGet, baseURL+testCacheID, http.NoBody)
+			responseRecorder := httptest.NewRecorder()
+			dataStoreAPI.Router.ServeHTTP(responseRecorder, request)
+
+			Convey("The status code should be 401", func() {
+
+				So(responseRecorder.Code, ShouldEqual, http.StatusUnauthorized)
+			})
+		})
+	})
+}
+
+func TestGetCacheTimeEndpoint(t *testing.T) {
+	Convey("Given a GetCacheTime handler", t, func() {
+		ctx := context.Background()
+		dataStoreMock := &mock.DataStoreMock{
+			GetCacheTimeFunc: func(ctx context.Context, id string) (*models.CacheTime, error) {
+				switch id {
+				case testCacheID:
+					return &models.CacheTime{
+						ID:           testCacheID,
+						Path:         "testpath",
+						ETag:         "testetag",
+						CollectionID: 123,
+						ReleaseTime:  staticTime,
+					}, nil
+				default:
+					return nil, errors.New("Something went wrong")
+				}
+			},
+		}
+
+		dataStoreAPI := setupAPINoAuthWithStore(ctx, dataStoreMock)
 
 		Convey("When an existing cache time is requested with its ID", func() {
 			request := httptest.NewRequest(http.MethodGet, baseURL+testCacheID, http.NoBody)
@@ -75,7 +110,7 @@ func TestUpdateExistingCacheTime(t *testing.T) {
 				return nil
 			},
 		}
-		dataStoreAPI := setupAPIWithStore(ctx, dataStoreMock)
+		dataStoreAPI := setupAPINoAuthWithStore(ctx, dataStoreMock)
 
 		existingCacheTime := models.CacheTime{
 			ID:           testCacheID,
@@ -122,7 +157,7 @@ func TestCreateNewCacheTime(t *testing.T) {
 				return nil
 			},
 		}
-		dataStoreAPI := setupAPIWithStore(ctx, dataStoreMock)
+		dataStoreAPI := setupAPINoAuthWithStore(ctx, dataStoreMock)
 
 		Convey("When creating a new cache time", func() {
 			newCacheTime := models.CacheTime{

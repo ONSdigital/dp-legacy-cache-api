@@ -20,14 +20,12 @@ type API struct {
 	dataStore DataStore
 }
 
-// Setup function sets up the api and returns an api
+// Setup function sets up the api with authentication and returns an api
 func Setup(ctx context.Context, router *mux.Router, dataStore DataStore) *API {
 	api := &API{
 		Router:    router,
 		dataStore: dataStore,
 	}
-
-	// router.Path("/mongocheck").Methods("GET").HandlerFunc(api.GetDataSets(ctx))
 
 	api.get(
 		"/v1/cache-times/{id}",
@@ -50,6 +48,36 @@ func Setup(ctx context.Context, router *mux.Router, dataStore DataStore) *API {
 		"/mongocheck",
 		api.isAuthenticated(
 			func(w http.ResponseWriter, req *http.Request) { api.GetDataSets(ctx) }),
+	)
+
+	return api
+}
+
+// Setup function sets up the api and returns an api
+func SetupNoAuth(ctx context.Context, router *mux.Router, dataStore DataStore) *API {
+	api := &API{
+		Router:    router,
+		dataStore: dataStore,
+	}
+
+	api.get(
+		"/v1/cache-times/{id}",
+		func(w http.ResponseWriter, req *http.Request) { api.GetCacheTime(ctx, w, req) },
+	)
+
+	api.put(
+		"/v1/cache-times/{id}",
+		func(w http.ResponseWriter, req *http.Request) { api.CreateOrUpdateCacheTime(ctx, w, req) },
+	)
+
+	api.post(
+		"/mongocheck",
+		func(w http.ResponseWriter, req *http.Request) { api.AddDataSets(ctx) },
+	)
+
+	api.get(
+		"/mongocheck",
+		func(w http.ResponseWriter, req *http.Request) { api.GetDataSets(ctx) },
 	)
 
 	return api

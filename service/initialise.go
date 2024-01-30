@@ -7,7 +7,7 @@ import (
 	"github.com/ONSdigital/dp-healthcheck/healthcheck"
 	"github.com/ONSdigital/dp-legacy-cache-api/config"
 	"github.com/ONSdigital/dp-legacy-cache-api/mongo"
-	dphttp "github.com/ONSdigital/dp-net/v2/http"
+	dphttp "github.com/ONSdigital/dp-net/http"
 )
 
 // ExternalServiceList holds the initialiser and initialisation state of external services.
