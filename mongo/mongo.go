@@ -96,7 +96,7 @@ func (m *Mongo) GetCacheTime(ctx context.Context, id string) (*models.CacheTime,
 			log.Info(ctx, "api.dataStore.GetCacheTime document not found")
 			return nil, errs.ErrCacheTimeNotFound
 		}
-		log.Error(ctx, "error targetting api.dataStore.GetCacheTime", err)
+		log.Error(ctx, "error targeting api.dataStore.GetCacheTime", err)
 		return nil, errs.ErrDataStore
 	}
 	return &result, nil
