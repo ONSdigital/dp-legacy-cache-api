@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -90,9 +91,9 @@ func TestGetCacheTimeEndpoint(t *testing.T) {
 					ReleaseTime:  staticTime,
 				}
 				cacheTime := models.CacheTime{}
-				// payload, _ := io.ReadAll(responseRecorder.Body)
-				// err := json.Unmarshal(payload, &cacheTime)
-				// So(err, ShouldBeNil)
+				payload, _ := io.ReadAll(responseRecorder.Body)
+				err := json.Unmarshal(payload, &cacheTime)
+				So(err, ShouldBeNil)
 				So(responseRecorder.Code, ShouldEqual, http.StatusOK)
 				So(cacheTime, ShouldEqual, expectedCacheTime)
 			})
