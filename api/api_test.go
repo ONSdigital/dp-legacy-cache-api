@@ -6,16 +6,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/ONSdigital/dp-authorisation/auth"
 	"github.com/ONSdigital/dp-legacy-cache-api/api"
 	"github.com/ONSdigital/dp-legacy-cache-api/api/mock"
 	"github.com/gorilla/mux"
 	. "github.com/smartystreets/goconvey/convey"
 )
-
-type AuthHandler interface {
-	Require(required auth.Permissions, handler http.HandlerFunc) http.HandlerFunc
-}
 
 func TestSetup(t *testing.T) {
 	Convey("Given an API instance", t, func() {

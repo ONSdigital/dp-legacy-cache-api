@@ -4,15 +4,9 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/ONSdigital/dp-authorisation/auth"
 	dphandlers "github.com/ONSdigital/dp-net/handlers"
 	"github.com/gorilla/mux"
 )
-
-// AuthHandler provides authorisation checks on requests
-type AuthHandler interface {
-	Require(required auth.Permissions, handler http.HandlerFunc) http.HandlerFunc
-}
 
 // API provides a struct to wrap the api around
 type API struct {

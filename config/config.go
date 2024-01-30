@@ -13,13 +13,12 @@ type MongoConfig = mongodb.MongoDriverConfig
 
 // Config represents service configuration for dp-legacy-cache-api
 type Config struct {
-    ZebedeeURL                 string        `envconfig:"ZEBEDEE_URL"`
+	ZebedeeURL                 string        `envconfig:"ZEBEDEE_URL"`
 	BindAddr                   string        `envconfig:"BIND_ADDR"`
 	GracefulShutdownTimeout    time.Duration `envconfig:"GRACEFUL_SHUTDOWN_TIMEOUT"`
 	HealthCheckInterval        time.Duration `envconfig:"HEALTHCHECK_INTERVAL"`
 	HealthCheckCriticalTimeout time.Duration `envconfig:"HEALTHCHECK_CRITICAL_TIMEOUT"`
 	MongoConfig
-	ZebedeeURL string
 }
 
 var cfg *Config
