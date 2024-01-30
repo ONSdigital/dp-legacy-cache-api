@@ -60,14 +60,14 @@ func (svc *Service) Run(ctx context.Context, cfg *config.Config, serviceList *Ex
 		return err
 	}
 
+	router.StrictSlash(true).Path("/health").HandlerFunc(svc.HealthCheck.Handler)
+	svc.HealthCheck.Start(ctx)
+
 	aliceChain := alice.New(dphandlers.Identity(svc.Config.ZebedeeURL)).Then(router)
 	svc.Server = svc.ServiceList.GetHTTPServer(svc.Config.BindAddr, aliceChain)
 
 	// Setup the API
 	svc.API = api.Setup(ctx, router, svc.mongoDB)
-
-	router.StrictSlash(true).Path("/health").HandlerFunc(svc.HealthCheck.Handler)
-	svc.HealthCheck.Start(ctx)
 
 	// Run the HTTP server in a new go-routine
 	go func() {
