@@ -143,7 +143,7 @@ func TestRun(t *testing.T) {
 			err = cacheService.Run(ctx, cfg, svcList, testBuildTime, testGitCommit, testVersion, svcErrors)
 
 			Convey("Then service Run fails, but all checks try to register", func() {
-				// So(err, ShouldNotBeNil)
+				So(err, ShouldNotBeNil)
 				// So(err.Error(), ShouldResemble, fmt.Sprintf("unable to register checkers: %s", errAddheckFail.Error()))
 				So(svcList.HealthCheck, ShouldBeTrue)
 				So(len(hcMockAddFail.AddCheckCalls()), ShouldEqual, 1)
@@ -164,13 +164,13 @@ func TestRun(t *testing.T) {
 			err = cacheService.Run(ctx, cfg, svcList, testBuildTime, testGitCommit, testVersion, svcErrors)
 
 			Convey("Then service Run succeeds and all the flags are set", func() {
-				// So(err, ShouldBeNil)
+				So(err, ShouldBeNil)
 				So(svcList.MongoDB, ShouldBeTrue)
 				So(svcList.HealthCheck, ShouldBeTrue)
 			})
 
 			Convey("The checkers are registered and the healthcheck and http server started", func() {
-				// So(len(hcMock.AddCheckCalls()), ShouldEqual, 1)
+				So(len(hcMock.AddCheckCalls()), ShouldEqual, 1)
 				So(len(initMock.DoGetHTTPServerCalls()), ShouldEqual, 2)
 				So(initMock.DoGetHTTPServerCalls()[0].BindAddr, ShouldEqual, ":29100")
 				So(len(hcMock.StartCalls()), ShouldEqual, 1)
@@ -192,7 +192,7 @@ func TestRun(t *testing.T) {
 			cacheService := service.New(cfg, svcList)
 			serverWg.Add(1)
 			err = cacheService.Run(ctx, cfg, svcList, testBuildTime, testGitCommit, testVersion, svcErrors)
-			// So(err, ShouldBeNil)
+			So(err, ShouldBeNil)
 
 			Convey("Then the error is returned in the error channel", func() {
 				sErr := <-svcErrors
