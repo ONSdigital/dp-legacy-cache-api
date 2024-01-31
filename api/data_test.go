@@ -20,7 +20,7 @@ var testCacheID = "testCacheID"
 var baseURL = "http://localhost:29100/v1/cache-times/"
 var staticTime = time.Date(2024, time.January, 1, 0, 0, 0, 0, time.UTC)
 
-func TestGetCacheTimeEndpointReturns401WhenTokenIsMisssing(t *testing.T) {
+func TestGetCacheTimeEndpointReturns200WhenAuthIsOnAndTokenIsMisssing(t *testing.T) {
 	Convey("Given a GetCacheTime handler", t, func() {
 		ctx := context.Background()
 		dataStoreMock := &mock.DataStoreMock{
@@ -47,8 +47,50 @@ func TestGetCacheTimeEndpointReturns401WhenTokenIsMisssing(t *testing.T) {
 			responseRecorder := httptest.NewRecorder()
 			dataStoreAPI.Router.ServeHTTP(responseRecorder, request)
 
-			Convey("The status code should be 401", func() {
+			Convey("The status code should be 200", func() {
+				So(responseRecorder.Code, ShouldEqual, http.StatusOK)
+			})
+		})
+	})
+}
 
+func TestUpdateExistingCacheTimeRetursn401WhenAuthIsOnAndAuthTokenIsMissiing(t *testing.T) {
+	Convey("Given an existing cache time", t, func() {
+		ctx := context.Background()
+		db := make(map[string]models.CacheTime)
+		dataStoreMock := &mock.DataStoreMock{
+			UpsertCacheTimeFunc: func(ctx context.Context, cacheTime *models.CacheTime) error {
+				db[cacheTime.ID] = *cacheTime
+				return nil
+			},
+		}
+		dataStoreAPI := setupAPIWithStore(ctx, dataStoreMock)
+
+		existingCacheTime := models.CacheTime{
+			ID:           testCacheID,
+			Path:         "existingpath",
+			ETag:         "existingetag",
+			CollectionID: 123,
+			ReleaseTime:  staticTime,
+		}
+		db[testCacheID] = existingCacheTime
+
+		Convey("When updating the cache time", func() {
+			updatedCacheTime := models.CacheTime{
+				ID:           testCacheID,
+				Path:         "updatedpath",
+				ETag:         "updatedetag",
+				CollectionID: 123,
+				ReleaseTime:  staticTime,
+			}
+			payload, err := json.Marshal(updatedCacheTime)
+			So(err, ShouldBeNil)
+			reader := bytes.NewReader(payload)
+			request := httptest.NewRequest(http.MethodPut, baseURL+testCacheID, reader)
+			responseRecorder := httptest.NewRecorder()
+			dataStoreAPI.Router.ServeHTTP(responseRecorder, request)
+
+			Convey("The status code should be 401", func() {
 				So(responseRecorder.Code, ShouldEqual, http.StatusUnauthorized)
 			})
 		})
