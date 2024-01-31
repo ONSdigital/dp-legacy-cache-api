@@ -98,7 +98,7 @@ func TestRun(t *testing.T) {
 			err = cacheService.Run(ctx, cfg, svcList, testBuildTime, testGitCommit, testVersion, svcErrors)
 
 			Convey("Then service Run fails with the same error and the flag is not set. No further initialisations are attempted", func() {
-				// So(err, ShouldResemble, errMongoDB)
+				So(err, ShouldResemble, errMongoDB)
 				So(svcList.MongoDB, ShouldBeFalse)
 				So(svcList.HealthCheck, ShouldBeFalse)
 			})
@@ -117,7 +117,7 @@ func TestRun(t *testing.T) {
 			err = cacheService.Run(ctx, cfg, svcList, testBuildTime, testGitCommit, testVersion, svcErrors)
 
 			Convey("Then service Run fails with the same error and the flag is not set", func() {
-				//	So(err, ShouldResemble, errHealthcheck)
+				So(err, ShouldResemble, errHealthcheck)
 				So(svcList.MongoDB, ShouldBeTrue)
 				So(svcList.HealthCheck, ShouldBeFalse)
 			})
@@ -144,7 +144,7 @@ func TestRun(t *testing.T) {
 
 			Convey("Then service Run fails, but all checks try to register", func() {
 				So(err, ShouldNotBeNil)
-				// So(err.Error(), ShouldResemble, fmt.Sprintf("unable to register checkers: %s", errAddheckFail.Error()))
+				So(err.Error(), ShouldResemble, errAddheckFail.Error())
 				So(svcList.HealthCheck, ShouldBeTrue)
 				So(len(hcMockAddFail.AddCheckCalls()), ShouldEqual, 1)
 			})
@@ -259,7 +259,7 @@ func TestClose(t *testing.T) {
 			So(err, ShouldBeNil)
 
 			err = cacheService.Close(context.Background())
-			// So(err, ShouldBeNil)
+			So(err, ShouldBeNil)
 			So(len(hcMock.StopCalls()), ShouldEqual, 1)
 			So(len(serverMock.ShutdownCalls()), ShouldEqual, 1)
 			So(len(mongoDBMock.CloseCalls()), ShouldEqual, 1)
