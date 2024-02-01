@@ -46,36 +46,6 @@ func Setup(ctx context.Context, router *mux.Router, dataStore DataStore) *API {
 	return api
 }
 
-// Setup function sets up the api and returns an api
-func SetupNoAuth(ctx context.Context, router *mux.Router, dataStore DataStore) *API {
-	api := &API{
-		Router:    router,
-		dataStore: dataStore,
-	}
-
-	api.get(
-		"/v1/cache-times/{id}",
-		func(w http.ResponseWriter, req *http.Request) { api.GetCacheTime(ctx, w, req) },
-	)
-
-	api.put(
-		"/v1/cache-times/{id}",
-		func(w http.ResponseWriter, req *http.Request) { api.CreateOrUpdateCacheTime(ctx, w, req) },
-	)
-
-	api.post(
-		"/mongocheck",
-		func(w http.ResponseWriter, req *http.Request) { api.AddDataSets(ctx) },
-	)
-
-	api.get(
-		"/mongocheck",
-		func(w http.ResponseWriter, req *http.Request) { api.GetDataSets(ctx) },
-	)
-
-	return api
-}
-
 // isAuthenticated wraps a http handler func in another http handler func that checks the caller is authenticated to
 // perform the requested action. handler is the http.HandlerFunc to wrap in an
 // authentication check. The wrapped handler is only called if the caller is authenticated

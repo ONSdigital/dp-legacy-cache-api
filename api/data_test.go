@@ -13,6 +13,7 @@ import (
 
 	"github.com/ONSdigital/dp-legacy-cache-api/api/mock"
 	"github.com/ONSdigital/dp-legacy-cache-api/models"
+	dprequest "github.com/ONSdigital/dp-net/request"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -20,7 +21,7 @@ var testCacheID = "testCacheID"
 var baseURL = "http://localhost:29100/v1/cache-times/"
 var staticTime = time.Date(2024, time.January, 1, 0, 0, 0, 0, time.UTC)
 
-func TestGetCacheTimeEndpointReturns200WhenAuthIsOnAndTokenIsMisssing(t *testing.T) {
+func TestGetCacheTimeEndpointReturns200WhenAuthIsOnAndTokenIsMissing(t *testing.T) {
 	Convey("Given a GetCacheTime handler", t, func() {
 		ctx := context.Background()
 		dataStoreMock := &mock.DataStoreMock{
@@ -35,7 +36,7 @@ func TestGetCacheTimeEndpointReturns200WhenAuthIsOnAndTokenIsMisssing(t *testing
 						ReleaseTime:  staticTime,
 					}, nil
 				default:
-					return nil, errors.New("Something went wrong")
+					return nil, errors.New("something went wrong")
 				}
 			},
 		}
@@ -54,7 +55,7 @@ func TestGetCacheTimeEndpointReturns200WhenAuthIsOnAndTokenIsMisssing(t *testing
 	})
 }
 
-func TestUpdateExistingCacheTimeRetursn401WhenAuthIsOnAndAuthTokenIsMissiing(t *testing.T) {
+func TestUpdateCacheTimeReturns401WhenAuthIsOnAndAuthTokenIsMissing(t *testing.T) {
 	Convey("Given an existing cache time", t, func() {
 		ctx := context.Background()
 		db := make(map[string]models.CacheTime)
@@ -112,12 +113,12 @@ func TestGetCacheTimeEndpoint(t *testing.T) {
 						ReleaseTime:  staticTime,
 					}, nil
 				default:
-					return nil, errors.New("Something went wrong")
+					return nil, errors.New("something went wrong")
 				}
 			},
 		}
 
-		dataStoreAPI := setupAPINoAuthWithStore(ctx, dataStoreMock)
+		dataStoreAPI := setupAPIWithStore(ctx, dataStoreMock)
 
 		Convey("When an existing cache time is requested with its ID", func() {
 			request := httptest.NewRequest(http.MethodGet, baseURL+testCacheID, http.NoBody)
@@ -153,7 +154,7 @@ func TestUpdateExistingCacheTime(t *testing.T) {
 				return nil
 			},
 		}
-		dataStoreAPI := setupAPINoAuthWithStore(ctx, dataStoreMock)
+		dataStoreAPI := setupAPIWithStore(ctx, dataStoreMock)
 
 		existingCacheTime := models.CacheTime{
 			ID:           testCacheID,
@@ -175,7 +176,7 @@ func TestUpdateExistingCacheTime(t *testing.T) {
 			payload, err := json.Marshal(updatedCacheTime)
 			So(err, ShouldBeNil)
 			reader := bytes.NewReader(payload)
-			request := httptest.NewRequest(http.MethodPut, baseURL+testCacheID, reader)
+			request := createRequestWithAuth(http.MethodPut, baseURL+testCacheID, reader)
 			responseRecorder := httptest.NewRecorder()
 			dataStoreAPI.Router.ServeHTTP(responseRecorder, request)
 
@@ -200,7 +201,7 @@ func TestCreateNewCacheTime(t *testing.T) {
 				return nil
 			},
 		}
-		dataStoreAPI := setupAPINoAuthWithStore(ctx, dataStoreMock)
+		dataStoreAPI := setupAPIWithStore(ctx, dataStoreMock)
 
 		Convey("When creating a new cache time", func() {
 			newCacheTime := models.CacheTime{
@@ -213,7 +214,7 @@ func TestCreateNewCacheTime(t *testing.T) {
 			payload, err := json.Marshal(newCacheTime)
 			So(err, ShouldBeNil)
 			reader := bytes.NewReader(payload)
-			request := httptest.NewRequest(http.MethodPut, baseURL+testCacheID, reader)
+			request := createRequestWithAuth(http.MethodPut, baseURL+testCacheID, reader)
 			responseRecorder := httptest.NewRecorder()
 			dataStoreAPI.Router.ServeHTTP(responseRecorder, request)
 
@@ -226,4 +227,12 @@ func TestCreateNewCacheTime(t *testing.T) {
 			})
 		})
 	})
+}
+
+func createRequestWithAuth(method, target string, body io.Reader) *http.Request {
+	r := httptest.NewRequest(method, target, body)
+	ctx := r.Context()
+	ctx = dprequest.SetCaller(ctx, "someone@ons.gov.uk")
+	r = r.WithContext(ctx)
+	return r
 }

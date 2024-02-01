@@ -38,7 +38,3 @@ func hasRoute(r *mux.Router, path, method string) bool {
 func setupAPIWithStore(ctx context.Context, dataStore api.DataStore) *api.API {
 	return api.Setup(ctx, mux.NewRouter(), dataStore)
 }
-
-func setupAPINoAuthWithStore(ctx context.Context, dataStore api.DataStore) *api.API {
-	return api.SetupNoAuth(ctx, mux.NewRouter(), dataStore)
-}
