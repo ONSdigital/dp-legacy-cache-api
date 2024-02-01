@@ -43,7 +43,7 @@ func TestGetCacheTimeEndpointReturns200WhenAuthIsOnAndTokenIsMissing(t *testing.
 
 		dataStoreAPI := setupAPIWithStore(ctx, dataStoreMock)
 
-		Convey("When an existing cache time is requested with its ID", func() {
+		Convey("When an existing cache time is requested with its ID and request is NOT authenticated", func() {
 			request := httptest.NewRequest(http.MethodGet, baseURL+testCacheID, http.NoBody)
 			responseRecorder := httptest.NewRecorder()
 			dataStoreAPI.Router.ServeHTTP(responseRecorder, request)
@@ -56,35 +56,13 @@ func TestGetCacheTimeEndpointReturns200WhenAuthIsOnAndTokenIsMissing(t *testing.
 }
 
 func TestUpdateCacheTimeReturns401WhenAuthIsOnAndAuthTokenIsMissing(t *testing.T) {
-	Convey("Given an existing cache time", t, func() {
+	Convey("Given a GetCacheTime handler", t, func() {
 		ctx := context.Background()
-		db := make(map[string]models.CacheTime)
-		dataStoreMock := &mock.DataStoreMock{
-			UpsertCacheTimeFunc: func(ctx context.Context, cacheTime *models.CacheTime) error {
-				db[cacheTime.ID] = *cacheTime
-				return nil
-			},
-		}
+		dataStoreMock := &mock.DataStoreMock{}
 		dataStoreAPI := setupAPIWithStore(ctx, dataStoreMock)
 
-		existingCacheTime := models.CacheTime{
-			ID:           testCacheID,
-			Path:         "existingpath",
-			ETag:         "existingetag",
-			CollectionID: 123,
-			ReleaseTime:  staticTime,
-		}
-		db[testCacheID] = existingCacheTime
-
-		Convey("When updating the cache time", func() {
-			updatedCacheTime := models.CacheTime{
-				ID:           testCacheID,
-				Path:         "updatedpath",
-				ETag:         "updatedetag",
-				CollectionID: 123,
-				ReleaseTime:  staticTime,
-			}
-			payload, err := json.Marshal(updatedCacheTime)
+		Convey("When trying an unauthenticated request to the put cache-times endpoint", func() {
+			payload, err := json.Marshal("")
 			So(err, ShouldBeNil)
 			reader := bytes.NewReader(payload)
 			request := httptest.NewRequest(http.MethodPut, baseURL+testCacheID, reader)
@@ -120,7 +98,7 @@ func TestGetCacheTimeEndpoint(t *testing.T) {
 
 		dataStoreAPI := setupAPIWithStore(ctx, dataStoreMock)
 
-		Convey("When an existing cache time is requested with its ID", func() {
+		Convey("When an existing cache time is requested with its ID with no authenticationen set", func() {
 			request := httptest.NewRequest(http.MethodGet, baseURL+testCacheID, http.NoBody)
 			responseRecorder := httptest.NewRecorder()
 			dataStoreAPI.Router.ServeHTTP(responseRecorder, request)
@@ -165,7 +143,7 @@ func TestUpdateExistingCacheTime(t *testing.T) {
 		}
 		db[testCacheID] = existingCacheTime
 
-		Convey("When updating the cache time", func() {
+		Convey("When updating the cache time with an authenticated request", func() {
 			updatedCacheTime := models.CacheTime{
 				ID:           testCacheID,
 				Path:         "updatedpath",
@@ -203,7 +181,7 @@ func TestCreateNewCacheTime(t *testing.T) {
 		}
 		dataStoreAPI := setupAPIWithStore(ctx, dataStoreMock)
 
-		Convey("When creating a new cache time", func() {
+		Convey("When creating a new cache time request with authentication", func() {
 			newCacheTime := models.CacheTime{
 				ID:           testCacheID,
 				Path:         "newpath",
