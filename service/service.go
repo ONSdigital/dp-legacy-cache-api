@@ -2,11 +2,11 @@ package service
 
 import (
 	"context"
-
-	dphandlers "github.com/ONSdigital/dp-net/handlers"
+	"net/http"
 
 	"github.com/ONSdigital/dp-legacy-cache-api/api"
 	"github.com/ONSdigital/dp-legacy-cache-api/config"
+	dphandlers "github.com/ONSdigital/dp-net/handlers"
 	"github.com/ONSdigital/log.go/v2/log"
 	"github.com/gorilla/mux"
 	"github.com/justinas/alice"
@@ -62,7 +62,8 @@ func (svc *Service) Run(ctx context.Context, cfg *config.Config, serviceList *Ex
 	router.StrictSlash(true).Path("/health").HandlerFunc(svc.HealthCheck.Handler)
 	svc.HealthCheck.Start(ctx)
 
-	aliceChain := alice.New(dphandlers.Identity(svc.Config.ZebedeeURL)).Then(router)
+	middleware := svc.createMiddleware()
+	aliceChain := middleware.Then(router)
 	svc.Server = svc.ServiceList.GetHTTPServer(svc.Config.BindAddr, aliceChain)
 
 	// Setup the API
@@ -76,6 +77,30 @@ func (svc *Service) Run(ctx context.Context, cfg *config.Config, serviceList *Ex
 	}()
 
 	return nil
+}
+
+// CreateMiddleware creates an Alice middleware chain of handlers
+// to forward authentication header for PUT requests to zebedee
+func (svc *Service) createMiddleware() alice.Chain {
+	// skip middleware for healthcheck and GET requests
+	skipGetRequestHandler := newSkipGetRequestHandler()
+	middleware := alice.New(skipGetRequestHandler)
+	middleware = middleware.Append(dphandlers.Identity(svc.Config.ZebedeeURL))
+
+	return middleware
+}
+
+// newSkipGetRequestHandler creates a new http.Handler to intercept requests and skip GET request.
+func newSkipGetRequestHandler() func(http.Handler) http.Handler {
+	return func(h http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			if req.Method == "GET" {
+				return
+			}
+
+			h.ServeHTTP(w, req)
+		})
+	}
 }
 
 // Close gracefully shuts the service down in the required order, with timeout
