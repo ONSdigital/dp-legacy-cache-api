@@ -80,6 +80,13 @@ func (api *API) CreateOrUpdateCacheTime(ctx context.Context, w http.ResponseWrit
 	vars := mux.Vars(req)
 	id := vars["id"]
 
+	err := isValidID(id)
+	if err != nil {
+		log.Info(ctx, "createOrUpdateCacheTime endpoint: id failed validation checks")
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
 	var docToInsertOrUpdate = &models.CacheTime{
 		ID: id,
 	}
@@ -94,7 +101,7 @@ func (api *API) CreateOrUpdateCacheTime(ctx context.Context, w http.ResponseWrit
 	decoder := json.NewDecoder(req.Body)
 	decoder.DisallowUnknownFields() // disallow unknown fields in the request body
 
-	err := decoder.Decode(&docToInsertOrUpdate)
+	err = decoder.Decode(&docToInsertOrUpdate)
 	if err != nil {
 		// Handle error for unknown fields, incorrect field type and decode
 		log.Info(ctx, "createOrUpdateCacheTime endpoint: error decoding request body")
@@ -127,6 +134,13 @@ func (api *API) GetCacheTime(ctx context.Context, w http.ResponseWriter, req *ht
 	vars := mux.Vars(req)
 	id := vars["id"]
 
+	err := isValidID(id)
+	if err != nil {
+		log.Info(ctx, "getCacheTime endpoint: id failed validation checks")
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
 	cacheTime, err := api.dataStore.GetCacheTime(ctx, id)
 	if err != nil {
 		if errors.Is(err, errs.ErrCacheTimeNotFound) {
@@ -149,8 +163,6 @@ func (api *API) GetCacheTime(ctx context.Context, w http.ResponseWriter, req *ht
 func isValidCacheTime(cacheTime *models.CacheTime) error {
 	var e []error
 
-	e = append(e, isValidID(cacheTime.ID)...)
-
 	if cacheTime.ETag == "" {
 		e = append(e, errors.New("etag field missing"))
 	}
@@ -165,7 +177,7 @@ func isValidCacheTime(cacheTime *models.CacheTime) error {
 	return nil
 }
 
-func isValidID(ID string) []error {
+func isValidID(ID string) error {
 	var e []error
 
 	if len(ID) != 32 {
@@ -177,8 +189,10 @@ func isValidID(ID string) []error {
 	if !isHexadecimal(ID) {
 		e = append(e, errors.New("id is not a valid hexadecimal"))
 	}
-
-	return e
+	if len(e) > 0 {
+		return fmt.Errorf("validation errors: %v", e)
+	}
+	return nil
 }
 
 func isHexadecimal(s string) bool {
