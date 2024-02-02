@@ -66,8 +66,17 @@ func (api *API) CreateOrUpdateCacheTime(ctx context.Context, w http.ResponseWrit
 // GetCacheTime retrieves a cache time for a given ID and writes it to the HTTP response.
 func (api *API) GetCacheTime(ctx context.Context, w http.ResponseWriter, req *http.Request) {
 	log.Info(ctx, "calling get cache time handler")
+	w.Header().Set("Content-Type", "application/json")
+
 	vars := mux.Vars(req)
 	id := vars["id"]
+
+	err := isValidID(id)
+	if err != nil {
+		log.Info(ctx, "getCacheTime endpoint: id failed validation checks")
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	cacheTime, err := api.dataStore.GetCacheTime(ctx, id)
 	if err != nil {
@@ -80,7 +89,7 @@ func (api *API) GetCacheTime(ctx context.Context, w http.ResponseWriter, req *ht
 		}
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
+
 	if err := json.NewEncoder(w).Encode(cacheTime); err != nil {
 		log.Error(ctx, "error encoding results to JSON", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -89,29 +98,41 @@ func (api *API) GetCacheTime(ctx context.Context, w http.ResponseWriter, req *ht
 }
 
 func isValidCacheTime(cacheTime *models.CacheTime) error {
-	var e []error
+	e := findIDErrors(cacheTime.ID)
 
-	if len(cacheTime.ID) != 32 {
-		e = append(e, errors.New("id should be 32 characters in length"))
-	}
-	if !isLower(cacheTime.ID) {
-		e = append(e, errors.New("id is not lowercase"))
-	}
-	if !isHexadecimal(cacheTime.ID) {
-		e = append(e, errors.New("id is not a valid hexadecimal"))
-	}
 	if cacheTime.ETag == "" {
 		e = append(e, errors.New("etag field missing"))
 	}
 	if cacheTime.Path == "" {
 		e = append(e, errors.New("path field missing"))
 	}
-
-	// Return nil if no errors were found
 	if len(e) > 0 {
 		return fmt.Errorf("validation errors: %v", e)
 	}
 	return nil
+}
+
+func isValidID(id string) error {
+	e := findIDErrors(id)
+	if len(e) > 0 {
+		return fmt.Errorf("validation errors: %v", e)
+	}
+	return nil
+}
+
+func findIDErrors(id string) []error {
+	var e []error
+
+	if len(id) != 32 {
+		e = append(e, errors.New("id should be 32 characters in length"))
+	}
+	if !isLower(id) {
+		e = append(e, errors.New("id is not lowercase"))
+	}
+	if !isHexadecimal(id) {
+		e = append(e, errors.New("id is not a valid hexadecimal"))
+	}
+	return e
 }
 
 func isHexadecimal(s string) bool {

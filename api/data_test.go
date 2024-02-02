@@ -213,6 +213,27 @@ func TestCreateNewCacheTime(t *testing.T) {
 		})
 	})
 }
+
+func TestGetCacheTimeReturnsError400(t *testing.T) {
+	Convey("Given an API", t, func() {
+		ctx := context.Background()
+		dataStoreMock := &mock.DataStoreMock{}
+		dataStoreAPI := setupAPIWithStore(ctx, dataStoreMock)
+		Convey("When the id provided is not 32 characters, not hexidecimal and not lowercase", func() {
+			var idTotallyInvalid = "XXX"
+			request := httptest.NewRequest(http.MethodGet, baseURL+idTotallyInvalid, http.NoBody)
+			responseRecorder := httptest.NewRecorder()
+			dataStoreAPI.Router.ServeHTTP(responseRecorder, request)
+			Convey("Then a 400 is returned with all three ID validation errors raised", func() {
+				So(responseRecorder.Code, ShouldEqual, 400)
+				So(responseRecorder.Body.String(), ShouldContainSubstring, "id should be 32 characters in length")
+				So(responseRecorder.Body.String(), ShouldContainSubstring, "id is not a valid hexadecimal")
+				So(responseRecorder.Body.String(), ShouldContainSubstring, "id is not lowercase")
+			})
+		})
+	})
+}
+
 func TestCreateOrUpdateCacheTimeReturnsErr(t *testing.T) {
 	Convey("Given an API", t, func() {
 		ctx := context.Background()
@@ -265,7 +286,8 @@ func TestCreateOrUpdateCacheTimeReturnsErr(t *testing.T) {
 
 		Convey("When the id provided is not 32 characters in length and the CreateOrUpdateCacheTime endpoint is called", func() {
 			body := validBody
-			request := httptest.NewRequest(http.MethodPut, baseURL+"abc", bytes.NewBufferString(body))
+			var idTooShort = "abc"
+			request := httptest.NewRequest(http.MethodPut, baseURL+idTooShort, bytes.NewBufferString(body))
 			responseRecorder := httptest.NewRecorder()
 			dataStoreAPI.Router.ServeHTTP(responseRecorder, request)
 			Convey("Then a 400 is returned with an ID length error in the response", func() {
@@ -275,8 +297,8 @@ func TestCreateOrUpdateCacheTimeReturnsErr(t *testing.T) {
 		})
 
 		Convey("When the id provided is not lowercase and the CreateOrUpdateCacheTime endpoint is called", func() {
-			idWithUpperCase := "1A2B3C4D5E6F7890A1B2C3D4E5F67890"
 			body := validBody
+			var idWithUpperCase = "1A2B3C4D5E6F7890A1B2C3D4E5F67890"
 			request := httptest.NewRequest(http.MethodPut, baseURL+idWithUpperCase, bytes.NewBufferString(body))
 			responseRecorder := httptest.NewRecorder()
 			dataStoreAPI.Router.ServeHTTP(responseRecorder, request)
@@ -286,8 +308,8 @@ func TestCreateOrUpdateCacheTimeReturnsErr(t *testing.T) {
 			})
 		})
 		Convey("When the id provided is not hexadecimal CreateOrUpdateCacheTime endpoint is called", func() {
-			idNotHexadecimal := "1a2b3c4d5g6h7890g1h2i3j4k5l67890"
 			body := validBody
+			var idNotHexadecimal = "1a2b3c4d5g6h7890g1h2i3j4k5l67890"
 			request := httptest.NewRequest(http.MethodPut, baseURL+idNotHexadecimal, bytes.NewBufferString(body))
 			responseRecorder := httptest.NewRecorder()
 			dataStoreAPI.Router.ServeHTTP(responseRecorder, request)
