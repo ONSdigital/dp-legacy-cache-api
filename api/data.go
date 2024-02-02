@@ -169,8 +169,6 @@ func isValidCacheTime(cacheTime *models.CacheTime) error {
 	if cacheTime.Path == "" {
 		e = append(e, errors.New("path field missing"))
 	}
-
-	// Return nil if no errors were found
 	if len(e) > 0 {
 		return fmt.Errorf("validation errors: %v", e)
 	}
