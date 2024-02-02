@@ -40,7 +40,6 @@ func (svc *Service) Run(ctx context.Context, cfg *config.Config, serviceList *Ex
 	log.Info(ctx, "using service configuration", log.Data{"config": cfg})
 
 	router := mux.NewRouter()
-	svc.Server = serviceList.GetHTTPServer(cfg.BindAddr, router)
 
 	svc.mongoDB, err = serviceList.GetMongoDB(ctx, cfg)
 	if err != nil {
