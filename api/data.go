@@ -149,15 +149,8 @@ func (api *API) GetCacheTime(ctx context.Context, w http.ResponseWriter, req *ht
 func isValidCacheTime(cacheTime *models.CacheTime) error {
 	var e []error
 
-	if len(cacheTime.ID) != 32 {
-		e = append(e, errors.New("id should be 32 characters in length"))
-	}
-	if !isLower(cacheTime.ID) {
-		e = append(e, errors.New("id is not lowercase"))
-	}
-	if !isHexadecimal(cacheTime.ID) {
-		e = append(e, errors.New("id is not a valid hexadecimal"))
-	}
+	e = append(e, isValidID(cacheTime.ID)...)
+
 	if cacheTime.ETag == "" {
 		e = append(e, errors.New("etag field missing"))
 	}
@@ -170,6 +163,22 @@ func isValidCacheTime(cacheTime *models.CacheTime) error {
 		return fmt.Errorf("validation errors: %v", e)
 	}
 	return nil
+}
+
+func isValidID(ID string) []error {
+	var e []error
+
+	if len(ID) != 32 {
+		e = append(e, errors.New("id should be 32 characters in length"))
+	}
+	if !isLower(ID) {
+		e = append(e, errors.New("id is not lowercase"))
+	}
+	if !isHexadecimal(ID) {
+		e = append(e, errors.New("id is not a valid hexadecimal"))
+	}
+
+	return e
 }
 
 func isHexadecimal(s string) bool {
