@@ -31,6 +31,10 @@ paths:
           description: "Successfully returned a cache time for a given id"
           schema:
             $ref: "#/definitions/CacheTime"
+        404:
+          description: "No cache time was found using the id provided"
+        500:
+          $ref: '#/responses/InternalError'
     put:
       tags:
         - "cache times"
@@ -53,6 +57,14 @@ paths:
       responses:
         204:
           description: "Cache time successfully updated or created"
+        400:
+          description: |
+            Invalid request, reasons can be one of the following:
+              * cache time id was incorrect
+              * missing required fields
+              * empty request body
+              * unknown extra fields
+              * wrong type for field
   /health:
     get:
       tags:
@@ -94,7 +106,7 @@ definitions:
         type: string
         example: "etag_example"
       collection_id:
-        description: "Collection ID - used for grouping and filtering of cache-time objects"
+        description: "Collection ID - used for grouping and filtering of cache time objects"
         type: integer
         format: int32
         example: 123
@@ -118,7 +130,7 @@ definitions:
         type: string
         example: "etag_example"
       collection_id:
-        description: "Collection ID - used for grouping and filtering of cache-time objects"
+        description: "Collection ID - used for grouping and filtering of cache time objects"
         type: integer
         format: int32
         example: 123
@@ -128,9 +140,9 @@ definitions:
         format: date-time
         example: "2024-01-15T12:00:00Z"      
   CacheTimeID:
-    description: "Unique identifier for CacheTime, represented as an MD5 hash of the path"
+    description: "Unique identifier for a cache time, represented as an MD5 hash of the path"
     type: string
-    example: "1b2b3c4d5e6f7g8h9i0j"
+    example: "a1b2c3d4e5f67890123456789abcdef0"
   Health:
     type: object
     properties:

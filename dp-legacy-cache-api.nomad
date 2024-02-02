@@ -67,7 +67,7 @@ job "dp-legacy-cache-api" {
         # Secret configs read from vault
         {{ with (secret (print "secret/" (env "NOMAD_TASK_NAME"))) }}
         {{ range $key, $value := .Data }}
-        export {{ $key }}="{{ $value }}"
+        export {{ $key }}={{ $value | toJSON }}
         {{ end }}
         {{ end }}
         EOH
@@ -140,7 +140,7 @@ job "dp-legacy-cache-api" {
         # Secret configs read from vault
         {{ with (secret (print "secret/" (env "NOMAD_TASK_NAME"))) }}
         {{ range $key, $value := .Data }}
-        export {{ $key }}="{{ $value }}"
+        export {{ $key }}={{ $value | toJSON }}
         {{ end }}
         {{ end }}
         EOH
