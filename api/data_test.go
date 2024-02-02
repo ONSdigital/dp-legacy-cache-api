@@ -22,8 +22,8 @@ var testCacheID = "a1b2c3d4e5f67890123456789abcdef0"
 var baseURL = "http://localhost:29100/v1/cache-times/"
 var staticTime = time.Date(2024, time.January, 1, 0, 0, 0, 0, time.UTC)
 
-func TestGetCacheTimeEndpointReturns200WhenAuthIsOnAndTokenIsMissing(t *testing.T) {
-	Convey("Given a GetCacheTime handler", t, func() {
+func TestGetEndpointReturns200WhenAuthTokenIsMissing(t *testing.T) {
+	Convey("Given we have an api with routes attached partly require authentication", t, func() {
 		ctx := context.Background()
 		dataStoreMock := &mock.DataStoreMock{
 			GetCacheTimeFunc: func(ctx context.Context, id string) (*models.CacheTime, error) {
@@ -56,13 +56,13 @@ func TestGetCacheTimeEndpointReturns200WhenAuthIsOnAndTokenIsMissing(t *testing.
 	})
 }
 
-func TestUpdateCacheTimeReturns401WhenAuthIsOnAndAuthTokenIsMissing(t *testing.T) {
-	Convey("Given a GetCacheTime handler", t, func() {
+func TestPutReturns401WhenAuthIsOnAndAuthTokenIsMissing(t *testing.T) {
+	Convey("Given we have an api with routes attached partly require authentication", t, func() {
 		ctx := context.Background()
 		dataStoreMock := &mock.DataStoreMock{}
 		dataStoreAPI := setupAPIWithStore(ctx, dataStoreMock)
 
-		Convey("When trying an unauthenticated request to the put cache-times endpoint", func() {
+		Convey("When trying an unauthenticated request (without a valid token) to the put cache-times endpoint", func() {
 			payload, err := json.Marshal("")
 			So(err, ShouldBeNil)
 			reader := bytes.NewReader(payload)
