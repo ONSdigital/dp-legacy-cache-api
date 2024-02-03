@@ -27,7 +27,7 @@ func (api *API) GetDataSets(ctx context.Context) http.HandlerFunc {
 		}
 
 		// Setting the header and encoding the results to JSON
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.Header().Set("Content-Type", "application/json")
 		err = json.NewEncoder(w).Encode(results)
 		if err != nil {
 			log.Error(ctx, "error encoding results to JSON", err)
@@ -62,7 +62,7 @@ func (api *API) AddDataSets(ctx context.Context) http.HandlerFunc {
 		log.Info(ctx, "successfully inserted document")
 
 		// Respond with the inserted document and StatusCreated
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
 		err = json.NewEncoder(w).Encode(docToInsert)
 		if err != nil {
@@ -138,7 +138,7 @@ func (api *API) GetCacheTime(ctx context.Context, w http.ResponseWriter, req *ht
 		}
 		return
 	}
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(cacheTime); err != nil {
 		log.Error(ctx, "error encoding results to JSON", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
