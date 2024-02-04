@@ -33,14 +33,12 @@ func Setup(ctx context.Context, router *mux.Router, dataStore DataStore) *API {
 
 	api.post(
 		"/mongocheck",
-		api.isAuthenticated(
-			func(w http.ResponseWriter, req *http.Request) { api.AddDataSets(ctx) }),
+		api.isAuthenticated(func(w http.ResponseWriter, req *http.Request) { api.AddDataSets(ctx) }),
 	)
 
 	api.get(
 		"/mongocheck",
-		api.isAuthenticated(
-			func(w http.ResponseWriter, req *http.Request) { api.GetDataSets(ctx) }),
+		api.isAuthenticated(func(w http.ResponseWriter, req *http.Request) { api.GetDataSets(ctx) }),
 	)
 
 	return api

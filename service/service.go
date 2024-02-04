@@ -24,68 +24,66 @@ type Service struct {
 	mongoDB     DataStore
 }
 
-// New creates a new service instance
-func New(cfg *config.Config, serviceList *ExternalServiceList) *Service {
-	svc := &Service{
-		Config:      cfg,
-		ServiceList: serviceList,
-	}
-	return svc
-}
-
 // Run the service
-func (svc *Service) Run(ctx context.Context, cfg *config.Config, serviceList *ExternalServiceList, buildTime, gitCommit, version string, svcErrors chan error) error {
-	var err error
+func Run(ctx context.Context, cfg *config.Config, serviceList *ExternalServiceList, buildTime, gitCommit, version string, svcErrors chan error) (*Service, error) {
 	log.Info(ctx, "running service")
+
 	log.Info(ctx, "using service configuration", log.Data{"config": cfg})
 
+	// Get HTTP Server and ... // TODO: Add any middleware that your service requires
 	router := mux.NewRouter()
 
-	svc.mongoDB, err = serviceList.GetMongoDB(ctx, cfg)
+	middleware := createMiddleware(cfg.ZebedeeURL)
+	aliceChain := middleware.Then(router)
+	httpServer := serviceList.GetHTTPServer(cfg.BindAddr, aliceChain)
+
+	mongoDB, err := serviceList.GetMongoDB(ctx, cfg)
 	if err != nil {
 		log.Fatal(ctx, "failed to initialise mongo DB", err)
-		return err
+		return nil, err
 	}
-
-	svc.HealthCheck, err = serviceList.GetHealthCheck(cfg, buildTime, gitCommit, version)
-
-	if err != nil {
-		log.Fatal(ctx, "could not instantiate healthcheck", err)
-		return err
-	}
-
-	if err = registerCheckers(ctx, svc.HealthCheck, svc.mongoDB); err != nil {
-		log.Fatal(ctx, "could not instantiate healthcheck", errors.Wrap(err, "unable to register checkers"))
-		return err
-	}
-
-	router.StrictSlash(true).Path("/health").HandlerFunc(svc.HealthCheck.Handler)
-	svc.HealthCheck.Start(ctx)
-
-	middleware := svc.createMiddleware()
-	aliceChain := middleware.Then(router)
-	svc.Server = svc.ServiceList.GetHTTPServer(svc.Config.BindAddr, aliceChain)
 
 	// Setup the API
-	svc.API = api.Setup(ctx, router, svc.mongoDB)
+	cacheAPI := api.Setup(ctx, router, mongoDB)
+
+	hc, err := serviceList.GetHealthCheck(cfg, buildTime, gitCommit, version)
+	if err != nil {
+		log.Fatal(ctx, "could not instantiate healthcheck", err)
+		return nil, err
+	}
+
+	if err := registerCheckers(ctx, hc, mongoDB); err != nil {
+		return nil, errors.Wrap(err, "unable to register checkers")
+	}
+
+	router.StrictSlash(true).Path("/health").HandlerFunc(hc.Handler)
+	hc.Start(ctx)
 
 	// Run the HTTP server in a new go-routine
 	go func() {
-		if err = svc.Server.ListenAndServe(); err != nil {
+		if err := httpServer.ListenAndServe(); err != nil {
 			svcErrors <- errors.Wrap(err, "failure in HTTP listen and serve")
 		}
 	}()
 
-	return nil
+	return &Service{
+		Config:      cfg,
+		Router:      router,
+		API:         cacheAPI,
+		HealthCheck: hc,
+		ServiceList: serviceList,
+		Server:      httpServer,
+		mongoDB:     mongoDB,
+	}, nil
 }
 
-// CreateMiddleware creates an Alice middleware chain of handlers
-// to forward authentication header for PUT requests to zebedee
-func (svc *Service) createMiddleware() alice.Chain {
+// createMiddleware creates an Alice middleware chain of handlers
+// to forward authentication header for PUT requests to Zebedee
+func createMiddleware(zebedeeURL string) alice.Chain {
 	// skip middleware for healthcheck and GET requests
 	skipGetRequestHandler := newSkipGetRequestHandler()
 	middleware := alice.New(skipGetRequestHandler)
-	middleware = middleware.Append(dphandlers.Identity(svc.Config.ZebedeeURL))
+	middleware = middleware.Append(dphandlers.Identity(zebedeeURL))
 
 	return middleware
 }

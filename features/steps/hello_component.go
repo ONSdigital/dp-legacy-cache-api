@@ -32,12 +32,11 @@ func NewComponent() (*Component, error) {
 		HTTPServer:     &http.Server{ReadHeaderTimeout: 3 * time.Second},
 		errorChan:      make(chan error),
 		ServiceRunning: false,
-		Config:         nil,
 	}
 
 	var err error
-	c.Config, err = config.Get()
 
+	c.Config, err = config.Get()
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +48,7 @@ func NewComponent() (*Component, error) {
 	}
 
 	c.svcList = service.NewServiceList(initMock)
-	c.svc = service.New(c.Config, c.svcList)
+
 	c.apiFeature = componenttest.NewAPIFeature(c.InitialiseService)
 
 	return c, nil
@@ -69,7 +68,8 @@ func (c *Component) Close() error {
 }
 
 func (c *Component) InitialiseService() (http.Handler, error) {
-	err := c.svc.Run(context.Background(), c.Config, c.svcList, "1", "", "", c.errorChan)
+	var err error
+	c.svc, err = service.Run(context.Background(), c.Config, c.svcList, "1", "", "", c.errorChan)
 	if err != nil {
 		return nil, err
 	}
