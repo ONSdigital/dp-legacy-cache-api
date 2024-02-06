@@ -66,7 +66,6 @@ func (api *API) CreateOrUpdateCacheTime(ctx context.Context, w http.ResponseWrit
 // GetCacheTime retrieves a cache time for a given ID and writes it to the HTTP response.
 func (api *API) GetCacheTime(ctx context.Context, w http.ResponseWriter, req *http.Request) {
 	log.Info(ctx, "calling get cache time handler")
-	w.Header().Set("Content-Type", "application/json")
 
 	vars := mux.Vars(req)
 	id := vars["id"]
