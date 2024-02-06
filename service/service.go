@@ -32,10 +32,9 @@ func Run(ctx context.Context, cfg *config.Config, serviceList *ExternalServiceLi
 
 	// Get HTTP Server and ... // TODO: Add any middleware that your service requires
 	router := mux.NewRouter()
-
-	middleware := createMiddleware(cfg.ZebedeeURL)
-	aliceChain := middleware.Then(router)
-	httpServer := serviceList.GetHTTPServer(cfg.BindAddr, aliceChain)
+	chain := alice.New(dphandlers.Identity(cfg.ZebedeeURL)).Then(http.HandlerFunc(handle))
+	router.Path("/v1/cache-times/{id}").Methods(http.MethodPost, http.MethodPut).Handler(chain)
+	httpServer := serviceList.GetHTTPServer(cfg.BindAddr, router)
 
 	mongoDB, err := serviceList.GetMongoDB(ctx, cfg)
 	if err != nil {
@@ -77,29 +76,7 @@ func Run(ctx context.Context, cfg *config.Config, serviceList *ExternalServiceLi
 	}, nil
 }
 
-// createMiddleware creates an Alice middleware chain of handlers
-// to forward authentication header for PUT requests to Zebedee
-func createMiddleware(zebedeeURL string) alice.Chain {
-	// skip middleware for healthcheck and GET requests
-	skipGetRequestHandler := newSkipGetRequestHandler()
-	middleware := alice.New(skipGetRequestHandler)
-	middleware = middleware.Append(dphandlers.Identity(zebedeeURL))
-
-	return middleware
-}
-
-// newSkipGetRequestHandler creates a new http.Handler to intercept requests and skip GET request.
-func newSkipGetRequestHandler() func(http.Handler) http.Handler {
-	return func(h http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-			if req.Method == "GET" {
-				return
-			}
-
-			h.ServeHTTP(w, req)
-		})
-	}
-}
+func handle(http.ResponseWriter, *http.Request) {}
 
 // Close gracefully shuts the service down in the required order, with timeout
 func (svc *Service) Close(ctx context.Context) error {
