@@ -29,7 +29,7 @@ func (api *API) CreateOrUpdateCacheTime(ctx context.Context, w http.ResponseWrit
 	// Check request body not empty
 	if req.ContentLength <= 0 {
 		log.Info(ctx, "createOrUpdateCacheTime endpoint: empty request body")
-		http.Error(w, "bad request: empty request body", http.StatusBadRequest)
+		sendJSONError(ctx, w, http.StatusBadRequest, "bad request: empty request body")
 		return
 	}
 
@@ -40,7 +40,7 @@ func (api *API) CreateOrUpdateCacheTime(ctx context.Context, w http.ResponseWrit
 	if err != nil {
 		// Handle error for unknown fields, incorrect field type and decode
 		log.Info(ctx, "createOrUpdateCacheTime endpoint: error decoding request body")
-		http.Error(w, fmt.Errorf("bad request: %v", err).Error(), http.StatusBadRequest)
+		sendJSONError(ctx, w, http.StatusBadRequest, fmt.Sprintf("bad request: %v", err))
 		return
 	}
 
@@ -48,7 +48,7 @@ func (api *API) CreateOrUpdateCacheTime(ctx context.Context, w http.ResponseWrit
 	err = isValidCacheTime(docToInsertOrUpdate)
 	if err != nil {
 		log.Info(ctx, "createOrUpdateCacheTime endpoint: cache time failed validation checks")
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		sendJSONError(ctx, w, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -56,7 +56,7 @@ func (api *API) CreateOrUpdateCacheTime(ctx context.Context, w http.ResponseWrit
 	err = api.dataStore.UpsertCacheTime(ctx, docToInsertOrUpdate)
 	if err != nil {
 		log.Error(ctx, "createOrUpdateCacheTime endpoint: error upserting document", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		sendJSONError(ctx, w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -73,7 +73,7 @@ func (api *API) GetCacheTime(ctx context.Context, w http.ResponseWriter, req *ht
 	err := isValidID(id)
 	if err != nil {
 		log.Info(ctx, "getCacheTime endpoint: id failed validation checks")
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		sendJSONError(ctx, w, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -81,10 +81,10 @@ func (api *API) GetCacheTime(ctx context.Context, w http.ResponseWriter, req *ht
 	if err != nil {
 		if errors.Is(err, errs.ErrCacheTimeNotFound) {
 			log.Info(ctx, "getCacheTime endpoint: api.dataStore.GetCacheTime document not found")
-			http.Error(w, err.Error(), http.StatusNotFound)
+			sendJSONError(ctx, w, http.StatusNotFound, err.Error())
 		} else {
 			log.Error(ctx, "getCacheTime endpoint: api.dataStore.GetCacheTime internal server error", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			sendJSONError(ctx, w, http.StatusInternalServerError, err.Error())
 		}
 		return
 	}
@@ -141,4 +141,13 @@ func isHexadecimal(s string) bool {
 
 func isLower(s string) bool {
 	return strings.ToLower(s) == s
+}
+
+func sendJSONError(ctx context.Context, w http.ResponseWriter, code int, message string) {
+	w.WriteHeader(code)
+	if err := json.NewEncoder(w).Encode(map[string]string{"error": message}); err != nil {
+		log.Error(ctx, "error encoding results to JSON", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
 }

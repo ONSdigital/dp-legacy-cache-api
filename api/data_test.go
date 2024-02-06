@@ -269,7 +269,7 @@ func TestCreateOrUpdateCacheTimeReturnsErr(t *testing.T) {
 			dataStoreAPI.Router.ServeHTTP(responseRecorder, request)
 			Convey("Then a 400 is returned with an error about the unknown field", func() {
 				So(responseRecorder.Code, ShouldEqual, 400)
-				So(responseRecorder.Body.String(), ShouldContainSubstring, `json: unknown field "extra_field"`)
+				So(responseRecorder.Body.String(), ShouldContainSubstring, `json: unknown field \"extra_field\"`)
 			})
 		})
 
