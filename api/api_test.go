@@ -37,7 +37,6 @@ func getMockIdentityHandler() func(http.Handler) http.Handler {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 			ctx := req.Context()
-			log.Info(ctx, "Mock executing identity check middleware")
 			req = req.WithContext(ctx)
 			h.ServeHTTP(w, req)
 		})

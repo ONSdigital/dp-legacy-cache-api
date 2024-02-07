@@ -36,7 +36,7 @@ func TestGetEndpointReturns200WhenAuthTokenIsMissing(t *testing.T) {
 						Path:         "testpath",
 						ETag:         "testetag",
 						CollectionID: 123,
-						ReleaseTime:  staticTime,
+						ReleaseTime:  staticTimePtr,
 					}, nil
 				default:
 					return nil, errors.New("something went wrong")
@@ -248,7 +248,7 @@ func TestCreateNewCacheTime(t *testing.T) {
 			})
 		})
 		Convey("When creating a new cache time with no collection id or release time", func() {
-			request := httptest.NewRequest(http.MethodPut, baseURL+testCacheID, bytes.NewBufferString(validBody))
+			request := createRequestWithAuth(http.MethodPut, baseURL+testCacheID, bytes.NewBufferString(validBody))
 			responseRecorder := httptest.NewRecorder()
 			dataStoreAPI.Router.ServeHTTP(responseRecorder, request)
 

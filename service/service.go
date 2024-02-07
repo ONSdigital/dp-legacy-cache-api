@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"net/http"
 
 	"github.com/ONSdigital/dp-legacy-cache-api/api"
 	"github.com/ONSdigital/dp-legacy-cache-api/config"
