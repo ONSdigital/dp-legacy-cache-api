@@ -26,7 +26,7 @@ type Component struct {
 	MongoClient    *mongo.Mongo
 }
 
-func NewComponent() (*Component, error) {
+func NewComponent(mongoURI, mongoDatabaseName string) (*Component, error) {
 	c := &Component{
 		HTTPServer:     &http.Server{ReadHeaderTimeout: 3 * time.Second},
 		errorChan:      make(chan error),
@@ -36,6 +36,14 @@ func NewComponent() (*Component, error) {
 	var err error
 
 	c.Config, err = config.Get()
+	if err != nil {
+		return nil, err
+	}
+
+	c.Config.MongoConfig.ClusterEndpoint = mongoURI
+	c.Config.MongoConfig.Database = mongoDatabaseName
+
+	c.MongoClient, err = mongo.NewMongoStore(context.Background(), c.Config.MongoConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -59,8 +67,15 @@ func (c *Component) Reset() *Component {
 }
 
 func (c *Component) Close() error {
+	ctx := context.Background()
+
 	if c.svc != nil && c.ServiceRunning {
-		c.svc.Close(context.Background())
+		if err := c.MongoClient.Connection.DropDatabase(ctx); err != nil {
+			return err
+		}
+		if err := c.svc.Close(ctx); err != nil {
+			return err
+		}
 		c.ServiceRunning = false
 	}
 	return nil
@@ -92,7 +107,5 @@ func (c *Component) DoGetHTTPServer(bindAddr string, router http.Handler) servic
 }
 
 func (c *Component) DoGetMongoDB(_ context.Context, _ *config.Config) (service.DataStore, error) {
-	return &mock.DataStoreMock{
-		CloseFunc: func(ctx context.Context) error { return nil },
-	}, nil
+	return c.MongoClient, nil
 }

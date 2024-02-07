@@ -3,9 +3,9 @@ package models
 import "time"
 
 type CacheTime struct {
-	ID           string    `json:"_id" bson:"_id"`                     // MD5 of the path
-	Path         string    `json:"path" bson:"path"`                   // Path for which caching is set
-	ETag         string    `json:"etag" bson:"etag"`                   // ETag for cache validation
-	CollectionID int       `json:"collection_id" bson:"collection_id"` // Collection ID - used for grouping and filtering of cache-time objects.
-	ReleaseTime  time.Time `json:"release_time" bson:"release_time"`   // Release time in ISO-8601 format
+	ID           string     `bson:"_id" json:"_id"`                                         // MD5 of the path
+	Path         string     `bson:"path" json:"path"`                                       // Path for which caching is set
+	ETag         string     `bson:"etag" json:"etag"`                                       // ETag for cache validation
+	CollectionID int        `bson:"collection_id,omitempty" json:"collection_id,omitempty"` // Collection ID - used for grouping and filtering of cache-time objects.
+	ReleaseTime  *time.Time `bson:"release_time,omitempty" json:"release_time,omitempty"`   // Release time in ISO-8601 format
 }

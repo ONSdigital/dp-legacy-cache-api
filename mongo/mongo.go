@@ -2,8 +2,10 @@ package mongo
 
 import (
 	"context"
+	"errors"
 
 	"github.com/ONSdigital/dp-healthcheck/healthcheck"
+	errs "github.com/ONSdigital/dp-legacy-cache-api/apierrors"
 	"github.com/ONSdigital/dp-legacy-cache-api/config"
 	"github.com/ONSdigital/dp-legacy-cache-api/models"
 	mongoHealth "github.com/ONSdigital/dp-mongodb/v3/health"
@@ -62,13 +64,16 @@ func (m *Mongo) IsConnected(ctx context.Context) bool {
 // GetCacheTime returns a cache time with its given id
 func (m *Mongo) GetCacheTime(ctx context.Context, id string) (*models.CacheTime, error) {
 	filter := bson.M{"_id": id}
-	var result models.CacheTime
 
+	var result models.CacheTime
 	err := m.Connection.Collection(m.ActualCollectionName(config.CacheTimesCollection)).FindOne(ctx, filter, &result)
 	if err != nil {
-		// TODO: need to differentiate between 404 not found err and internal server error.
-		log.Error(ctx, "error finding dataset", err)
-		return nil, err
+		if errors.Is(err, mongoDriver.ErrNoDocumentFound) {
+			log.Info(ctx, "api.dataStore.GetCacheTime document not found")
+			return nil, errs.ErrCacheTimeNotFound
+		}
+		log.Error(ctx, "error targeting api.dataStore.GetCacheTime", err)
+		return nil, errs.ErrDataStore
 	}
 	return &result, nil
 }
@@ -76,7 +81,7 @@ func (m *Mongo) GetCacheTime(ctx context.Context, id string) (*models.CacheTime,
 // UpsertCacheTime adds or overrides an existing cache time
 func (m *Mongo) UpsertCacheTime(ctx context.Context, cacheTime *models.CacheTime) (err error) {
 	update := bson.M{
-		"$set": cacheTime,
+		"$set": bson.M{"path": cacheTime.Path, "etag": cacheTime.ETag, "collection_id": cacheTime.CollectionID, "release_time": cacheTime.ReleaseTime},
 	}
 	selector := bson.M{"_id": cacheTime.ID}
 
