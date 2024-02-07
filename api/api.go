@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/ONSdigital/dp-legacy-cache-api/config"
 	dphandlers "github.com/ONSdigital/dp-net/handlers"
 	"github.com/gorilla/mux"
 )

@@ -8,6 +8,7 @@ import (
 
 	"github.com/ONSdigital/dp-legacy-cache-api/api"
 	"github.com/ONSdigital/dp-legacy-cache-api/api/mock"
+	"github.com/ONSdigital/dp-legacy-cache-api/config"
 	"github.com/gorilla/mux"
 	. "github.com/smartystreets/goconvey/convey"
 )
@@ -16,6 +17,7 @@ func TestSetup(t *testing.T) {
 	Convey("Given an API instance", t, func() {
 		router := mux.NewRouter()
 		ctx := context.Background()
+		cfg, _ := config.Get()
 
 		mockMongoDB := &mock.DataStoreMock{}
 		cacheAPI := api.Setup(ctx, router, mockMongoDB, getMockIdentityHandler())
@@ -43,6 +45,6 @@ func getMockIdentityHandler() func(http.Handler) http.Handler {
 	}
 }
 
-func setupAPIWithStore(ctx context.Context, dataStore api.DataStore) *api.API {
-	return api.Setup(ctx, mux.NewRouter(), dataStore, getMockIdentityHandler())
+func setupAPIWithStore(ctx context.Context, dataStore api.DataStore,  cfg *config.Config)) *api.API {
+	return api.Setup(ctx, mux.NewRouter(), dataStore, getMockIdentityHandler(), cfg)
 }

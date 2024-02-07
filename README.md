@@ -31,6 +31,7 @@ REST API for managing cache control information for pages within the legacy CMS
 | HEALTHCHECK_INTERVAL         | 30s                             | Time between self-healthchecks (`time.Duration` format)                                                            |
 | HEALTHCHECK_CRITICAL_TIMEOUT | 90s                             | Time to wait until an unhealthy dependent propagates its state to make this app unhealthy (`time.Duration` format) |
 | ZEBEDEE_URL                  | http://localhost:8082           | Zebedee host address and port for authentication                                                                   |
+| IS_PUBLISHING                | true                            | If true the endpoint for writing cache becomes accessible otherwise its not accessible                             |
 
 Copyright © 2023, Office for National Statistics (https://www.ons.gov.uk)
 
