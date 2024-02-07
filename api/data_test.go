@@ -18,9 +18,11 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
+var validBody = `{"path": "testpath", "etag": "testetag"}`
 var testCacheID = "a1b2c3d4e5f67890123456789abcdef0"
 var baseURL = "http://localhost:29100/v1/cache-times/"
 var staticTime = time.Date(2024, time.January, 1, 0, 0, 0, 0, time.UTC)
+var staticTimePtr = &staticTime
 
 func TestGetEndpointReturns200WhenAuthTokenIsMissing(t *testing.T) {
 	Convey("Given we have an api with routes attached partly require authentication", t, func() {
@@ -89,7 +91,7 @@ func TestGetCacheTimeEndpoint(t *testing.T) {
 						Path:         "testpath",
 						ETag:         "testetag",
 						CollectionID: 123,
-						ReleaseTime:  staticTime,
+						ReleaseTime:  staticTimePtr,
 					}, nil
 				default:
 					return nil, errors.New("something went wrong")
@@ -109,7 +111,7 @@ func TestGetCacheTimeEndpoint(t *testing.T) {
 					Path:         "testpath",
 					ETag:         "testetag",
 					CollectionID: 123,
-					ReleaseTime:  staticTime,
+					ReleaseTime:  staticTimePtr,
 				}
 				cacheTime := models.CacheTime{}
 				payload, _ := io.ReadAll(responseRecorder.Body)
@@ -180,7 +182,7 @@ func TestUpdateExistingCacheTime(t *testing.T) {
 			Path:         "existingpath",
 			ETag:         "existingetag",
 			CollectionID: 123,
-			ReleaseTime:  staticTime,
+			ReleaseTime:  staticTimePtr,
 		}
 		db[testCacheID] = existingCacheTime
 
@@ -190,7 +192,7 @@ func TestUpdateExistingCacheTime(t *testing.T) {
 				Path:         "updatedpath",
 				ETag:         "updatedetag",
 				CollectionID: 123,
-				ReleaseTime:  staticTime,
+				ReleaseTime:  staticTimePtr,
 			}
 			payload, err := json.Marshal(updatedCacheTime)
 			So(err, ShouldBeNil)
@@ -228,7 +230,7 @@ func TestCreateNewCacheTime(t *testing.T) {
 				Path:         "newpath",
 				ETag:         "newetag",
 				CollectionID: 123,
-				ReleaseTime:  staticTime,
+				ReleaseTime:  staticTimePtr,
 			}
 			payload, err := json.Marshal(newCacheTime)
 			So(err, ShouldBeNil)
@@ -245,11 +247,29 @@ func TestCreateNewCacheTime(t *testing.T) {
 				So(responseRecorder.Body.Len(), ShouldEqual, 0)
 			})
 		})
+		Convey("When creating a new cache time with no collection id or release time", func() {
+			request := httptest.NewRequest(http.MethodPut, baseURL+testCacheID, bytes.NewBufferString(validBody))
+			responseRecorder := httptest.NewRecorder()
+			dataStoreAPI.Router.ServeHTTP(responseRecorder, request)
+
+			Convey("Then a new cache time should be created with status code 204 with an empty response body", func() {
+				expectedCacheTime := models.CacheTime{
+					ID:           testCacheID,
+					Path:         "testpath",
+					ETag:         "testetag",
+					CollectionID: 0,
+					ReleaseTime:  nil,
+				}
+				So(responseRecorder.Code, ShouldEqual, http.StatusNoContent)
+				So(responseRecorder.Body.Len(), ShouldEqual, 0)
+				createdRecord, exists := db[testCacheID]
+				So(exists, ShouldBeTrue)
+				So(createdRecord, ShouldEqual, expectedCacheTime)
+			})
+		})
 	})
 }
 func TestCreateOrUpdateCacheTimeReturnsErr(t *testing.T) {
-	const validBody = `{"path": "testpath", "etag": "testetag"}`
-
 	Convey("Given an API", t, func() {
 		ctx := context.Background()
 		dataStoreMock := &mock.DataStoreMock{}

@@ -32,17 +32,6 @@ func Setup(ctx context.Context, router *mux.Router, dataStore DataStore, identit
 		"/v1/cache-times/{id}",
 		api.isAuthenticated(func(w http.ResponseWriter, req *http.Request) { api.CreateOrUpdateCacheTime(ctx, w, req) }),
 	)
-
-	api.post(
-		"/mongocheck",
-		(func(w http.ResponseWriter, req *http.Request) { api.AddDataSets(ctx) }),
-	)
-
-	api.get(
-		"/mongocheck",
-		(func(w http.ResponseWriter, req *http.Request) { api.GetDataSets(ctx) }),
-	)
-
 	return api
 }
 

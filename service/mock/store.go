@@ -21,9 +21,6 @@ var _ api.DataStore = &DataStoreMock{}
 //
 //		// make and configure a mocked api.DataStore
 //		mockedDataStore := &DataStoreMock{
-//			AddDataSetFunc: func(ctx context.Context, dataset models.DataMessage) error {
-//				panic("mock out the AddDataSet method")
-//			},
 //			CheckerFunc: func(ctx context.Context, state *healthcheck.CheckState) error {
 //				panic("mock out the Checker method")
 //			},
@@ -32,9 +29,6 @@ var _ api.DataStore = &DataStoreMock{}
 //			},
 //			GetCacheTimeFunc: func(ctx context.Context, id string) (*models.CacheTime, error) {
 //				panic("mock out the GetCacheTime method")
-//			},
-//			GetDataSetsFunc: func(ctx context.Context) ([]models.DataMessage, error) {
-//				panic("mock out the GetDataSets method")
 //			},
 //			IsConnectedFunc: func(ctx context.Context) bool {
 //				panic("mock out the IsConnected method")
@@ -49,9 +43,6 @@ var _ api.DataStore = &DataStoreMock{}
 //
 //	}
 type DataStoreMock struct {
-	// AddDataSetFunc mocks the AddDataSet method.
-	AddDataSetFunc func(ctx context.Context, dataset models.DataMessage) error
-
 	// CheckerFunc mocks the Checker method.
 	CheckerFunc func(ctx context.Context, state *healthcheck.CheckState) error
 
@@ -61,9 +52,6 @@ type DataStoreMock struct {
 	// GetCacheTimeFunc mocks the GetCacheTime method.
 	GetCacheTimeFunc func(ctx context.Context, id string) (*models.CacheTime, error)
 
-	// GetDataSetsFunc mocks the GetDataSets method.
-	GetDataSetsFunc func(ctx context.Context) ([]models.DataMessage, error)
-
 	// IsConnectedFunc mocks the IsConnected method.
 	IsConnectedFunc func(ctx context.Context) bool
 
@@ -72,13 +60,6 @@ type DataStoreMock struct {
 
 	// calls tracks calls to the methods.
 	calls struct {
-		// AddDataSet holds details about calls to the AddDataSet method.
-		AddDataSet []struct {
-			// Ctx is the ctx argument value.
-			Ctx context.Context
-			// Dataset is the dataset argument value.
-			Dataset models.DataMessage
-		}
 		// Checker holds details about calls to the Checker method.
 		Checker []struct {
 			// Ctx is the ctx argument value.
@@ -98,11 +79,6 @@ type DataStoreMock struct {
 			// ID is the id argument value.
 			ID string
 		}
-		// GetDataSets holds details about calls to the GetDataSets method.
-		GetDataSets []struct {
-			// Ctx is the ctx argument value.
-			Ctx context.Context
-		}
 		// IsConnected holds details about calls to the IsConnected method.
 		IsConnected []struct {
 			// Ctx is the ctx argument value.
@@ -116,49 +92,11 @@ type DataStoreMock struct {
 			CacheTime *models.CacheTime
 		}
 	}
-	lockAddDataSet      sync.RWMutex
 	lockChecker         sync.RWMutex
 	lockClose           sync.RWMutex
 	lockGetCacheTime    sync.RWMutex
-	lockGetDataSets     sync.RWMutex
 	lockIsConnected     sync.RWMutex
 	lockUpsertCacheTime sync.RWMutex
-}
-
-// AddDataSet calls AddDataSetFunc.
-func (mock *DataStoreMock) AddDataSet(ctx context.Context, dataset models.DataMessage) error {
-	if mock.AddDataSetFunc == nil {
-		panic("DataStoreMock.AddDataSetFunc: method is nil but DataStore.AddDataSet was just called")
-	}
-	callInfo := struct {
-		Ctx     context.Context
-		Dataset models.DataMessage
-	}{
-		Ctx:     ctx,
-		Dataset: dataset,
-	}
-	mock.lockAddDataSet.Lock()
-	mock.calls.AddDataSet = append(mock.calls.AddDataSet, callInfo)
-	mock.lockAddDataSet.Unlock()
-	return mock.AddDataSetFunc(ctx, dataset)
-}
-
-// AddDataSetCalls gets all the calls that were made to AddDataSet.
-// Check the length with:
-//
-//	len(mockedDataStore.AddDataSetCalls())
-func (mock *DataStoreMock) AddDataSetCalls() []struct {
-	Ctx     context.Context
-	Dataset models.DataMessage
-} {
-	var calls []struct {
-		Ctx     context.Context
-		Dataset models.DataMessage
-	}
-	mock.lockAddDataSet.RLock()
-	calls = mock.calls.AddDataSet
-	mock.lockAddDataSet.RUnlock()
-	return calls
 }
 
 // Checker calls CheckerFunc.
@@ -262,38 +200,6 @@ func (mock *DataStoreMock) GetCacheTimeCalls() []struct {
 	mock.lockGetCacheTime.RLock()
 	calls = mock.calls.GetCacheTime
 	mock.lockGetCacheTime.RUnlock()
-	return calls
-}
-
-// GetDataSets calls GetDataSetsFunc.
-func (mock *DataStoreMock) GetDataSets(ctx context.Context) ([]models.DataMessage, error) {
-	if mock.GetDataSetsFunc == nil {
-		panic("DataStoreMock.GetDataSetsFunc: method is nil but DataStore.GetDataSets was just called")
-	}
-	callInfo := struct {
-		Ctx context.Context
-	}{
-		Ctx: ctx,
-	}
-	mock.lockGetDataSets.Lock()
-	mock.calls.GetDataSets = append(mock.calls.GetDataSets, callInfo)
-	mock.lockGetDataSets.Unlock()
-	return mock.GetDataSetsFunc(ctx)
-}
-
-// GetDataSetsCalls gets all the calls that were made to GetDataSets.
-// Check the length with:
-//
-//	len(mockedDataStore.GetDataSetsCalls())
-func (mock *DataStoreMock) GetDataSetsCalls() []struct {
-	Ctx context.Context
-} {
-	var calls []struct {
-		Ctx context.Context
-	}
-	mock.lockGetDataSets.RLock()
-	calls = mock.calls.GetDataSets
-	mock.lockGetDataSets.RUnlock()
 	return calls
 }
 

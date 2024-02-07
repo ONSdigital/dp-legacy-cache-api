@@ -40,30 +40,6 @@ func NewMongoStore(_ context.Context, cfg config.MongoConfig) (m *Mongo, err err
 	return m, nil
 }
 
-// GetDataSets retrieves all the data records from the Datasets collection in MongoDB.
-func (m *Mongo) GetDataSets(ctx context.Context) (values []models.DataMessage, err error) {
-	filter := bson.M{}
-
-	var results []models.DataMessage
-
-	_, err = m.Connection.Collection(config.CacheTimesCollection).Find(ctx, filter, &results)
-	if err != nil {
-		log.Error(ctx, "error finding collection", err)
-		return nil, err
-	}
-	return results, nil
-}
-
-// AddDataSet stores one dataset in the connected database
-func (m *Mongo) AddDataSet(ctx context.Context, dataset models.DataMessage) error {
-	_, err := m.Connection.Collection(config.CacheTimesCollection).InsertOne(ctx, dataset)
-	if err != nil {
-		log.Error(ctx, "error inserting document into collection", err)
-		return err
-	}
-	return nil
-}
-
 // Checker is called by the healthcheck library to check the health state of this mongoDB instance
 func (m *Mongo) Checker(ctx context.Context, state *healthcheck.CheckState) error {
 	return m.healthClient.Checker(ctx, state)
@@ -88,8 +64,8 @@ func (m *Mongo) IsConnected(ctx context.Context) bool {
 // GetCacheTime returns a cache time with its given id
 func (m *Mongo) GetCacheTime(ctx context.Context, id string) (*models.CacheTime, error) {
 	filter := bson.M{"_id": id}
-	var result models.CacheTime
 
+	var result models.CacheTime
 	err := m.Connection.Collection(m.ActualCollectionName(config.CacheTimesCollection)).FindOne(ctx, filter, &result)
 	if err != nil {
 		if errors.Is(err, mongoDriver.ErrNoDocumentFound) {
@@ -105,7 +81,7 @@ func (m *Mongo) GetCacheTime(ctx context.Context, id string) (*models.CacheTime,
 // UpsertCacheTime adds or overrides an existing cache time
 func (m *Mongo) UpsertCacheTime(ctx context.Context, cacheTime *models.CacheTime) (err error) {
 	update := bson.M{
-		"$set": cacheTime,
+		"$set": bson.M{"path": cacheTime.Path, "etag": cacheTime.ETag, "collection_id": cacheTime.CollectionID, "release_time": cacheTime.ReleaseTime},
 	}
 	selector := bson.M{"_id": cacheTime.ID}
 

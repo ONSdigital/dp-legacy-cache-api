@@ -54,8 +54,8 @@ test: ## Runs unit tests including checks for race conditions and returns covera
 	go test -race -cover -count=1 ./...
 
 .PHONY: test-component
-test-component:
-	go test -race -cover -coverpkg=github.com/ONSdigital/dp-permissions-api/... -component
+test-component: ## Runs component test suite
+	go test -cover -coverpkg=github.com/ONSdigital/dp-legacy-cache-api/... -component
 
 .PHONY: help
 help: ## Show help page for list of make targets

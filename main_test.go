@@ -19,13 +19,20 @@ type ComponentTest struct {
 }
 
 func (f *ComponentTest) InitializeScenario(ctx *godog.ScenarioContext) {
-	component, err := steps.NewComponent()
+	mongoURI := f.MongoFeature.Server.URI()
+	mongoDatabaseName := f.MongoFeature.Database.Name()
+
+	component, err := steps.NewComponent(mongoURI, mongoDatabaseName)
 	if err != nil {
 		panic(err)
 	}
 
 	ctx.Before(func(ctx context.Context, sc *godog.Scenario) (context.Context, error) {
 		component.Reset()
+
+		if err := f.MongoFeature.Reset(); err != nil {
+			panic(err)
+		}
 
 		return ctx, nil
 	})
@@ -39,6 +46,7 @@ func (f *ComponentTest) InitializeScenario(ctx *godog.ScenarioContext) {
 	})
 
 	component.RegisterSteps(ctx)
+	f.MongoFeature.RegisterSteps(ctx)
 }
 
 func (f *ComponentTest) InitializeTestSuite(ctx *godog.TestSuiteContext) {
@@ -61,6 +69,7 @@ func TestComponent(t *testing.T) {
 			Output: colors.Colored(os.Stdout),
 			Format: "pretty",
 			Paths:  flag.Args(),
+			Strict: true,
 		}
 
 		f := &ComponentTest{}
