@@ -10,15 +10,17 @@ import (
 
 // API provides a struct to wrap the api around
 type API struct {
-	Router    *mux.Router
-	dataStore DataStore
+	Router          *mux.Router
+	dataStore       DataStore
+	identityHandler func(http.Handler) http.Handler
 }
 
 // Setup function sets up the api with authentication and returns an api
-func Setup(ctx context.Context, router *mux.Router, dataStore DataStore) *API {
+func Setup(ctx context.Context, router *mux.Router, dataStore DataStore, identityHandler func(http.Handler) http.Handler) *API {
 	api := &API{
-		Router:    router,
-		dataStore: dataStore,
+		Router:          router,
+		dataStore:       dataStore,
+		identityHandler: identityHandler,
 	}
 
 	api.get(
@@ -44,11 +46,14 @@ func Setup(ctx context.Context, router *mux.Router, dataStore DataStore) *API {
 	return api
 }
 
-// isAuthenticated wraps a http handler func in another http handler func that checks the caller is authenticated to
+// isAuthenticated wraps a http handler func in another http handler func that checks the callers identity and if it is authenticated to
 // perform the requested action. handler is the http.HandlerFunc to wrap in an
 // authentication check. The wrapped handler is only called if the caller is authenticated
 func (api *API) isAuthenticated(handler http.HandlerFunc) http.HandlerFunc {
-	return dphandlers.CheckIdentity(handler)
+	return func(w http.ResponseWriter, req *http.Request) {
+		checkIdentityHandler := api.identityHandler(dphandlers.CheckIdentity(handler)) // -> handler chain: call identityhandler first then checkIdentity then when  identity exists the final handler is called
+		checkIdentityHandler.ServeHTTP(w, req)
+	}
 }
 
 // get registers a GET http.HandlerFunc.

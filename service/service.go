@@ -9,7 +9,7 @@ import (
 	dphandlers "github.com/ONSdigital/dp-net/handlers"
 	"github.com/ONSdigital/log.go/v2/log"
 	"github.com/gorilla/mux"
-	"github.com/justinas/alice"
+
 	"github.com/pkg/errors"
 )
 
@@ -30,10 +30,8 @@ func Run(ctx context.Context, cfg *config.Config, serviceList *ExternalServiceLi
 
 	log.Info(ctx, "using service configuration", log.Data{"config": cfg})
 
-	// Get HTTP Server and ... // TODO: Add any middleware that your service requires
+	// Get HTTP Server
 	router := mux.NewRouter()
-	chain := alice.New(dphandlers.Identity(cfg.ZebedeeURL)).Then(http.HandlerFunc(handle))
-	router.Path("/v1/cache-times/{id}").Methods(http.MethodPost, http.MethodPut).Handler(chain)
 	httpServer := serviceList.GetHTTPServer(cfg.BindAddr, router)
 
 	mongoDB, err := serviceList.GetMongoDB(ctx, cfg)
@@ -42,8 +40,10 @@ func Run(ctx context.Context, cfg *config.Config, serviceList *ExternalServiceLi
 		return nil, err
 	}
 
+	identityHandler := dphandlers.Identity(cfg.ZebedeeURL)
+
 	// Setup the API
-	cacheAPI := api.Setup(ctx, router, mongoDB)
+	cacheAPI := api.Setup(ctx, router, mongoDB, identityHandler)
 
 	hc, err := serviceList.GetHealthCheck(cfg, buildTime, gitCommit, version)
 	if err != nil {
@@ -75,8 +75,6 @@ func Run(ctx context.Context, cfg *config.Config, serviceList *ExternalServiceLi
 		mongoDB:     mongoDB,
 	}, nil
 }
-
-func handle(http.ResponseWriter, *http.Request) {}
 
 // Close gracefully shuts the service down in the required order, with timeout
 func (svc *Service) Close(ctx context.Context) error {

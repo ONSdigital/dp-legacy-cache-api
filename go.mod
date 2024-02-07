@@ -10,7 +10,6 @@ require (
 	github.com/ONSdigital/log.go/v2 v2.4.3
 	github.com/cucumber/godog v0.13.0
 	github.com/gorilla/mux v1.8.1
-	github.com/justinas/alice v1.2.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/pkg/errors v0.9.1
 	github.com/smartystreets/goconvey v1.8.1
@@ -46,6 +45,7 @@ require (
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/jtolds/gls v4.20.0+incompatible // indirect
+	github.com/justinas/alice v1.2.0 // indirect
 	github.com/klauspost/compress v1.17.4 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect

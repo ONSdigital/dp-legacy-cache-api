@@ -18,7 +18,7 @@ func TestSetup(t *testing.T) {
 		ctx := context.Background()
 
 		mockMongoDB := &mock.DataStoreMock{}
-		cacheAPI := api.Setup(ctx, router, mockMongoDB)
+		cacheAPI := api.Setup(ctx, router, mockMongoDB, getMockIdentityHandler())
 
 		Convey("When created the following routes should have been added", func() {
 			So(hasRoute(cacheAPI.Router, "/mongocheck", "POST"), ShouldBeTrue)
@@ -35,6 +35,17 @@ func hasRoute(r *mux.Router, path, method string) bool {
 	return r.Match(req, match)
 }
 
+func getMockIdentityHandler() func(http.Handler) http.Handler {
+	return func(h http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			ctx := req.Context()
+			log.Info(ctx, "Mock executing identity check middleware")
+			req = req.WithContext(ctx)
+			h.ServeHTTP(w, req)
+		})
+	}
+}
+
 func setupAPIWithStore(ctx context.Context, dataStore api.DataStore) *api.API {
-	return api.Setup(ctx, mux.NewRouter(), dataStore)
+	return api.Setup(ctx, mux.NewRouter(), dataStore, getMockIdentityHandler())
 }

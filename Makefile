@@ -55,7 +55,7 @@ test: ## Runs unit tests including checks for race conditions and returns covera
 
 .PHONY: test-component
 test-component:
-	exit 0
+	go test -race -cover -coverpkg=github.com/ONSdigital/dp-permissions-api/... -component
 
 .PHONY: help
 help: ## Show help page for list of make targets
