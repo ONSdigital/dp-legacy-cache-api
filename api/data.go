@@ -106,7 +106,7 @@ func isValidCacheTime(cacheTime *models.CacheTime) error {
 		e = append(e, errors.New("path field missing"))
 	}
 	if len(e) > 0 {
-		return fmt.Errorf("validation errors: %v", e)
+		return fmt.Errorf("validation errors: %v", formatErrorList(e))
 	}
 	return nil
 }
@@ -114,7 +114,7 @@ func isValidCacheTime(cacheTime *models.CacheTime) error {
 func isValidID(id string) error {
 	e := findIDErrors(id)
 	if len(e) > 0 {
-		return fmt.Errorf("validation errors: %v", e)
+		return fmt.Errorf("validation errors: %v", formatErrorList(e))
 	}
 	return nil
 }
@@ -146,8 +146,20 @@ func isLower(s string) bool {
 func sendJSONError(ctx context.Context, w http.ResponseWriter, code int, message string) {
 	w.WriteHeader(code)
 	if err := json.NewEncoder(w).Encode(map[string]string{"error": message}); err != nil {
-		log.Error(ctx, "error encoding results to JSON", err)
+		log.Error(ctx, "error encoding error message to JSON", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
+}
+
+func formatErrorList(errList []error) string {
+	strErrors := make([]string, len(errList))
+	for i, err := range errList {
+		strErrors[i] = err.Error()
+	}
+
+	// Join the string array with commas and wrap it with square brackets
+	formattedArrayStr := fmt.Sprintf("[%s]", strings.Join(strErrors, ", "))
+
+	return formattedArrayStr
 }

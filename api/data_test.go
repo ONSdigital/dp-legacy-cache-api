@@ -258,7 +258,7 @@ func TestCreateOrUpdateCacheTimeReturnsErr(t *testing.T) {
 			dataStoreAPI.Router.ServeHTTP(responseRecorder, request)
 			Convey("Then a 400 is returned with the missing fields in the response", func() {
 				So(responseRecorder.Code, ShouldEqual, 400)
-				So(responseRecorder.Body.String(), ShouldContainSubstring, "[etag field missing path field missing]")
+				So(responseRecorder.Body.String(), ShouldContainSubstring, "[etag field missing, path field missing]")
 			})
 		})
 

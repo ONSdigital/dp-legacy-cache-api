@@ -32,6 +32,6 @@ Feature: Read Cache Time
     Then I should receive the following JSON response with status "400":
             """
             {
-                "error": "validation errors: [id should be 32 characters in length id is not lowercase id is not a valid hexadecimal]"
+                "error": "validation errors: [id should be 32 characters in length, id is not lowercase, id is not a valid hexadecimal]"
             }
             """
