@@ -40,7 +40,7 @@ func Run(ctx context.Context, cfg *config.Config, serviceList *ExternalServiceLi
 	}
 
 	// Setup the API
-	cacheAPI := api.Setup(ctx, router, mongoDB)
+	cacheAPI := api.Setup(ctx, cfg.IsPublishing, router, mongoDB)
 
 	hc, err := serviceList.GetHealthCheck(cfg, buildTime, gitCommit, version)
 	if err != nil {

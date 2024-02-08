@@ -22,6 +22,7 @@ var testCacheID = "a1b2c3d4e5f67890123456789abcdef0"
 var baseURL = "http://localhost:29100/v1/cache-times/"
 var staticTime = time.Date(2024, time.January, 1, 0, 0, 0, 0, time.UTC)
 var staticTimePtr = &staticTime
+var isPublishing = true
 
 func TestGetCacheTimeEndpoint(t *testing.T) {
 	Convey("Given a GetCacheTime handler", t, func() {
@@ -42,7 +43,7 @@ func TestGetCacheTimeEndpoint(t *testing.T) {
 				}
 			},
 		}
-		dataStoreAPI := setupAPIWithStore(ctx, dataStoreMock)
+		dataStoreAPI := setupAPIWithStore(ctx, isPublishing, dataStoreMock)
 
 		Convey("When an existing cache time is requested with its ID", func() {
 			request := httptest.NewRequest(http.MethodGet, baseURL+testCacheID, http.NoBody)
@@ -76,7 +77,7 @@ func TestGetCacheTimeReturnsError404(t *testing.T) {
 				return nil, errs.ErrCacheTimeNotFound
 			},
 		}
-		dataStoreAPI := setupAPIWithStore(ctx, mockedDataStore)
+		dataStoreAPI := setupAPIWithStore(ctx, isPublishing, mockedDataStore)
 		Convey("When a non-existent cache time is requested with its ID", func() {
 			var nonExistentCacheID = "abcdef0a1b2c3d4e5f67890123456789"
 			r := httptest.NewRequest(http.MethodGet, baseURL+nonExistentCacheID, http.NoBody)
@@ -97,7 +98,7 @@ func TestGetCacheTimeReturnsError500(t *testing.T) {
 				return nil, errs.ErrDataStore
 			},
 		}
-		dataStoreAPI := setupAPIWithStore(ctx, mockedDataStore)
+		dataStoreAPI := setupAPIWithStore(ctx, isPublishing, mockedDataStore)
 		Convey("When there is an error with the datastore ", func() {
 			r := httptest.NewRequest(http.MethodGet, baseURL+testCacheID, http.NoBody)
 			w := httptest.NewRecorder()
@@ -119,7 +120,7 @@ func TestUpdateExistingCacheTime(t *testing.T) {
 				return nil
 			},
 		}
-		dataStoreAPI := setupAPIWithStore(ctx, dataStoreMock)
+		dataStoreAPI := setupAPIWithStore(ctx, isPublishing, dataStoreMock)
 
 		existingCacheTime := models.CacheTime{
 			ID:           testCacheID,
@@ -166,7 +167,7 @@ func TestCreateNewCacheTime(t *testing.T) {
 				return nil
 			},
 		}
-		dataStoreAPI := setupAPIWithStore(ctx, dataStoreMock)
+		dataStoreAPI := setupAPIWithStore(ctx, isPublishing, dataStoreMock)
 
 		Convey("When creating a new cache time", func() {
 			newCacheTime := models.CacheTime{
@@ -215,17 +216,17 @@ func TestCreateNewCacheTime(t *testing.T) {
 }
 
 func TestGetCacheTimeReturnsError400(t *testing.T) {
-	Convey("Given an API", t, func() {
+	Convey("Given an API in publishing subnet", t, func() {
 		ctx := context.Background()
 		dataStoreMock := &mock.DataStoreMock{}
-		dataStoreAPI := setupAPIWithStore(ctx, dataStoreMock)
+		dataStoreAPI := setupAPIWithStore(ctx, isPublishing, dataStoreMock)
 		Convey("When the id provided is not 32 characters, not hexidecimal and not lowercase", func() {
 			var idTotallyInvalid = "XXX"
 			request := httptest.NewRequest(http.MethodGet, baseURL+idTotallyInvalid, http.NoBody)
 			responseRecorder := httptest.NewRecorder()
 			dataStoreAPI.Router.ServeHTTP(responseRecorder, request)
 			Convey("Then a 400 is returned with all three ID validation errors raised", func() {
-				So(responseRecorder.Code, ShouldEqual, 400)
+				So(responseRecorder.Code, ShouldEqual, http.StatusBadRequest)
 				So(responseRecorder.Body.String(), ShouldContainSubstring, "id should be 32 characters in length")
 				So(responseRecorder.Body.String(), ShouldContainSubstring, "id is not a valid hexadecimal")
 				So(responseRecorder.Body.String(), ShouldContainSubstring, "id is not lowercase")
@@ -235,17 +236,17 @@ func TestGetCacheTimeReturnsError400(t *testing.T) {
 }
 
 func TestCreateOrUpdateCacheTimeReturnsErr(t *testing.T) {
-	Convey("Given an API", t, func() {
+	Convey("Given an API in publishing subnet", t, func() {
 		ctx := context.Background()
 		dataStoreMock := &mock.DataStoreMock{}
-		dataStoreAPI := setupAPIWithStore(ctx, dataStoreMock)
+		dataStoreAPI := setupAPIWithStore(ctx, isPublishing, dataStoreMock)
 
 		Convey("When no request body is provided and the CreateOrUpdateCacheTime endpoint is called", func() {
 			request := httptest.NewRequest(http.MethodPut, baseURL+testCacheID, http.NoBody)
 			responseRecorder := httptest.NewRecorder()
 			dataStoreAPI.Router.ServeHTTP(responseRecorder, request)
 			Convey("Then a 400 is returned with 'empty request body' in the response", func() {
-				So(responseRecorder.Code, ShouldEqual, 400)
+				So(responseRecorder.Code, ShouldEqual, http.StatusBadRequest)
 				So(responseRecorder.Body.String(), ShouldContainSubstring, "empty request body")
 			})
 		})
@@ -257,7 +258,7 @@ func TestCreateOrUpdateCacheTimeReturnsErr(t *testing.T) {
 			responseRecorder := httptest.NewRecorder()
 			dataStoreAPI.Router.ServeHTTP(responseRecorder, request)
 			Convey("Then a 400 is returned with the missing fields in the response", func() {
-				So(responseRecorder.Code, ShouldEqual, 400)
+				So(responseRecorder.Code, ShouldEqual, http.StatusBadRequest)
 				So(responseRecorder.Body.String(), ShouldContainSubstring, "[etag field missing, path field missing]")
 			})
 		})
@@ -268,7 +269,7 @@ func TestCreateOrUpdateCacheTimeReturnsErr(t *testing.T) {
 			responseRecorder := httptest.NewRecorder()
 			dataStoreAPI.Router.ServeHTTP(responseRecorder, request)
 			Convey("Then a 400 is returned with an error about the unknown field", func() {
-				So(responseRecorder.Code, ShouldEqual, 400)
+				So(responseRecorder.Code, ShouldEqual, http.StatusBadRequest)
 				So(responseRecorder.Body.String(), ShouldContainSubstring, `json: unknown field \"extra_field\"`)
 			})
 		})
@@ -279,7 +280,7 @@ func TestCreateOrUpdateCacheTimeReturnsErr(t *testing.T) {
 			responseRecorder := httptest.NewRecorder()
 			dataStoreAPI.Router.ServeHTTP(responseRecorder, request)
 			Convey("Then a 400 is returned with a type mismatch error in the response", func() {
-				So(responseRecorder.Code, ShouldEqual, 400)
+				So(responseRecorder.Code, ShouldEqual, http.StatusBadRequest)
 				So(responseRecorder.Body.String(), ShouldContainSubstring, "json: cannot unmarshal number into Go struct field CacheTime.path of type string")
 			})
 		})
@@ -291,7 +292,7 @@ func TestCreateOrUpdateCacheTimeReturnsErr(t *testing.T) {
 			responseRecorder := httptest.NewRecorder()
 			dataStoreAPI.Router.ServeHTTP(responseRecorder, request)
 			Convey("Then a 400 is returned with an ID length error in the response", func() {
-				So(responseRecorder.Code, ShouldEqual, 400)
+				So(responseRecorder.Code, ShouldEqual, http.StatusBadRequest)
 				So(responseRecorder.Body.String(), ShouldContainSubstring, "[id should be 32 characters in length]")
 			})
 		})
@@ -303,7 +304,7 @@ func TestCreateOrUpdateCacheTimeReturnsErr(t *testing.T) {
 			responseRecorder := httptest.NewRecorder()
 			dataStoreAPI.Router.ServeHTTP(responseRecorder, request)
 			Convey("Then a 400 is returned with an ID format error in the response", func() {
-				So(responseRecorder.Code, ShouldEqual, 400)
+				So(responseRecorder.Code, ShouldEqual, http.StatusBadRequest)
 				So(responseRecorder.Body.String(), ShouldContainSubstring, "[id is not lowercase]")
 			})
 		})
@@ -314,8 +315,23 @@ func TestCreateOrUpdateCacheTimeReturnsErr(t *testing.T) {
 			responseRecorder := httptest.NewRecorder()
 			dataStoreAPI.Router.ServeHTTP(responseRecorder, request)
 			Convey("Then a 400 is returned with an ID format error in the response", func() {
-				So(responseRecorder.Code, ShouldEqual, 400)
+				So(responseRecorder.Code, ShouldEqual, http.StatusBadRequest)
 				So(responseRecorder.Body.String(), ShouldContainSubstring, "[id is not a valid hexadecimal]")
+			})
+		})
+	})
+	Convey("Given an API in web subnet", t, func() {
+		isPublishing = false
+		ctx := context.Background()
+		dataStoreMock := &mock.DataStoreMock{}
+		dataStoreAPI := setupAPIWithStore(ctx, isPublishing, dataStoreMock)
+		Convey("When a valid request is made to the PUT endpoint", func() {
+			body := validBody
+			request := httptest.NewRequest(http.MethodPut, baseURL+testCacheID, bytes.NewBufferString(body))
+			responseRecorder := httptest.NewRecorder()
+			dataStoreAPI.Router.ServeHTTP(responseRecorder, request)
+			Convey("Then a 405 Method not allowed should be returned", func() {
+				So(responseRecorder.Code, ShouldEqual, http.StatusMethodNotAllowed)
 			})
 		})
 	})

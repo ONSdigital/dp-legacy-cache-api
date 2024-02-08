@@ -14,7 +14,7 @@ type API struct {
 }
 
 // Setup function sets up the api and returns an api
-func Setup(ctx context.Context, r *mux.Router, dataStore DataStore) *API {
+func Setup(ctx context.Context, isPublishing bool, r *mux.Router, dataStore DataStore) *API {
 	api := &API{
 		Router:    r,
 		dataStore: dataStore,
@@ -23,8 +23,11 @@ func Setup(ctx context.Context, r *mux.Router, dataStore DataStore) *API {
 	r.HandleFunc("/v1/cache-times/{id}", func(w http.ResponseWriter, req *http.Request) {
 		api.GetCacheTime(ctx, w, req)
 	}).Methods(http.MethodGet)
-	r.HandleFunc("/v1/cache-times/{id}", func(w http.ResponseWriter, req *http.Request) {
-		api.CreateOrUpdateCacheTime(ctx, w, req)
-	}).Methods(http.MethodPut)
+
+	if isPublishing {
+		r.HandleFunc("/v1/cache-times/{id}", func(w http.ResponseWriter, req *http.Request) {
+			api.CreateOrUpdateCacheTime(ctx, w, req)
+		}).Methods(http.MethodPut)
+	}
 	return api
 }
