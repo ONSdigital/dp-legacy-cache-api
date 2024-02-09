@@ -31,6 +31,8 @@ paths:
           description: "Successfully returned a cache time for a given id"
           schema:
             $ref: "#/definitions/CacheTime"
+        400:
+          description: "Invalid request, cache time id was in the wrong format"
         404:
           description: "No cache time was found using the id provided"
         500:

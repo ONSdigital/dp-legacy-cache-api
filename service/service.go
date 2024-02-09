@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/ONSdigital/dp-legacy-cache-api/api"
 	"github.com/ONSdigital/dp-legacy-cache-api/config"
@@ -29,6 +30,7 @@ func Run(ctx context.Context, cfg *config.Config, serviceList *ExternalServiceLi
 	log.Info(ctx, "using service configuration", log.Data{"config": cfg})
 
 	router := mux.NewRouter()
+	router.Use(ensureJSONHeaderMiddleware)
 
 	httpServer := serviceList.GetHTTPServer(cfg.BindAddr, router)
 
@@ -40,7 +42,7 @@ func Run(ctx context.Context, cfg *config.Config, serviceList *ExternalServiceLi
 
 	identityHandler := dphandlers.Identity(cfg.ZebedeeURL)
 
-	legacyCacheAPI := api.Setup(ctx, router, mongoDB, identityHandler)
+	legacyCacheAPI := api.Setup(ctx, cfg.IsPublishing, router, mongoDB, identityHandler)
 
 	hc, err := serviceList.GetHealthCheck(cfg, buildTime, gitCommit, version)
 	if err != nil {
@@ -71,6 +73,13 @@ func Run(ctx context.Context, cfg *config.Config, serviceList *ExternalServiceLi
 		Server:      httpServer,
 		mongoDB:     mongoDB,
 	}, nil
+}
+
+func ensureJSONHeaderMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Content-Type", "application/json")
+		next.ServeHTTP(w, r)
+	})
 }
 
 // Close gracefully shuts the service down in the required order, with timeout

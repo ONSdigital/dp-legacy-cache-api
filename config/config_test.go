@@ -28,6 +28,7 @@ func TestConfig(t *testing.T) {
 					GracefulShutdownTimeout:    5 * time.Second,
 					HealthCheckInterval:        30 * time.Second,
 					HealthCheckCriticalTimeout: 90 * time.Second,
+					IsPublishing:               false,
 					ZebedeeURL:                 "http://localhost:8082",
 					MongoConfig: mongodriver.MongoDriverConfig{
 						ClusterEndpoint:               "localhost:27017",

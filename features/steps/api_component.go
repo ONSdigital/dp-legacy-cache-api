@@ -40,6 +40,7 @@ func NewComponent(mongoURI, mongoDatabaseName string) (*Component, error) {
 		return nil, err
 	}
 
+	c.Config.IsPublishing = true
 	c.Config.MongoConfig.ClusterEndpoint = mongoURI
 	c.Config.MongoConfig.Database = mongoDatabaseName
 

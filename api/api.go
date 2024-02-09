@@ -16,7 +16,7 @@ type API struct {
 }
 
 // Setup function sets up the api with authentication and returns an api
-func Setup(ctx context.Context, router *mux.Router, dataStore DataStore, identityHandler func(http.Handler) http.Handler) *API {
+func Setup(ctx context.Context, isPublishing bool, router *mux.Router, dataStore DataStore, identityHandler func(http.Handler) http.Handler) *API {
 	api := &API{
 		Router:          router,
 		dataStore:       dataStore,
@@ -28,10 +28,13 @@ func Setup(ctx context.Context, router *mux.Router, dataStore DataStore, identit
 		func(w http.ResponseWriter, req *http.Request) { api.GetCacheTime(ctx, w, req) },
 	)
 
-	api.put(
-		"/v1/cache-times/{id}",
-		api.isAuthenticated(func(w http.ResponseWriter, req *http.Request) { api.CreateOrUpdateCacheTime(ctx, w, req) }),
-	)
+	if isPublishing {
+		api.put(
+			"/v1/cache-times/{id}",
+			api.isAuthenticated(func(w http.ResponseWriter, req *http.Request) { api.CreateOrUpdateCacheTime(ctx, w, req) }),
+		)
+	}
+
 	return api
 }
 
