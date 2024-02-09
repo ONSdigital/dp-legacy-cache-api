@@ -24,11 +24,11 @@ func TestConfig(t *testing.T) {
 				configuration, err = Get() // This Get() is only called once, when inside this function
 				So(err, ShouldBeNil)
 				So(configuration, ShouldResemble, &Config{
-					ZebedeeURL:                 "http://localhost:8082",
 					BindAddr:                   ":29100",
 					GracefulShutdownTimeout:    5 * time.Second,
 					HealthCheckInterval:        30 * time.Second,
 					HealthCheckCriticalTimeout: 90 * time.Second,
+					ZebedeeURL:                 "http://localhost:8082",
 					MongoConfig: mongodriver.MongoDriverConfig{
 						ClusterEndpoint:               "localhost:27017",
 						Username:                      "",

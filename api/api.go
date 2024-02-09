@@ -40,7 +40,7 @@ func Setup(ctx context.Context, router *mux.Router, dataStore DataStore, identit
 // authentication check. The wrapped handler is only called if the caller is authenticated
 func (api *API) isAuthenticated(handler http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		checkIdentityHandler := api.identityHandler(dphandlers.CheckIdentity(handler)) // -> handler chain: call identityhandler first then checkIdentity then when  identity exists the final handler is called
+		checkIdentityHandler := api.identityHandler(dphandlers.CheckIdentity(handler))
 		checkIdentityHandler.ServeHTTP(w, req)
 	}
 }
@@ -53,9 +53,4 @@ func (api *API) get(path string, handler http.HandlerFunc) {
 // put registers a PUT http.HandlerFunc.
 func (api *API) put(path string, handler http.HandlerFunc) {
 	api.Router.HandleFunc(path, handler).Methods(http.MethodPut)
-}
-
-// post registers a POST http.HandlerFunc.
-func (api *API) post(path string, handler http.HandlerFunc) {
-	api.Router.HandleFunc(path, handler).Methods(http.MethodPost)
 }

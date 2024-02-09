@@ -90,5 +90,3 @@ Feature: Upsert Cache Time
                 "etag": "a-different-etag"
             }
             """
-
-  

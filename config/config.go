@@ -13,11 +13,11 @@ type MongoConfig = mongodb.MongoDriverConfig
 
 // Config represents service configuration for dp-legacy-cache-api
 type Config struct {
-	ZebedeeURL                 string        `envconfig:"ZEBEDEE_URL"`
 	BindAddr                   string        `envconfig:"BIND_ADDR"`
 	GracefulShutdownTimeout    time.Duration `envconfig:"GRACEFUL_SHUTDOWN_TIMEOUT"`
 	HealthCheckInterval        time.Duration `envconfig:"HEALTHCHECK_INTERVAL"`
 	HealthCheckCriticalTimeout time.Duration `envconfig:"HEALTHCHECK_CRITICAL_TIMEOUT"`
+	ZebedeeURL                 string        `envconfig:"ZEBEDEE_URL"`
 	MongoConfig
 }
 
@@ -31,11 +31,11 @@ func Get() (*Config, error) {
 	}
 
 	cfg = &Config{
-		ZebedeeURL:                 "http://localhost:8082",
 		BindAddr:                   ":29100",
 		GracefulShutdownTimeout:    5 * time.Second,
 		HealthCheckInterval:        30 * time.Second,
 		HealthCheckCriticalTimeout: 90 * time.Second,
+		ZebedeeURL:                 "http://localhost:8082",
 		MongoConfig: MongoConfig{
 			ClusterEndpoint:               "localhost:27017",
 			Username:                      "",

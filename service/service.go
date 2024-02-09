@@ -8,7 +8,6 @@ import (
 	dphandlers "github.com/ONSdigital/dp-net/handlers"
 	"github.com/ONSdigital/log.go/v2/log"
 	"github.com/gorilla/mux"
-
 	"github.com/pkg/errors"
 )
 
@@ -29,8 +28,8 @@ func Run(ctx context.Context, cfg *config.Config, serviceList *ExternalServiceLi
 
 	log.Info(ctx, "using service configuration", log.Data{"config": cfg})
 
-	// Get HTTP Server
 	router := mux.NewRouter()
+
 	httpServer := serviceList.GetHTTPServer(cfg.BindAddr, router)
 
 	mongoDB, err := serviceList.GetMongoDB(ctx, cfg)
@@ -41,8 +40,7 @@ func Run(ctx context.Context, cfg *config.Config, serviceList *ExternalServiceLi
 
 	identityHandler := dphandlers.Identity(cfg.ZebedeeURL)
 
-	// Setup the API
-	cacheAPI := api.Setup(ctx, router, mongoDB, identityHandler)
+	legacyCacheAPI := api.Setup(ctx, router, mongoDB, identityHandler)
 
 	hc, err := serviceList.GetHealthCheck(cfg, buildTime, gitCommit, version)
 	if err != nil {
@@ -67,7 +65,7 @@ func Run(ctx context.Context, cfg *config.Config, serviceList *ExternalServiceLi
 	return &Service{
 		Config:      cfg,
 		Router:      router,
-		API:         cacheAPI,
+		API:         legacyCacheAPI,
 		HealthCheck: hc,
 		ServiceList: serviceList,
 		Server:      httpServer,
