@@ -14,22 +14,19 @@ import (
 
 func TestSetup(t *testing.T) {
 	Convey("Given an API instance", t, func() {
-		router := mux.NewRouter()
-		ctx := context.Background()
-
 		mockMongoDB := &mock.DataStoreMock{}
+
 		Convey("When created in publishing subnet", func() {
-			var isPublishing = true
-			cacheAPI := api.Setup(ctx, isPublishing, router, mockMongoDB)
+			cacheAPI := setupPublishingAPI(mockMongoDB)
 
 			Convey("Then all the routes should be available", func() {
 				So(hasRoute(cacheAPI.Router, "/v1/cache-times/{id}", "GET"), ShouldBeTrue)
 				So(hasRoute(cacheAPI.Router, "/v1/cache-times/{id}", "PUT"), ShouldBeTrue)
 			})
 		})
+
 		Convey("When created in web subnet", func() {
-			var isPublishing = false
-			cacheAPI := api.Setup(ctx, isPublishing, router, mockMongoDB)
+			cacheAPI := setupWebAPI(mockMongoDB)
 
 			Convey("Then the PUT endpoint should not have been added", func() {
 				So(hasRoute(cacheAPI.Router, "/v1/cache-times/{id}", "GET"), ShouldBeTrue)
@@ -45,6 +42,18 @@ func hasRoute(r *mux.Router, path, method string) bool {
 	return r.Match(req, match)
 }
 
-func setupAPIWithStore(ctx context.Context, isPublishing bool, dataStore api.DataStore) *api.API {
-	return api.Setup(ctx, isPublishing, mux.NewRouter(), dataStore)
+func setupAPI(isPublishing bool, dataStore api.DataStore) *api.API {
+	mockIdentityHandler := func(h http.Handler) http.Handler {
+		return h
+	}
+
+	return api.Setup(context.Background(), isPublishing, mux.NewRouter(), dataStore, mockIdentityHandler)
+}
+
+func setupPublishingAPI(dataStore api.DataStore) *api.API {
+	return setupAPI(true, dataStore)
+}
+
+func setupWebAPI(dataStore api.DataStore) *api.API {
+	return setupAPI(false, dataStore)
 }

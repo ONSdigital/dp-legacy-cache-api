@@ -6,6 +6,7 @@ import (
 
 	"github.com/ONSdigital/dp-legacy-cache-api/api"
 	"github.com/ONSdigital/dp-legacy-cache-api/config"
+	dphandlers "github.com/ONSdigital/dp-net/handlers"
 	"github.com/ONSdigital/log.go/v2/log"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
@@ -39,8 +40,9 @@ func Run(ctx context.Context, cfg *config.Config, serviceList *ExternalServiceLi
 		return nil, err
 	}
 
-	// Setup the API
-	cacheAPI := api.Setup(ctx, cfg.IsPublishing, router, mongoDB)
+	identityHandler := dphandlers.Identity(cfg.ZebedeeURL)
+
+	legacyCacheAPI := api.Setup(ctx, cfg.IsPublishing, router, mongoDB, identityHandler)
 
 	hc, err := serviceList.GetHealthCheck(cfg, buildTime, gitCommit, version)
 	if err != nil {
@@ -65,7 +67,7 @@ func Run(ctx context.Context, cfg *config.Config, serviceList *ExternalServiceLi
 	return &Service{
 		Config:      cfg,
 		Router:      router,
-		API:         cacheAPI,
+		API:         legacyCacheAPI,
 		HealthCheck: hc,
 		ServiceList: serviceList,
 		Server:      httpServer,

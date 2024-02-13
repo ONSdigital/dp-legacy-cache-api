@@ -23,6 +23,7 @@ type Component struct {
 	HTTPServer     *http.Server
 	ServiceRunning bool
 	apiFeature     *componenttest.APIFeature
+	authFeature    *componenttest.AuthorizationFeature
 	MongoClient    *mongo.Mongo
 }
 
@@ -58,12 +59,19 @@ func NewComponent(mongoURI, mongoDatabaseName string) (*Component, error) {
 	c.svcList = service.NewServiceList(initMock)
 
 	c.apiFeature = componenttest.NewAPIFeature(c.InitialiseService)
+	c.authFeature = componenttest.NewAuthorizationFeature()
+
+	c.Config.ZebedeeURL = c.authFeature.FakeAuthService.ResolveURL("")
 
 	return c, nil
 }
 
 func (c *Component) Reset() *Component {
 	c.apiFeature.Reset()
+	c.authFeature.Reset()
+
+	c.authFeature.FakeAuthService.NewHandler().Get("/identity").Reply(200).BodyString(`{ "identifier": "svc-authenticated"}`)
+
 	return c
 }
 
@@ -71,6 +79,7 @@ func (c *Component) Close() error {
 	ctx := context.Background()
 
 	if c.svc != nil && c.ServiceRunning {
+		c.authFeature.Close()
 		if err := c.MongoClient.Connection.DropDatabase(ctx); err != nil {
 			return err
 		}

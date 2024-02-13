@@ -64,6 +64,8 @@ job "dp-legacy-cache-api" {
         # Configs based on environment (e.g. export BIND_ADDR=":{{ env "NOMAD_PORT_http" }}")
         # or static (e.g. export BIND_ADDR=":8080")
 
+        export ZEBEDEE_URL="http://{{ env "NOMAD_IP_http" }}:10050"
+
         # Secret configs read from vault
         {{ with (secret (print "secret/" (env "NOMAD_TASK_NAME"))) }}
         {{ range $key, $value := .Data }}
@@ -136,6 +138,8 @@ job "dp-legacy-cache-api" {
         data = <<EOH
         # Configs based on environment (e.g. export BIND_ADDR=":{{ env "NOMAD_PORT_http" }}")
         # or static (e.g. export BIND_ADDR=":8080")
+
+        export ZEBEDEE_URL="http://{{ env "NOMAD_IP_http" }}:10050"
 
         # Secret configs read from vault
         {{ with (secret (print "secret/" (env "NOMAD_TASK_NAME"))) }}

@@ -57,7 +57,10 @@ func (f *ComponentTest) InitializeTestSuite(ctx *godog.TestSuiteContext) {
 		f.MongoFeature = componenttest.NewMongoFeature(componenttest.MongoOptions{MongoVersion: MongoVersion, DatabaseName: DatabaseName})
 	})
 	ctx.AfterSuite(func() {
-		f.MongoFeature.Close()
+		err := f.MongoFeature.Close()
+		if err != nil {
+			panic(err)
+		}
 	})
 }
 

@@ -138,6 +138,7 @@ func TestRun(t *testing.T) {
 			svcErrors := make(chan error, 1)
 			svcList := service.NewServiceList(initMock)
 			_, err := service.Run(ctx, cfg, svcList, testBuildTime, testGitCommit, testVersion, svcErrors)
+
 			Convey("Then service Run fails, but all checks try to register", func() {
 				So(err, ShouldNotBeNil)
 				So(err.Error(), ShouldResemble, fmt.Sprintf("unable to register checkers: %s", errAddheckFail.Error()))

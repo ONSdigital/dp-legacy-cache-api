@@ -16,7 +16,7 @@ REST API for managing cache control information for pages within the legacy CMS
 ### Configuration
 
 | Environment variable         | Default                         | Description                                                                                                        |
-| ---------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+|------------------------------|---------------------------------|--------------------------------------------------------------------------------------------------------------------|
 | BIND_ADDR                    | :29100                          | The host and port to bind to                                                                                       |
 | MONGODB_BIND_ADDR            | localhost:27017                 | The MongoDB bind address                                                                                           |
 | MONGODB_USERNAME             |                                 | The MongoDB Username                                                                                               |
@@ -33,6 +33,7 @@ REST API for managing cache control information for pages within the legacy CMS
 | HEALTHCHECK_INTERVAL         | 30s                             | Time between self-healthchecks (`time.Duration` format)                                                            |
 | HEALTHCHECK_CRITICAL_TIMEOUT | 90s                             | Time to wait until an unhealthy dependent propagates its state to make this app unhealthy (`time.Duration` format) |
 | IS_PUBLISHING                | false                           | Determines if the instance is in publishing or not                                                                 |
+| ZEBEDEE_URL                  | http://localhost:8082           | Zebedee host address and port for authentication                                                                   |
 
 Copyright © 2024, Office for National Statistics (https://www.ons.gov.uk)
 
