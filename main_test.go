@@ -21,14 +21,17 @@ type ComponentTest struct {
 func (f *ComponentTest) InitializeScenario(ctx *godog.ScenarioContext) {
 	mongoURI := f.MongoFeature.Server.URI()
 	mongoDatabaseName := f.MongoFeature.Database.Name()
+	authorizationFeature := componenttest.NewAuthorizationFeature()
 
-	component, err := steps.NewComponent(mongoURI, mongoDatabaseName)
+	component, err := steps.NewComponent(mongoURI, mongoDatabaseName, authorizationFeature.FakeAuthService.ResolveURL(""))
 	if err != nil {
 		panic(err)
 	}
 
 	ctx.Before(func(ctx context.Context, sc *godog.Scenario) (context.Context, error) {
 		component.Reset()
+		authorizationFeature.Reset()
+		authorizationFeature.FakeAuthService.NewHandler().Get("/identity").Reply(200).BodyString(`{ "identifier": "svc-authenticated"}`)
 
 		if err := f.MongoFeature.Reset(); err != nil {
 			panic(err)
@@ -41,12 +44,14 @@ func (f *ComponentTest) InitializeScenario(ctx *godog.ScenarioContext) {
 		if closeErr := component.Close(); closeErr != nil {
 			panic(closeErr)
 		}
+		authorizationFeature.Close()
 
 		return ctx, nil
 	})
 
 	component.RegisterSteps(ctx)
 	f.MongoFeature.RegisterSteps(ctx)
+	authorizationFeature.RegisterSteps(ctx)
 }
 
 func (f *ComponentTest) InitializeTestSuite(ctx *godog.TestSuiteContext) {

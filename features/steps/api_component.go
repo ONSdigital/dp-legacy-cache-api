@@ -26,7 +26,7 @@ type Component struct {
 	MongoClient    *mongo.Mongo
 }
 
-func NewComponent(mongoURI, mongoDatabaseName string) (*Component, error) {
+func NewComponent(mongoURI, mongoDatabaseName, zebedeeURL string) (*Component, error) {
 	c := &Component{
 		HTTPServer:     &http.Server{ReadHeaderTimeout: 3 * time.Second},
 		errorChan:      make(chan error),
@@ -43,6 +43,7 @@ func NewComponent(mongoURI, mongoDatabaseName string) (*Component, error) {
 	c.Config.IsPublishing = true
 	c.Config.MongoConfig.ClusterEndpoint = mongoURI
 	c.Config.MongoConfig.Database = mongoDatabaseName
+	c.Config.ZebedeeURL = zebedeeURL
 
 	c.MongoClient, err = mongo.NewMongoStore(context.Background(), c.Config.MongoConfig)
 	if err != nil {

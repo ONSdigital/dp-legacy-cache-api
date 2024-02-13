@@ -2,6 +2,7 @@ Feature: Upsert Cache Time
 
   Scenario: Create Cache Time resource
     Given the document with "_id" set to "5d41402abc4b2a76b9719d911017c592" does not exist in the "cachetimes" collection
+    And I am authorised
     When I PUT "/v1/cache-times/5d41402abc4b2a76b9719d911017c592"
             """
             {
@@ -24,6 +25,7 @@ Feature: Upsert Cache Time
                 "release_time": "2024-01-31T01:23:45.678Z"
             }
             """
+    And I am authorised
     When I PUT "/v1/cache-times/5d41402abc4b2a76b9719d911017c592"
             """
             {
@@ -37,6 +39,7 @@ Feature: Upsert Cache Time
 
   Scenario: Upsert Cache Time resource with empty body
     Given the document with "_id" set to "5d41402abc4b2a76b9719d911017c592" does not exist in the "cachetimes" collection
+    And I am authorised
     When I PUT "/v1/cache-times/5d41402abc4b2a76b9719d911017c592"
             """
             """
@@ -44,6 +47,7 @@ Feature: Upsert Cache Time
 
   Scenario: Upsert Cache Time resource with empty release_time & collection_id
     Given the document with "_id" set to "5d41402abc4b2a76b9719d911017c592" does not exist in the "cachetimes" collection
+    And I am authorised
     When I PUT "/v1/cache-times/5d41402abc4b2a76b9719d911017c592"
             """
             {
@@ -73,6 +77,7 @@ Feature: Upsert Cache Time
                 "release_time": "2024-01-31T01:23:45.678Z"
             }
             """
+    And I am authorised
     When I PUT "/v1/cache-times/5d41402abc4b2a76b9719d911017c592"
             """
             {
