@@ -99,9 +99,6 @@ func (api *API) GetCacheTime(ctx context.Context, w http.ResponseWriter, req *ht
 func isValidCacheTime(cacheTime *models.CacheTime) error {
 	e := findIDErrors(cacheTime.ID)
 
-	if cacheTime.ETag == "" {
-		e = append(e, errors.New("etag field missing"))
-	}
 	if cacheTime.Path == "" {
 		e = append(e, errors.New("path field missing"))
 	}

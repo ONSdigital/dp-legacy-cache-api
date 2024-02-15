@@ -95,7 +95,6 @@ definitions:
     required:
       - id
       - path
-      - etag
     properties:
       id:
         $ref: "#/definitions/CacheTimeID"
@@ -103,10 +102,6 @@ definitions:
         description: "Path for which caching is set"
         type: string
         example: "admin"
-      etag:
-        description: "ETag for cache validation"
-        type: string
-        example: "etag_example"
       collection_id:
         description: "Collection ID - used for grouping and filtering of cache time objects"
         type: integer
@@ -121,16 +116,11 @@ definitions:
     type: object
     required:
       - path
-      - etag
     properties:
       path:
         description: "Path for which caching is set"
         type: string
         example: "admin"
-      etag:
-        description: "ETag for cache validation"
-        type: string
-        example: "etag_example"
       collection_id:
         description: "Collection ID - used for grouping and filtering of cache time objects"
         type: integer

@@ -18,7 +18,7 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-var validBody = `{"path": "testpath", "etag": "testetag"}`
+var validBody = `{"path": "testpath"}`
 var testCacheID = "a1b2c3d4e5f67890123456789abcdef0"
 var baseURL = "http://localhost:29100/v1/cache-times/"
 var staticTime = time.Date(2024, time.January, 1, 0, 0, 0, 0, time.UTC)
@@ -33,7 +33,6 @@ func TestGetCacheTimeEndpoint(t *testing.T) {
 					return &models.CacheTime{
 						ID:           testCacheID,
 						Path:         "testpath",
-						ETag:         "testetag",
 						CollectionID: 123,
 						ReleaseTime:  staticTimePtr,
 					}, nil
@@ -53,7 +52,6 @@ func TestGetCacheTimeEndpoint(t *testing.T) {
 				expectedCacheTime := models.CacheTime{
 					ID:           testCacheID,
 					Path:         "testpath",
-					ETag:         "testetag",
 					CollectionID: 123,
 					ReleaseTime:  staticTimePtr,
 				}
@@ -125,7 +123,6 @@ func TestUpdateExistingCacheTime(t *testing.T) {
 		existingCacheTime := models.CacheTime{
 			ID:           testCacheID,
 			Path:         "existingpath",
-			ETag:         "existingetag",
 			CollectionID: 123,
 			ReleaseTime:  staticTimePtr,
 		}
@@ -135,7 +132,6 @@ func TestUpdateExistingCacheTime(t *testing.T) {
 			updatedCacheTime := models.CacheTime{
 				ID:           testCacheID,
 				Path:         "updatedpath",
-				ETag:         "updatedetag",
 				CollectionID: 123,
 				ReleaseTime:  staticTimePtr,
 			}
@@ -172,7 +168,6 @@ func TestCreateNewCacheTime(t *testing.T) {
 			newCacheTime := models.CacheTime{
 				ID:           testCacheID,
 				Path:         "newpath",
-				ETag:         "newetag",
 				CollectionID: 123,
 				ReleaseTime:  staticTimePtr,
 			}
@@ -201,7 +196,6 @@ func TestCreateNewCacheTime(t *testing.T) {
 				expectedCacheTime := models.CacheTime{
 					ID:           testCacheID,
 					Path:         "testpath",
-					ETag:         "testetag",
 					CollectionID: 0,
 					ReleaseTime:  nil,
 				}
@@ -252,7 +246,7 @@ func TestCreateOrUpdateCacheTimeReturnsErr(t *testing.T) {
 			})
 		})
 
-		Convey("When an etag and/or path is not provided and the CreateOrUpdateCacheTime endpoint is called", func() {
+		Convey("When path is not provided and the CreateOrUpdateCacheTime endpoint is called", func() {
 			staticTimeString := staticTime.Format(time.RFC3339)
 			body := `{"collection_id": 123, "release_time":"` + staticTimeString + `"}`
 			request := newRequestWithAuth(http.MethodPut, baseURL+testCacheID, bytes.NewBufferString(body))
@@ -261,12 +255,12 @@ func TestCreateOrUpdateCacheTimeReturnsErr(t *testing.T) {
 
 			Convey("Then a 400 is returned with the missing fields in the response", func() {
 				So(responseRecorder.Code, ShouldEqual, http.StatusBadRequest)
-				So(responseRecorder.Body.String(), ShouldContainSubstring, "[etag field missing, path field missing]")
+				So(responseRecorder.Body.String(), ShouldContainSubstring, "[path field missing]")
 			})
 		})
 
 		Convey("When an extra field is provided and the CreateOrUpdateCacheTime endpoint is called", func() {
-			body := `{"path": "testpath", "etag": "testetag", "extra_field": "hello" }`
+			body := `{"path": "testpath", "extra_field": "hello" }`
 			request := newRequestWithAuth(http.MethodPut, baseURL+testCacheID, bytes.NewBufferString(body))
 			responseRecorder := httptest.NewRecorder()
 			dataStoreAPI.Router.ServeHTTP(responseRecorder, request)
@@ -278,7 +272,7 @@ func TestCreateOrUpdateCacheTimeReturnsErr(t *testing.T) {
 		})
 
 		Convey("When the field type provided is not the expected and the CreateOrUpdateCacheTime endpoint is called", func() {
-			body := `{"path": 1234, "etag": "testetag"}`
+			body := `{"path": 1234}`
 			request := newRequestWithAuth(http.MethodPut, baseURL+testCacheID, bytes.NewBufferString(body))
 			responseRecorder := httptest.NewRecorder()
 			dataStoreAPI.Router.ServeHTTP(responseRecorder, request)

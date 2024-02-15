@@ -7,7 +7,6 @@ Feature: Upsert Cache Time
       """
       {
         "path": "/my-path",
-        "etag": "test-etag",
         "collection_id": 123456,
         "release_time": "2024-01-31T01:23:45.678Z"
       }
@@ -20,7 +19,6 @@ Feature: Upsert Cache Time
       {
         "_id": "5d41402abc4b2a76b9719d911017c592",
         "path": "/my-path",
-        "etag": "test-etag",
         "collection_id": 123456,
         "release_time": "2024-01-31T01:23:45.678Z"
       }
@@ -30,7 +28,6 @@ Feature: Upsert Cache Time
       """
       {
         "path": "/some/other/path",
-        "etag": "a-different-etag",
         "collection_id": 999,
         "release_time": "1999-12-23T11:22:33.444Z"
       }
@@ -51,8 +48,7 @@ Feature: Upsert Cache Time
     When I PUT "/v1/cache-times/5d41402abc4b2a76b9719d911017c592"
       """
       {
-        "path": "/my-path",
-        "etag": "test-etag"
+        "path": "/my-path"
       }
       """
     Then the HTTP status code should be "204"
@@ -61,8 +57,7 @@ Feature: Upsert Cache Time
       """
       {
         "_id": "5d41402abc4b2a76b9719d911017c592",
-        "path": "/my-path",
-        "etag": "test-etag"
+        "path": "/my-path"
       }
       """
 
@@ -72,7 +67,6 @@ Feature: Upsert Cache Time
       {
         "_id": "5d41402abc4b2a76b9719d911017c592",
         "path": "/my-path",
-        "etag": "test-etag",
         "collection_id": 123456,
         "release_time": "2024-01-31T01:23:45.678Z"
       }
@@ -81,8 +75,7 @@ Feature: Upsert Cache Time
     When I PUT "/v1/cache-times/5d41402abc4b2a76b9719d911017c592"
       """
       {
-        "path": "/some/other/path",
-        "etag": "a-different-etag"
+        "path": "/some/other/path"
       }
       """
     Then the HTTP status code should be "204"
@@ -91,8 +84,7 @@ Feature: Upsert Cache Time
       """
       {
         "_id": "5d41402abc4b2a76b9719d911017c592",
-        "path": "/some/other/path",
-        "etag": "a-different-etag"
+        "path": "/some/other/path"
       }
       """
 
@@ -102,7 +94,6 @@ Feature: Upsert Cache Time
       """
       {
         "path": "/my-path",
-        "etag": "test-etag",
         "collection_id": 123456,
         "release_time": "2024-01-31T01:23:45.678Z"
       }

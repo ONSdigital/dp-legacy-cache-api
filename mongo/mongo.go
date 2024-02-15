@@ -81,7 +81,7 @@ func (m *Mongo) GetCacheTime(ctx context.Context, id string) (*models.CacheTime,
 // UpsertCacheTime adds or overrides an existing cache time
 func (m *Mongo) UpsertCacheTime(ctx context.Context, cacheTime *models.CacheTime) (err error) {
 	update := bson.M{
-		"$set": bson.M{"path": cacheTime.Path, "etag": cacheTime.ETag, "collection_id": cacheTime.CollectionID, "release_time": cacheTime.ReleaseTime},
+		"$set": bson.M{"path": cacheTime.Path, "collection_id": cacheTime.CollectionID, "release_time": cacheTime.ReleaseTime},
 	}
 	selector := bson.M{"_id": cacheTime.ID}
 
