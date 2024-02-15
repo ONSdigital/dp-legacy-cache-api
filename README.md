@@ -4,10 +4,17 @@ REST API for managing cache control information for pages within the legacy CMS
 
 ### Getting started
 
-- Ensure Docker is installed on your local machine, installation steps can be found here https://docs.docker.com/desktop/install/mac-install/
-- Run `docker run --name mongo-test -p 27017:27017 -e MONGO_INITDB_DATABASE=cache -v $(pwd)/mongo-init:/docker-entrypoint-initdb.d -d mongo`. This command launches a MongoDB container named mongo-test, maps port 27017 from the host to the container, sets cache as the default database, runs initialization scripts from a host directory, and operates in the background.
-- Run `make debug` to run application on http://localhost:29100
-- Run `make help` to see full list of make targets
+- Ensure Docker is installed on your local machine. Installation steps can be found [here](https://docs.docker.com/desktop/install/mac-install/).
+- Run `docker run --name mongo-test -p 27017:27017 -e MONGO_INITDB_DATABASE=cache -v $(pwd)/mongo-init:/docker-entrypoint-initdb.d -d mongo`.
+  - This command launches a MongoDB container named `mongo-test`, maps port 27017 from the host to the container, sets `cache` as the default database, runs initialization scripts (located in the `mongo-init` directory), and operates in the background.
+- Run `make debug` to run the application on http://localhost:29100.
+- By default, the write (PUT) endpoint is disabled. To be able to create or update resources, please follow these steps:
+  - Run [Zebedee](https://github.com/ONSdigital/zebedee).
+  - Run `IS_PUBLISHING=true make debug`. This will make the PUT endpoint available.
+  - Send a valid request to the PUT endpoint. You'll need to set the Bearer token (the `Authorization` header's value should be `Bearer your-token-here`).
+    - For local usage, you can use the Service Auth Token specified in the [DP's install guide](https://github.com/ONSdigital/dp/blob/a9ceaa3fb500e5e2850c8b4853bebf922640083b/guides/INSTALLING.md#environment-variables).
+    - For Sandbox/Production usage (or to generate a different token), please follow [this guide](https://github.com/ONSdigital/zebedee#service-authentication-with-zebedee).
+- Run `make help` to see a full list of make targets.
 
 ### Dependencies
 
