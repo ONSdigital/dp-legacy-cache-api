@@ -104,9 +104,8 @@ definitions:
         example: "admin"
       collection_id:
         description: "Collection ID - used for grouping and filtering of cache time objects"
-        type: integer
-        format: int32
-        example: 123
+        type: string
+        example: "123"
       release_time:
         description: "Release time in ISO-8601 format"
         type: string
@@ -123,9 +122,8 @@ definitions:
         example: "admin"
       collection_id:
         description: "Collection ID - used for grouping and filtering of cache time objects"
-        type: integer
-        format: int32
-        example: 123
+        type: string
+        example: "123"
       release_time:
         description: "Release time in ISO-8601 format"
         type: string

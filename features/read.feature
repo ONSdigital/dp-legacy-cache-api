@@ -6,7 +6,7 @@ Feature: Read Cache Time
       {
         "_id": "5d41402abc4b2a76b9719d911017c592",
         "path": "/my-path",
-        "collection_id": 123456,
+        "collection_id": "123456",
         "release_time": "2024-01-31T01:23:45.678Z"
       }
       """
@@ -16,7 +16,7 @@ Feature: Read Cache Time
       {
         "_id": "5d41402abc4b2a76b9719d911017c592",
         "path": "/my-path",
-        "collection_id": 123456,
+        "collection_id": "123456",
         "release_time": "2024-01-31T01:23:45.678Z"
       }
       """

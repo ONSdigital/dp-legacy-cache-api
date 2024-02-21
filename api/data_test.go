@@ -33,7 +33,7 @@ func TestGetCacheTimeEndpoint(t *testing.T) {
 					return &models.CacheTime{
 						ID:           testCacheID,
 						Path:         "testpath",
-						CollectionID: 123,
+						CollectionID: "123",
 						ReleaseTime:  staticTimePtr,
 					}, nil
 				default:
@@ -52,7 +52,7 @@ func TestGetCacheTimeEndpoint(t *testing.T) {
 				expectedCacheTime := models.CacheTime{
 					ID:           testCacheID,
 					Path:         "testpath",
-					CollectionID: 123,
+					CollectionID: "123",
 					ReleaseTime:  staticTimePtr,
 				}
 				cacheTime := models.CacheTime{}
@@ -123,7 +123,7 @@ func TestUpdateExistingCacheTime(t *testing.T) {
 		existingCacheTime := models.CacheTime{
 			ID:           testCacheID,
 			Path:         "existingpath",
-			CollectionID: 123,
+			CollectionID: "123",
 			ReleaseTime:  staticTimePtr,
 		}
 		db[testCacheID] = existingCacheTime
@@ -132,7 +132,7 @@ func TestUpdateExistingCacheTime(t *testing.T) {
 			updatedCacheTime := models.CacheTime{
 				ID:           testCacheID,
 				Path:         "updatedpath",
-				CollectionID: 123,
+				CollectionID: "123",
 				ReleaseTime:  staticTimePtr,
 			}
 			payload, err := json.Marshal(updatedCacheTime)
@@ -168,7 +168,7 @@ func TestCreateNewCacheTime(t *testing.T) {
 			newCacheTime := models.CacheTime{
 				ID:           testCacheID,
 				Path:         "newpath",
-				CollectionID: 123,
+				CollectionID: "123",
 				ReleaseTime:  staticTimePtr,
 			}
 			payload, err := json.Marshal(newCacheTime)
@@ -196,7 +196,7 @@ func TestCreateNewCacheTime(t *testing.T) {
 				expectedCacheTime := models.CacheTime{
 					ID:           testCacheID,
 					Path:         "testpath",
-					CollectionID: 0,
+					CollectionID: "",
 					ReleaseTime:  nil,
 				}
 				So(responseRecorder.Code, ShouldEqual, http.StatusNoContent)
@@ -248,7 +248,7 @@ func TestCreateOrUpdateCacheTimeReturnsErr(t *testing.T) {
 
 		Convey("When path is not provided and the CreateOrUpdateCacheTime endpoint is called", func() {
 			staticTimeString := staticTime.Format(time.RFC3339)
-			body := `{"collection_id": 123, "release_time":"` + staticTimeString + `"}`
+			body := `{"collection_id": "123", "release_time":"` + staticTimeString + `"}`
 			request := newRequestWithAuth(http.MethodPut, baseURL+testCacheID, bytes.NewBufferString(body))
 			responseRecorder := httptest.NewRecorder()
 			dataStoreAPI.Router.ServeHTTP(responseRecorder, request)
