@@ -7,7 +7,7 @@ Feature: Upsert Cache Time
       """
       {
         "path": "/my-path",
-        "collection_id": 123456,
+        "collection_id": "test-1a19e3462937d85804752375daa00ba41d1b6625d396f21000e3c4571ebf2606",
         "release_time": "2024-01-31T01:23:45.678Z"
       }
       """
@@ -19,7 +19,7 @@ Feature: Upsert Cache Time
       {
         "_id": "5d41402abc4b2a76b9719d911017c592",
         "path": "/my-path",
-        "collection_id": 123456,
+        "collection_id": "test-1a19e3462937d85804752375daa00ba41d1b6625d396f21000e3c4571ebf2606",
         "release_time": "2024-01-31T01:23:45.678Z"
       }
       """
@@ -28,7 +28,7 @@ Feature: Upsert Cache Time
       """
       {
         "path": "/some/other/path",
-        "collection_id": 999,
+        "collection_id": "updatedcollectionid-aa00ba41d1b6625d396f21000e3c4571ebf26061a19e3462937d85804752375d",
         "release_time": "1999-12-23T11:22:33.444Z"
       }
       """
@@ -67,7 +67,7 @@ Feature: Upsert Cache Time
       {
         "_id": "5d41402abc4b2a76b9719d911017c592",
         "path": "/my-path",
-        "collection_id": 123456,
+        "collection_id": "test-1a19e3462937d85804752375daa00ba41d1b6625d396f21000e3c4571ebf2606",
         "release_time": "2024-01-31T01:23:45.678Z"
       }
       """
@@ -94,7 +94,7 @@ Feature: Upsert Cache Time
       """
       {
         "path": "/my-path",
-        "collection_id": 123456,
+        "collection_id": "test-1a19e3462937d85804752375daa00ba41d1b6625d396f21000e3c4571ebf2606",
         "release_time": "2024-01-31T01:23:45.678Z"
       }
       """

@@ -1,6 +1,18 @@
 # dp-legacy-cache-api
 
-REST API for managing cache control information for pages within the legacy CMS
+REST API for managing cache control information for pages within the legacy CMS. dp-legacy-cache-api is called by:
+- dp-legacy-cache-proxy to read the release time for a particular item of content (Web subnet/ read-only mode)
+- Zebedee to set the right cache time for content based on publish notifications (Publishing subnet)
+
+The API talks to DocumentDB in the environment (or MongoDB locally) in the `cachetimes` collection.
+
+| Database Fields   | Description                                                     |
+|-------------------|-----------------------------------------------------------------|
+| ID                | MD5 hash representing the unique identifier of the page's path. |
+| Path              | URI indicating the location of the published page               |
+| Next Release Time | Scheduled time for the next update in ISO-8601 format           |
+| Collection ID     | Utilised for organising and filtering cache time entries        |        
+
 
 ### Getting started
 
@@ -41,6 +53,11 @@ REST API for managing cache control information for pages within the legacy CMS
 | HEALTHCHECK_CRITICAL_TIMEOUT | 90s                             | Time to wait until an unhealthy dependent propagates its state to make this app unhealthy (`time.Duration` format) |
 | IS_PUBLISHING                | false                           | Determines if the instance is in publishing or not                                                                 |
 | ZEBEDEE_URL                  | http://localhost:8082           | Zebedee host address and port for authentication                                                                   |
+
+### Auto-Deployment of secrets
+Functionality has been added to the nomad plan so that when the secrets are deployed to Vault, this will automatically cause Nomad to trigger a redeployment of the application to pick up the new secrets. Please note that this functionality does not appear to work with the current nomad/vault versions, but if these are upgraded it may then become functional. 
+
+### License
 
 Copyright © 2024, Office for National Statistics (https://www.ons.gov.uk)
 
