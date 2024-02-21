@@ -23,6 +23,7 @@ var testCacheID = "a1b2c3d4e5f67890123456789abcdef0"
 var baseURL = "http://localhost:29100/v1/cache-times/"
 var staticTime = time.Date(2024, time.January, 1, 0, 0, 0, 0, time.UTC)
 var staticTimePtr = &staticTime
+var testCollectionID = "test-1a19e3462937d85804752375daa00ba41d1b6625d396f21000e3c4571ebf2606"
 
 func TestGetCacheTimeEndpoint(t *testing.T) {
 	Convey("Given a GetCacheTime handler", t, func() {
@@ -33,7 +34,7 @@ func TestGetCacheTimeEndpoint(t *testing.T) {
 					return &models.CacheTime{
 						ID:           testCacheID,
 						Path:         "testpath",
-						CollectionID: "123",
+						CollectionID: testCollectionID,
 						ReleaseTime:  staticTimePtr,
 					}, nil
 				default:
@@ -52,7 +53,7 @@ func TestGetCacheTimeEndpoint(t *testing.T) {
 				expectedCacheTime := models.CacheTime{
 					ID:           testCacheID,
 					Path:         "testpath",
-					CollectionID: "123",
+					CollectionID: testCollectionID,
 					ReleaseTime:  staticTimePtr,
 				}
 				cacheTime := models.CacheTime{}
@@ -123,7 +124,7 @@ func TestUpdateExistingCacheTime(t *testing.T) {
 		existingCacheTime := models.CacheTime{
 			ID:           testCacheID,
 			Path:         "existingpath",
-			CollectionID: "123",
+			CollectionID: testCollectionID,
 			ReleaseTime:  staticTimePtr,
 		}
 		db[testCacheID] = existingCacheTime
@@ -132,7 +133,7 @@ func TestUpdateExistingCacheTime(t *testing.T) {
 			updatedCacheTime := models.CacheTime{
 				ID:           testCacheID,
 				Path:         "updatedpath",
-				CollectionID: "123",
+				CollectionID: testCollectionID,
 				ReleaseTime:  staticTimePtr,
 			}
 			payload, err := json.Marshal(updatedCacheTime)
@@ -168,7 +169,7 @@ func TestCreateNewCacheTime(t *testing.T) {
 			newCacheTime := models.CacheTime{
 				ID:           testCacheID,
 				Path:         "newpath",
-				CollectionID: "123",
+				CollectionID: testCollectionID,
 				ReleaseTime:  staticTimePtr,
 			}
 			payload, err := json.Marshal(newCacheTime)
@@ -248,7 +249,7 @@ func TestCreateOrUpdateCacheTimeReturnsErr(t *testing.T) {
 
 		Convey("When path is not provided and the CreateOrUpdateCacheTime endpoint is called", func() {
 			staticTimeString := staticTime.Format(time.RFC3339)
-			body := `{"collection_id": "123", "release_time":"` + staticTimeString + `"}`
+			body := `{"collection_id":"` + testCollectionID + `", "release_time":"` + staticTimeString + `"}`
 			request := newRequestWithAuth(http.MethodPut, baseURL+testCacheID, bytes.NewBufferString(body))
 			responseRecorder := httptest.NewRecorder()
 			dataStoreAPI.Router.ServeHTTP(responseRecorder, request)

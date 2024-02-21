@@ -105,7 +105,7 @@ definitions:
       collection_id:
         description: "Collection ID - used for grouping and filtering of cache time objects"
         type: string
-        example: "123"
+        example: "example-1a19e3462937d85804752375daa00ba41d1b6625d396f21000e3c4571ebf2606"
       release_time:
         description: "Release time in ISO-8601 format"
         type: string
@@ -123,7 +123,7 @@ definitions:
       collection_id:
         description: "Collection ID - used for grouping and filtering of cache time objects"
         type: string
-        example: "123"
+        example: "example-1a19e3462937d85804752375daa00ba41d1b6625d396f21000e3c4571ebf2606"
       release_time:
         description: "Release time in ISO-8601 format"
         type: string
