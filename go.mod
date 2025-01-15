@@ -1,6 +1,6 @@
 module github.com/ONSdigital/dp-legacy-cache-api
 
-go 1.21
+go 1.23
 
 require (
 	github.com/ONSdigital/dp-component-test v0.10.0
