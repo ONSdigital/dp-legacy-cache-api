@@ -14,7 +14,7 @@ import (
 	"github.com/ONSdigital/dp-legacy-cache-api/api/mock"
 	errs "github.com/ONSdigital/dp-legacy-cache-api/apierrors"
 	"github.com/ONSdigital/dp-legacy-cache-api/models"
-	dprequest "github.com/ONSdigital/dp-net/request"
+	dprequest "github.com/ONSdigital/dp-net/v3/request"
 	. "github.com/smartystreets/goconvey/convey"
 )
 

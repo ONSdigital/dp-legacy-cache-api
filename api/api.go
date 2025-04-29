@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	dphandlers "github.com/ONSdigital/dp-net/handlers"
+	dphandlers "github.com/ONSdigital/dp-net/v3/handlers"
 	"github.com/gorilla/mux"
 )
 
