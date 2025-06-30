@@ -41,8 +41,8 @@ func NewComponent(mongoURI, mongoDatabaseName string) (*Component, error) {
 	}
 
 	c.Config.IsPublishing = true
-	c.Config.MongoConfig.ClusterEndpoint = mongoURI
-	c.Config.MongoConfig.Database = mongoDatabaseName
+	c.Config.ClusterEndpoint = mongoURI
+	c.Config.Database = mongoDatabaseName
 
 	c.MongoClient, err = mongo.NewMongoStore(context.Background(), c.Config.MongoConfig)
 	if err != nil {
