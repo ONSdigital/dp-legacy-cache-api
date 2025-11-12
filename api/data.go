@@ -16,7 +16,8 @@ import (
 )
 
 // CreateOrUpdateCacheTime handles the creation or update of a cache time
-func (api *API) CreateOrUpdateCacheTime(ctx context.Context, w http.ResponseWriter, req *http.Request) {
+func (api *API) CreateOrUpdateCacheTime(w http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
 	log.Info(ctx, "calling create or update cache time handler")
 
 	vars := mux.Vars(req)
@@ -64,7 +65,8 @@ func (api *API) CreateOrUpdateCacheTime(ctx context.Context, w http.ResponseWrit
 }
 
 // GetCacheTime retrieves a cache time for a given ID and writes it to the HTTP response.
-func (api *API) GetCacheTime(ctx context.Context, w http.ResponseWriter, req *http.Request) {
+func (api *API) GetCacheTime(w http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
 	log.Info(ctx, "calling get cache time handler")
 
 	vars := mux.Vars(req)

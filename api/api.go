@@ -25,13 +25,13 @@ func Setup(ctx context.Context, isPublishing bool, r *mux.Router, dataStore Data
 
 	api.get(
 		"/v1/cache-times/{id}",
-		func(w http.ResponseWriter, req *http.Request) { api.GetCacheTime(ctx, w, req) },
+		api.GetCacheTime,
 	)
 
 	if isPublishing {
 		api.put(
 			"/v1/cache-times/{id}",
-			api.isAuthenticated(func(w http.ResponseWriter, req *http.Request) { api.CreateOrUpdateCacheTime(ctx, w, req) }),
+			api.isAuthenticated(api.CreateOrUpdateCacheTime),
 		)
 	}
 
