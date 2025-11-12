@@ -16,7 +16,7 @@ type API struct {
 }
 
 // Setup function sets up the api and returns an API
-func Setup(ctx context.Context, isPublishing bool, r *mux.Router, dataStore DataStore, identityHandler func(http.Handler) http.Handler) *API {
+func Setup(_ context.Context, isPublishing bool, r *mux.Router, dataStore DataStore, identityHandler func(http.Handler) http.Handler) *API {
 	api := &API{
 		Router:          r,
 		dataStore:       dataStore,
