@@ -90,6 +90,14 @@ func (cli *Client) callLegacyCacheAPI(ctx context.Context, path, method string, 
 
 	auth.Add(req)
 
+	q := req.URL.Query()
+	for key, values := range queryParams {
+		for _, value := range values {
+			q.Add(key, value)
+		}
+	}
+	req.URL.RawQuery = q.Encode()
+
 	resp, err := cli.hcCli.Client.Do(ctx, req)
 	if err != nil {
 		return nil, apiError.StatusError{

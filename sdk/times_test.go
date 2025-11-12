@@ -6,7 +6,9 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"net/url"
 	"testing"
+	"time"
 
 	"github.com/ONSdigital/dp-legacy-cache-api/models"
 	. "github.com/smartystreets/goconvey/convey"
@@ -95,7 +97,7 @@ func TestGetCacheTimes(t *testing.T) {
 				nil)
 
 			legacyCacheAPIClient := newLegacyCacheAPIClient(t, httpClient)
-			cacheTimesList, err := legacyCacheAPIClient.GetCacheTimes(ctx, Auth{}, Options{Limit: 1, Offset: 0})
+			cacheTimesList, err := legacyCacheAPIClient.GetCacheTimes(ctx, Auth{}, Options{Limit: 15, Offset: 1})
 
 			Convey("Then the expected cache times are returned", func() {
 				So(*cacheTimesList, ShouldResemble, testPaginationCacheTimesList)
@@ -107,6 +109,42 @@ func TestGetCacheTimes(t *testing.T) {
 						doCalls := httpClient.DoCalls()
 						So(doCalls, ShouldHaveLength, 1)
 						So(doCalls[0].Req.URL.Path, ShouldEqual, "/cache-times")
+						So(doCalls[0].Req.URL.RawQuery, ShouldContainSubstring, "limit=15")
+						So(doCalls[0].Req.URL.RawQuery, ShouldContainSubstring, "offset=1")
+					})
+				})
+			})
+		})
+
+		Convey("When GetCacheTimes is called with release_time param", func() {
+			body, err := json.Marshal(testPaginationCacheTimesList)
+			if err != nil {
+				t.Errorf("failed to setup test data, error: %v", err)
+			}
+
+			httpClient := newMockHTTPClient(
+				&http.Response{
+					StatusCode: http.StatusOK,
+					Body:       io.NopCloser(bytes.NewReader(body)),
+				},
+				nil)
+
+			legacyCacheAPIClient := newLegacyCacheAPIClient(t, httpClient)
+			releaseTimeString := "2024-01-31T01:23:45Z"
+			releaseTime, _ := time.Parse(time.RFC3339, releaseTimeString)
+			cacheTimesList, err := legacyCacheAPIClient.GetCacheTimes(ctx, Auth{}, Options{ReleaseTime: releaseTime})
+
+			Convey("Then the expected cache times are returned", func() {
+				So(*cacheTimesList, ShouldResemble, testPaginationCacheTimesList)
+				So(cacheTimesList.Count, ShouldEqual, 1)
+				Convey("And no error is returned", func() {
+					So(err, ShouldBeNil)
+
+					Convey("And client.Do should be called once with the expected parameters", func() {
+						doCalls := httpClient.DoCalls()
+						So(doCalls, ShouldHaveLength, 1)
+						So(doCalls[0].Req.URL.Path, ShouldEqual, "/cache-times")
+						So(doCalls[0].Req.URL.RawQuery, ShouldContainSubstring, "release_time="+url.QueryEscape(releaseTimeString))
 					})
 				})
 			})
