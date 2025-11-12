@@ -114,7 +114,7 @@ func (api *API) GetCacheTimes(w http.ResponseWriter, req *http.Request) {
 
 	response := models.CacheTimesList{
 		Items:      cacheTimes,
-		Count:      len(*cacheTimes),
+		Count:      len(cacheTimes),
 		Limit:      limit,
 		Offset:     offset,
 		TotalCount: totalCount,

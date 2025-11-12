@@ -10,7 +10,7 @@ type CacheTime struct {
 }
 
 type CacheTimesList struct {
-	Items      *[]CacheTime `json:"items"`
+	Items      []*CacheTime `json:"items"`
 	Count      int          `json:"count"`
 	Limit      int          `json:"limit"`
 	Offset     int          `json:"offset"`

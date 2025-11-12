@@ -26,18 +26,18 @@ var (
 		ReleaseTime:  nil,
 	}
 
-	testCacheTimeItems = []models.CacheTime{testCacheTime1, testCacheTime2}
+	testCacheTimeItems = []*models.CacheTime{&testCacheTime1, &testCacheTime2}
 	testCacheTimesList = models.CacheTimesList{
 		Count:  2,
-		Items:  &testCacheTimeItems,
+		Items:  testCacheTimeItems,
 		Offset: 0,
 		Limit:  20,
 	}
 
-	testPaginationCacheTimeItems = []models.CacheTime{testCacheTime1}
+	testPaginationCacheTimeItems = []*models.CacheTime{&testCacheTime1}
 	testPaginationCacheTimesList = models.CacheTimesList{
 		Count:  1,
-		Items:  &testPaginationCacheTimeItems,
+		Items:  testPaginationCacheTimeItems,
 		Offset: 0,
 		Limit:  20,
 	}

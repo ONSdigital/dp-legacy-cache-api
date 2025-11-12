@@ -114,8 +114,8 @@ func TestGetCacheTimeReturnsError500(t *testing.T) {
 func TestGetCacheTimesEndpoint(t *testing.T) {
 	Convey("Given a datastore that returns cache times", t, func() {
 		dataStoreMock := &mock.DataStoreMock{
-			GetCacheTimesFunc: func(ctx context.Context, offset, limit int, releaseTime time.Time) (*[]models.CacheTime, int, error) {
-				return &[]models.CacheTime{
+			GetCacheTimesFunc: func(ctx context.Context, offset, limit int, releaseTime time.Time) ([]*models.CacheTime, int, error) {
+				return []*models.CacheTime{
 					{
 						ID:           testCacheID,
 						Path:         "testpath",
@@ -134,7 +134,7 @@ func TestGetCacheTimesEndpoint(t *testing.T) {
 
 			Convey("The matched cache times are returned with status code 200", func() {
 				expectedCacheTimes := models.CacheTimesList{
-					Items: &[]models.CacheTime{
+					Items: []*models.CacheTime{
 						{
 							ID:           testCacheID,
 							Path:         "testpath",

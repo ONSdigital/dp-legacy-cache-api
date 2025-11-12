@@ -17,6 +17,6 @@ type DataStore interface {
 	Close(ctx context.Context) error
 	IsConnected(ctx context.Context) bool
 	GetCacheTime(ctx context.Context, id string) (*models.CacheTime, error)
-	GetCacheTimes(ctx context.Context, offset int, limit int, releaseTime time.Time) (*[]models.CacheTime, int, error)
+	GetCacheTimes(ctx context.Context, offset int, limit int, releaseTime time.Time) ([]*models.CacheTime, int, error)
 	UpsertCacheTime(ctx context.Context, cacheTime *models.CacheTime) error
 }
