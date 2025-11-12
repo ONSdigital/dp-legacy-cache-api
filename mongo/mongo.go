@@ -80,8 +80,7 @@ func (m *Mongo) GetCacheTime(ctx context.Context, id string) (*models.CacheTime,
 }
 
 // GetCacheTimes
-func (m *Mongo) GetCacheTimes(ctx context.Context, offset int, limit int, releaseTime time.Time) (*[]models.CacheTime, int, error) {
-
+func (m *Mongo) GetCacheTimes(ctx context.Context, offset, limit int, releaseTime time.Time) ([]*models.CacheTime, int, error) {
 	var filter bson.M
 
 	if !releaseTime.IsZero() {
@@ -90,9 +89,7 @@ func (m *Mongo) GetCacheTimes(ctx context.Context, offset int, limit int, releas
 		}
 	}
 
-	log.Info(ctx, "filter", log.Data{"filter": filter})
-
-	var results *[]models.CacheTime
+	results := []*models.CacheTime{}
 	totalCount, err := m.Connection.Collection(m.ActualCollectionName(config.CacheTimesCollection)).
 		Find(ctx,
 			filter,

@@ -31,7 +31,7 @@ var _ api.DataStore = &DataStoreMock{}
 //			GetCacheTimeFunc: func(ctx context.Context, id string) (*models.CacheTime, error) {
 //				panic("mock out the GetCacheTime method")
 //			},
-//			GetCacheTimesFunc: func(ctx context.Context, offset int, limit int, releaseTime time.Time) (*[]models.CacheTime, int, error) {
+//			GetCacheTimesFunc: func(ctx context.Context, offset int, limit int, releaseTime time.Time) ([]*models.CacheTime, int, error) {
 //				panic("mock out the GetCacheTimes method")
 //			},
 //			IsConnectedFunc: func(ctx context.Context) bool {
@@ -57,7 +57,7 @@ type DataStoreMock struct {
 	GetCacheTimeFunc func(ctx context.Context, id string) (*models.CacheTime, error)
 
 	// GetCacheTimesFunc mocks the GetCacheTimes method.
-	GetCacheTimesFunc func(ctx context.Context, offset int, limit int, releaseTime time.Time) (*[]models.CacheTime, int, error)
+	GetCacheTimesFunc func(ctx context.Context, offset int, limit int, releaseTime time.Time) ([]*models.CacheTime, int, error)
 
 	// IsConnectedFunc mocks the IsConnected method.
 	IsConnectedFunc func(ctx context.Context) bool
@@ -223,7 +223,7 @@ func (mock *DataStoreMock) GetCacheTimeCalls() []struct {
 }
 
 // GetCacheTimes calls GetCacheTimesFunc.
-func (mock *DataStoreMock) GetCacheTimes(ctx context.Context, offset int, limit int, releaseTime time.Time) (*[]models.CacheTime, int, error) {
+func (mock *DataStoreMock) GetCacheTimes(ctx context.Context, offset int, limit int, releaseTime time.Time) ([]*models.CacheTime, int, error) {
 	if mock.GetCacheTimesFunc == nil {
 		panic("DataStoreMock.GetCacheTimesFunc: method is nil but DataStore.GetCacheTimes was just called")
 	}
