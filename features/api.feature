@@ -1,3 +1,4 @@
+@API
 Feature: Legacy Cache API
 
   Scenario: Non existing endpoint
