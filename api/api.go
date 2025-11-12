@@ -29,6 +29,11 @@ func Setup(ctx context.Context, isPublishing bool, r *mux.Router, dataStore Data
 	)
 
 	if isPublishing {
+		api.get(
+			"/v1/cache-times",
+			api.GetCacheTimes,
+		)
+
 		api.put(
 			"/v1/cache-times/{id}",
 			api.isAuthenticated(api.CreateOrUpdateCacheTime),

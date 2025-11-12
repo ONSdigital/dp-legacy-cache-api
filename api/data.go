@@ -7,7 +7,9 @@ import (
 	"fmt"
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
+	"time"
 
 	errs "github.com/ONSdigital/dp-legacy-cache-api/apierrors"
 	"github.com/ONSdigital/dp-legacy-cache-api/models"
@@ -62,6 +64,67 @@ func (api *API) CreateOrUpdateCacheTime(w http.ResponseWriter, req *http.Request
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+}
+
+// GetCacheTimes retrieves a list of cache times with optional filtering and pagination.
+func (api *API) GetCacheTimes(w http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
+	strOffset := req.URL.Query().Get(QueryParamOffset)
+	strLimit := req.URL.Query().Get(QueryParamLimit)
+	strReleaseTime := req.URL.Query().Get(QueryParamReleaseTime)
+
+	// default offset to 0 if not provided - TODO make this configurable
+	if strOffset == "" {
+		strOffset = "0"
+	}
+
+	// default limit to 10 if not provided - TODO make this configurable
+	if strLimit == "" {
+		strLimit = "10"
+	}
+
+	offset, err := strconv.Atoi(strOffset)
+	if err != nil || offset < 0 {
+		sendJSONError(ctx, w, http.StatusBadRequest, "offset query parameter must be a non-negative integer")
+		return
+	}
+
+	limit, err := strconv.Atoi(strLimit)
+	if err != nil || limit <= 0 {
+		sendJSONError(ctx, w, http.StatusBadRequest, "limit query parameter must be a non-negative and non-zero integer")
+		return
+	}
+
+	var releaseTime time.Time
+	if strReleaseTime != "" {
+		releaseTime, err = time.Parse(time.RFC3339, strReleaseTime)
+		if err != nil {
+			log.Error(ctx, "invalid release_time format", err, log.Data{"release_time": strReleaseTime})
+			sendJSONError(ctx, w, http.StatusBadRequest, "release_time query parameter must be a valid RFC3339 timestamp")
+			return
+		}
+	}
+
+	cacheTimes, totalCount, err := api.dataStore.GetCacheTimes(ctx, offset, limit, releaseTime)
+	if err != nil {
+		log.Error(ctx, "getCacheTimes endpoint: api.dataStore.GetCacheTimes internal server error", err)
+		sendJSONError(ctx, w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	response := models.CacheTimesList{
+		Items:      cacheTimes,
+		Count:      len(*cacheTimes),
+		Limit:      limit,
+		Offset:     offset,
+		TotalCount: totalCount,
+	}
+
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		log.Error(ctx, "error encoding results to JSON", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
 }
 
 // GetCacheTime retrieves a cache time for a given ID and writes it to the HTTP response.
