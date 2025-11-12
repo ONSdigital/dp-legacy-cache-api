@@ -37,7 +37,7 @@ Feature: Get paginated cache times
         "_id": "5d41402abc4b2a76b9719d911017c592",
         "path": "/my-path",
         "collection_id": "test-1a19e3462937d85804752375daa00ba41d1b6625d396f21000e3c4571ebf2606",
-        "release_time": "2024-01-31 01:23:45.678Z"
+        "release_time": "2024-01-31T01:23:45.678Z"
       }
       """
     And the following document exists in the "cachetimes" collection:
