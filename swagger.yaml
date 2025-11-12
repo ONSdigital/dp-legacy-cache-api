@@ -11,7 +11,57 @@ schemes:
   - http
 tags:
   - name: "private"
-paths:          
+paths:   
+  /cache-times:
+    get:
+      tags:
+        - "cache times"
+      summary: "Returns paginated cache times"
+      description: "Returns a paginated list of cache times"
+      produces:
+        - "application/json"
+      parameters:
+        - in: query
+          name: offset
+          description: "The number of items to skip before starting to collect the result set"
+          type: integer
+          default: 0
+        - in: query
+          name: limit
+          description: "The numbers of items to return"
+          type: integer
+          default: 10
+        - in: query
+          name: release_time
+          description: |
+            Filter cache times by release time (RFC3339 format).
+          type: string
+      responses:
+        200:
+          description: "Successfully returned paginated cache times"
+          schema:
+            type: object
+            properties:
+              count:
+                type: integer
+                description: "The number of cache times returned in the current response"
+              items:
+                type: array
+                items:
+                  $ref: "#/definitions/CacheTime"
+              limit:
+                type: integer
+                description: "The limit submitted for items to return"
+              offset:
+                type: integer
+                description: "The number of items skipped before starting to collect the result set"
+              total_count:
+                type: integer
+                description: "Total number of cache times available"
+        400:
+          description: "Invalid request, reasons can be one of the following: invalid offset, limit or release_time format"
+        500:
+          $ref: '#/responses/InternalError'       
   /cache-times/{id}:
     get:
       tags:

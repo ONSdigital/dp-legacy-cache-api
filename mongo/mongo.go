@@ -3,6 +3,7 @@ package mongo
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/ONSdigital/dp-healthcheck/healthcheck"
 	errs "github.com/ONSdigital/dp-legacy-cache-api/apierrors"
@@ -78,6 +79,38 @@ func (m *Mongo) GetCacheTime(ctx context.Context, id string) (*models.CacheTime,
 	return &result, nil
 }
 
+// GetCacheTimes
+func (m *Mongo) GetCacheTimes(ctx context.Context, offset int, limit int, releaseTime time.Time) (*[]models.CacheTime, int, error) {
+
+	var filter bson.M
+
+	if !releaseTime.IsZero() {
+		filter = bson.M{
+			"release_time": buildDateTimeFilter(releaseTime),
+		}
+	}
+
+	log.Info(ctx, "filter", log.Data{"filter": filter})
+
+	var results *[]models.CacheTime
+	totalCount, err := m.Connection.Collection(m.ActualCollectionName(config.CacheTimesCollection)).
+		Find(ctx,
+			filter,
+			&results,
+			mongoDriver.Offset(offset),
+			mongoDriver.Limit(limit),
+			mongoDriver.Sort(bson.D{{Key: "_id", Value: 1}}),
+		)
+	if err != nil {
+		log.Error(ctx, "error targeting api.dataStore.GetCacheTimes", err)
+		return nil, 0, errs.ErrDataStore
+	}
+
+	log.Info(ctx, "results from query", log.Data{"results": results, "total_count": totalCount})
+
+	return results, totalCount, nil
+}
+
 // UpsertCacheTime adds or overrides an existing cache time
 func (m *Mongo) UpsertCacheTime(ctx context.Context, cacheTime *models.CacheTime) (err error) {
 	update := bson.M{
@@ -88,4 +121,17 @@ func (m *Mongo) UpsertCacheTime(ctx context.Context, cacheTime *models.CacheTime
 	_, err = m.Connection.Collection(m.ActualCollectionName(config.CacheTimesCollection)).UpsertOne(ctx, selector, update)
 
 	return err
+}
+
+// buildDateTimeFilter builds a bson filter for the datetime with a window of duration around the datetime
+func buildDateTimeFilter(date time.Time) bson.M {
+	const timeWindow = 2 * time.Second
+
+	startTime := date.Add(timeWindow * -1)
+	endTime := date.Add(timeWindow)
+
+	return bson.M{
+		"$gte": startTime,
+		"$lte": endTime,
+	}
 }
