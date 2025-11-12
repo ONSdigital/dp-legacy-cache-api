@@ -32,6 +32,10 @@ debug: ## Used to run code locally in debug mode
 	go build -tags 'debug' $(LDFLAGS) -o $(BINPATH)/dp-legacy-cache-api
 	HUMAN_LOG=1 DEBUG=1 $(BINPATH)/dp-legacy-cache-api
 
+.PHONY: debug-watch
+debug-watch: 
+	reflex -d none -c ./reflex
+
 .PHONY: delimiter-%
 delimiter-%:
 	@echo '===================${GREEN} $* ${RESET}==================='

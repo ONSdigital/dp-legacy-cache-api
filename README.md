@@ -52,6 +52,10 @@ To run `make validate-specification` you require Node v20.x and to install @redo
    npm install -g @redocly/cli
 ```
 
+### Watch for changes
+
+We use `reflex` to do rebuilds, which you will [need to install](https://github.com/cespare/reflex).
+
 ### Configuration
 
 | Environment variable         | Default                         | Description                                                                                                        |
