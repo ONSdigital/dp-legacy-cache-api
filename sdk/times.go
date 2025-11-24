@@ -16,7 +16,7 @@ import (
 
 // GetCacheTimes gets a list of cache times
 func (cli *Client) GetCacheTimes(ctx context.Context, auth Auth, opts Options) (*models.CacheTimesList, apiError.Error) {
-	path := fmt.Sprintf("%s/cache-times", cli.hcCli.URL)
+	path := fmt.Sprintf("%s/v1/cache-times", cli.hcCli.URL)
 	var cacheTimesList models.CacheTimesList
 
 	queryParams := url.Values{}

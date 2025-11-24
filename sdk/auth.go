@@ -7,8 +7,8 @@ import (
 )
 
 type Auth struct {
-	ServiceAuthToken string
-	UserAccessToken  string
+	ServiceAuthToken string `json:"-"`
+	UserAccessToken  string `json:"-"`
 }
 
 func (a *Auth) Add(req *http.Request) {
