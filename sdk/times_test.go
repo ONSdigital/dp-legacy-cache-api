@@ -14,6 +14,10 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
+const (
+	cacheTimesEndpoint = "/v1/cache-times"
+)
+
 var (
 	testCacheTime1 = models.CacheTime{
 		CollectionID: "collection1",
@@ -77,7 +81,7 @@ func TestGetCacheTimes(t *testing.T) {
 					Convey("And client.Do should be called once with the expected parameters", func() {
 						doCalls := httpClient.DoCalls()
 						So(doCalls, ShouldHaveLength, 1)
-						So(doCalls[0].Req.URL.Path, ShouldEqual, "/cache-times")
+						So(doCalls[0].Req.URL.Path, ShouldEqual, cacheTimesEndpoint)
 					})
 				})
 			})
@@ -108,7 +112,7 @@ func TestGetCacheTimes(t *testing.T) {
 					Convey("And client.Do should be called once with the expected parameters", func() {
 						doCalls := httpClient.DoCalls()
 						So(doCalls, ShouldHaveLength, 1)
-						So(doCalls[0].Req.URL.Path, ShouldEqual, "/cache-times")
+						So(doCalls[0].Req.URL.Path, ShouldEqual, cacheTimesEndpoint)
 						So(doCalls[0].Req.URL.RawQuery, ShouldContainSubstring, "limit=15")
 						So(doCalls[0].Req.URL.RawQuery, ShouldContainSubstring, "offset=1")
 					})
@@ -143,7 +147,7 @@ func TestGetCacheTimes(t *testing.T) {
 					Convey("And client.Do should be called once with the expected parameters", func() {
 						doCalls := httpClient.DoCalls()
 						So(doCalls, ShouldHaveLength, 1)
-						So(doCalls[0].Req.URL.Path, ShouldEqual, "/cache-times")
+						So(doCalls[0].Req.URL.Path, ShouldEqual, cacheTimesEndpoint)
 						So(doCalls[0].Req.URL.RawQuery, ShouldContainSubstring, "release_time="+url.QueryEscape(releaseTimeString))
 					})
 				})
@@ -171,7 +175,7 @@ func TestGetCacheTimes(t *testing.T) {
 				Convey("And client.Do should be called once with the expected parameters", func() {
 					doCalls := httpClient.DoCalls()
 					So(doCalls, ShouldHaveLength, 1)
-					So(doCalls[0].Req.URL.Path, ShouldEqual, "/cache-times")
+					So(doCalls[0].Req.URL.Path, ShouldEqual, cacheTimesEndpoint)
 				})
 			})
 		})
@@ -217,7 +221,7 @@ func TestGetCacheTimes(t *testing.T) {
 					Convey("And client.Do should be called once with the expected parameters", func() {
 						doCalls := httpClient.DoCalls()
 						So(doCalls, ShouldHaveLength, 1)
-						So(doCalls[0].Req.URL.Path, ShouldEqual, "/cache-times")
+						So(doCalls[0].Req.URL.Path, ShouldEqual, cacheTimesEndpoint)
 					})
 				})
 			})
