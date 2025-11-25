@@ -19,7 +19,10 @@ type ComponentTest struct {
 }
 
 func (f *ComponentTest) InitializeScenario(ctx *godog.ScenarioContext) {
-	mongoURI := f.MongoFeature.Server.URI()
+	mongoURI, err := f.MongoFeature.GetConnectionString()
+	if err != nil {
+		panic(err)
+	}
 	mongoDatabaseName := f.MongoFeature.Database.Name()
 
 	component, err := steps.NewComponent(mongoURI, mongoDatabaseName)

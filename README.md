@@ -44,6 +44,10 @@ We use `dis-vulncheck` to do auditing, which you will [need to install](https://
 
 We use v2 of golangci-lint, which you will [need to install](https://golangci-lint.run/docs/welcome/install).
 
+#### Component tests
+
+For running component tests we use [testcontainers](https://testcontainers.com/) which requires a Docker daemon to be running.
+
 ### Watch for changes
 
 We use `reflex` to do rebuilds, which you will [need to install](https://github.com/cespare/reflex).
