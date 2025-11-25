@@ -52,6 +52,10 @@ To run `make validate-specification` you require Node v20.x and to install @redo
    npm install -g @redocly/cli
 ```
 
+#### Component tests
+
+For running component tests we use [testcontainers](https://testcontainers.com/) which requires a Docker daemon to be running.
+
 ### Watch for changes
 
 We use `reflex` to do rebuilds, which you will [need to install](https://github.com/cespare/reflex).

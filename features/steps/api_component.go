@@ -41,15 +41,14 @@ func NewComponent(mongoURI, mongoDatabaseName string) (*Component, error) {
 		return nil, err
 	}
 
-	c.Config.IsPublishing = true
-
-	// Extract host:port from the MongoDB URI
 	parsedURI, err := url.Parse(mongoURI)
 	if err != nil {
 		return nil, err
 	}
-	hostAndPort := parsedURI.Host
-	c.Config.ClusterEndpoint = hostAndPort
+	hostPort := parsedURI.Host
+
+	c.Config.IsPublishing = true
+	c.Config.ClusterEndpoint = hostPort
 	c.Config.Database = mongoDatabaseName
 
 	c.MongoClient, err = mongo.NewMongoStore(context.Background(), c.Config.MongoConfig)

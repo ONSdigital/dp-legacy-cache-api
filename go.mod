@@ -4,6 +4,7 @@ go 1.24.0
 
 require (
 	github.com/ONSdigital/dp-component-test v1.4.2-alpha
+	github.com/ONSdigital/dp-api-clients-go/v2 v2.267.0
 	github.com/ONSdigital/dp-healthcheck v1.6.4
 	github.com/ONSdigital/dp-mongodb/v3 v3.13.0
 	github.com/ONSdigital/dp-net/v3 v3.10.0
