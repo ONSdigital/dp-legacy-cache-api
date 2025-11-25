@@ -9,6 +9,7 @@ import (
 	"github.com/ONSdigital/dp-legacy-cache-api/api"
 	"github.com/ONSdigital/dp-legacy-cache-api/models"
 	"sync"
+	"time"
 )
 
 // Ensure, that DataStoreMock does implement api.DataStore.
@@ -29,6 +30,9 @@ var _ api.DataStore = &DataStoreMock{}
 //			},
 //			GetCacheTimeFunc: func(ctx context.Context, id string) (*models.CacheTime, error) {
 //				panic("mock out the GetCacheTime method")
+//			},
+//			GetCacheTimesFunc: func(ctx context.Context, offset int, limit int, releaseTime time.Time) ([]*models.CacheTime, int, error) {
+//				panic("mock out the GetCacheTimes method")
 //			},
 //			IsConnectedFunc: func(ctx context.Context) bool {
 //				panic("mock out the IsConnected method")
@@ -51,6 +55,9 @@ type DataStoreMock struct {
 
 	// GetCacheTimeFunc mocks the GetCacheTime method.
 	GetCacheTimeFunc func(ctx context.Context, id string) (*models.CacheTime, error)
+
+	// GetCacheTimesFunc mocks the GetCacheTimes method.
+	GetCacheTimesFunc func(ctx context.Context, offset int, limit int, releaseTime time.Time) ([]*models.CacheTime, int, error)
 
 	// IsConnectedFunc mocks the IsConnected method.
 	IsConnectedFunc func(ctx context.Context) bool
@@ -79,6 +86,17 @@ type DataStoreMock struct {
 			// ID is the id argument value.
 			ID string
 		}
+		// GetCacheTimes holds details about calls to the GetCacheTimes method.
+		GetCacheTimes []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Offset is the offset argument value.
+			Offset int
+			// Limit is the limit argument value.
+			Limit int
+			// ReleaseTime is the releaseTime argument value.
+			ReleaseTime time.Time
+		}
 		// IsConnected holds details about calls to the IsConnected method.
 		IsConnected []struct {
 			// Ctx is the ctx argument value.
@@ -95,6 +113,7 @@ type DataStoreMock struct {
 	lockChecker         sync.RWMutex
 	lockClose           sync.RWMutex
 	lockGetCacheTime    sync.RWMutex
+	lockGetCacheTimes   sync.RWMutex
 	lockIsConnected     sync.RWMutex
 	lockUpsertCacheTime sync.RWMutex
 }
@@ -200,6 +219,50 @@ func (mock *DataStoreMock) GetCacheTimeCalls() []struct {
 	mock.lockGetCacheTime.RLock()
 	calls = mock.calls.GetCacheTime
 	mock.lockGetCacheTime.RUnlock()
+	return calls
+}
+
+// GetCacheTimes calls GetCacheTimesFunc.
+func (mock *DataStoreMock) GetCacheTimes(ctx context.Context, offset int, limit int, releaseTime time.Time) ([]*models.CacheTime, int, error) {
+	if mock.GetCacheTimesFunc == nil {
+		panic("DataStoreMock.GetCacheTimesFunc: method is nil but DataStore.GetCacheTimes was just called")
+	}
+	callInfo := struct {
+		Ctx         context.Context
+		Offset      int
+		Limit       int
+		ReleaseTime time.Time
+	}{
+		Ctx:         ctx,
+		Offset:      offset,
+		Limit:       limit,
+		ReleaseTime: releaseTime,
+	}
+	mock.lockGetCacheTimes.Lock()
+	mock.calls.GetCacheTimes = append(mock.calls.GetCacheTimes, callInfo)
+	mock.lockGetCacheTimes.Unlock()
+	return mock.GetCacheTimesFunc(ctx, offset, limit, releaseTime)
+}
+
+// GetCacheTimesCalls gets all the calls that were made to GetCacheTimes.
+// Check the length with:
+//
+//	len(mockedDataStore.GetCacheTimesCalls())
+func (mock *DataStoreMock) GetCacheTimesCalls() []struct {
+	Ctx         context.Context
+	Offset      int
+	Limit       int
+	ReleaseTime time.Time
+} {
+	var calls []struct {
+		Ctx         context.Context
+		Offset      int
+		Limit       int
+		ReleaseTime time.Time
+	}
+	mock.lockGetCacheTimes.RLock()
+	calls = mock.calls.GetCacheTimes
+	mock.lockGetCacheTimes.RUnlock()
 	return calls
 }
 

@@ -3,6 +3,7 @@ package steps
 import (
 	"context"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/ONSdigital/dp-legacy-cache-api/config"
@@ -40,8 +41,14 @@ func NewComponent(mongoURI, mongoDatabaseName string) (*Component, error) {
 		return nil, err
 	}
 
+	parsedURI, err := url.Parse(mongoURI)
+	if err != nil {
+		return nil, err
+	}
+	hostPort := parsedURI.Host
+
 	c.Config.IsPublishing = true
-	c.Config.ClusterEndpoint = mongoURI
+	c.Config.ClusterEndpoint = hostPort
 	c.Config.Database = mongoDatabaseName
 
 	c.MongoClient, err = mongo.NewMongoStore(context.Background(), c.Config.MongoConfig)

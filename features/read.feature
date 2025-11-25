@@ -1,3 +1,4 @@
+@GetCacheTime
 Feature: Read Cache Time
 
   Scenario: Read existing Cache Time resource

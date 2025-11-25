@@ -1,6 +1,7 @@
 # dp-legacy-cache-api
 
 REST API for managing cache control information for pages within the legacy CMS. dp-legacy-cache-api is called by:
+
 - dp-legacy-cache-proxy to read the release time for a particular item of content (Web subnet/ read-only mode)
 - Zebedee to set the right cache time for content based on publish notifications (Publishing subnet)
 
@@ -11,10 +12,9 @@ The API talks to DocumentDB in the environment (or MongoDB locally) in the `cach
 | ID                | MD5 hash representing the unique identifier of the page's path. |
 | Path              | URI indicating the location of the published page               |
 | Next Release Time | Scheduled time for the next update in ISO-8601 format           |
-| Collection ID     | Utilised for organising and filtering cache time entries        |        
+| Collection ID     | Utilised for organising and filtering cache time entries        |
 
-
-### Getting started
+## Getting started
 
 - Ensure Docker is installed on your local machine. Installation steps can be found [here](https://docs.docker.com/desktop/install/mac-install/).
 - Run `docker run --name mongo-test -p 27017:27017 -e MONGO_INITDB_DATABASE=cache -v $(pwd)/mongo-init:/docker-entrypoint-initdb.d -d mongo`.
@@ -44,6 +44,14 @@ We use `dis-vulncheck` to do auditing, which you will [need to install](https://
 
 We use v2 of golangci-lint, which you will [need to install](https://golangci-lint.run/docs/welcome/install).
 
+#### Component tests
+
+For running component tests we use [testcontainers](https://testcontainers.com/) which requires a Docker daemon to be running.
+
+### Watch for changes
+
+We use `reflex` to do rebuilds, which you will [need to install](https://github.com/cespare/reflex).
+
 ### Configuration
 
 | Environment variable         | Default                         | Description                                                                                                        |
@@ -67,7 +75,8 @@ We use v2 of golangci-lint, which you will [need to install](https://golangci-li
 | ZEBEDEE_URL                  | http://localhost:8082           | Zebedee host address and port for authentication                                                                   |
 
 ### Auto-Deployment of secrets
-Functionality has been added to the nomad plan so that when the secrets are deployed to Vault, this will automatically cause Nomad to trigger a redeployment of the application to pick up the new secrets. Please note that this functionality does not appear to work with the current nomad/vault versions, but if these are upgraded it may then become functional. 
+
+Functionality has been added to the nomad plan so that when the secrets are deployed to Vault, this will automatically cause Nomad to trigger a redeployment of the application to pick up the new secrets. Please note that this functionality does not appear to work with the current nomad/vault versions, but if these are upgraded it may then become functional.
 
 ### License
 
