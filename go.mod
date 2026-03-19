@@ -3,8 +3,8 @@ module github.com/ONSdigital/dp-legacy-cache-api
 go 1.24.0
 
 require (
+	github.com/ONSdigital/dp-api-clients-go/v2 v2.270.0
 	github.com/ONSdigital/dp-component-test v1.4.2-alpha
-	github.com/ONSdigital/dp-api-clients-go/v2 v2.267.0
 	github.com/ONSdigital/dp-healthcheck v1.6.4
 	github.com/ONSdigital/dp-mongodb/v3 v3.13.0
 	github.com/ONSdigital/dp-net/v3 v3.10.0
@@ -21,7 +21,6 @@ require (
 	dario.cat/mergo v1.0.2 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20250102033503-faa5f7b0171c // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
-	github.com/ONSdigital/dp-api-clients-go/v2 v2.270.0 // indirect
 	github.com/ONSdigital/dp-authorisation/v2 v2.32.3 // indirect
 	github.com/ONSdigital/dp-kafka/v4 v4.3.0 // indirect
 	github.com/ONSdigital/dp-permissions-api v1.7.0 // indirect
