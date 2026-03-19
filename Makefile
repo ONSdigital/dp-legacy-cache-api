@@ -44,6 +44,7 @@ fmt: ## Run Go formatting on code
 lint: lint-go validate-specification ## Used in ci to run linters against Go code
 
 .PHONY: lint-go
+lint-go:
 	golangci-lint run ./...
 
 .PHONY: lint-local
