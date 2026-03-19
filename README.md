@@ -44,6 +44,14 @@ We use `dis-vulncheck` to do auditing, which you will [need to install](https://
 
 We use v2 of golangci-lint, which you will [need to install](https://golangci-lint.run/docs/welcome/install).
 
+#### Specification validation
+
+To run `make validate-specification` you require Node v20.x and to install @redocly/cli:
+
+```sh
+   npm install -g @redocly/cli
+```
+
 ### Configuration
 
 | Environment variable         | Default                         | Description                                                                                                        |

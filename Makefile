@@ -41,7 +41,9 @@ fmt: ## Run Go formatting on code
 	go fmt ./...
 
 .PHONY: lint
-lint: ## Used in ci to run linters against Go code
+lint: lint-go validate-specification ## Used in ci to run linters against Go code
+
+.PHONY: lint-go
 	golangci-lint run ./...
 
 .PHONY: lint-local
@@ -56,6 +58,10 @@ test: ## Runs unit tests including checks for race conditions and returns covera
 .PHONY: test-component
 test-component: ## Runs component test suite
 	go test -cover -coverpkg=github.com/ONSdigital/dp-legacy-cache-api/... -component
+
+.PHONY: validate-specification
+validate-specification:
+	redocly lint swagger.yaml
 
 .PHONY: help
 help: ## Show help page for list of make targets

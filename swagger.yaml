@@ -11,9 +11,13 @@ schemes:
   - http
 tags:
   - name: "private"
+    description: "Endpoints that are not publicly accessible and require authorization"
+  - name: "cache times"
+    description: "Endpoints for managing cache times for pages within the legacy CMS"
 paths:          
   /cache-times/{id}:
     get:
+      security: []
       tags:
         - "cache times"
       summary: "Returns a cache time"
@@ -38,8 +42,11 @@ paths:
         500:
           $ref: '#/responses/InternalError'
     put:
+      security:
+        - Authorization: []
       tags:
         - "cache times"
+        - "private"
       summary: "Updates or creates a cache time"
       description: "Updates a cache time if it exists or creates a new one for a given id"
       consumes:
@@ -69,6 +76,7 @@ paths:
               * wrong type for field
   /health:
     get:
+      security: []
       tags:
         - private
       summary: "Returns API's health status"
@@ -202,3 +210,9 @@ definitions:
         type: string
         description: "The last failed health check date and time of the external service"
         example: "2019-09-22T11:48:51.0000001Z"
+securityDefinitions:
+  Authorization:
+    name: Authorization
+    description: "Access token used by Auth service in a Bearer format"
+    in: header
+    type: apiKey
