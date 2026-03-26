@@ -1,9 +1,9 @@
 module github.com/ONSdigital/dp-legacy-cache-api
 
-go 1.24.0
+go 1.26.0
 
 require (
-	github.com/ONSdigital/dp-api-clients-go/v2 v2.270.0
+	github.com/ONSdigital/dp-api-clients-go/v2 v2.278.0
 	github.com/ONSdigital/dp-component-test v1.4.2-alpha
 	github.com/ONSdigital/dp-healthcheck v1.6.4
 	github.com/ONSdigital/dp-mongodb/v3 v3.13.0

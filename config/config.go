@@ -36,7 +36,7 @@ func Get() (*Config, error) {
 		GracefulShutdownTimeout:    5 * time.Second,
 		HealthCheckInterval:        30 * time.Second,
 		HealthCheckCriticalTimeout: 90 * time.Second,
-		IsPublishing:               false,
+		IsPublishing:               true,
 		ZebedeeURL:                 "http://localhost:8082",
 		MongoConfig: MongoConfig{
 			ClusterEndpoint:               "localhost:27017",
