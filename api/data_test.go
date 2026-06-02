@@ -19,7 +19,9 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-var validBody = `{"path": "testpath"}`
+const testPath = "testpath"
+
+var validBody = `{"path": testPath}`
 var testCacheID = "a1b2c3d4e5f67890123456789abcdef0"
 var baseURL = "http://localhost:29100/v1/cache-times"
 var staticTime = time.Date(2024, time.January, 1, 0, 0, 0, 0, time.UTC)
@@ -34,7 +36,7 @@ func TestGetCacheTimeEndpoint(t *testing.T) {
 				case testCacheID:
 					return &models.CacheTime{
 						ID:           testCacheID,
-						Path:         "testpath",
+						Path:         testPath,
 						CollectionID: testCollectionID,
 						ReleaseTime:  staticTimePtr,
 					}, nil
@@ -53,7 +55,7 @@ func TestGetCacheTimeEndpoint(t *testing.T) {
 			Convey("The matched cache time is returned with status code 200", func() {
 				expectedCacheTime := models.CacheTime{
 					ID:           testCacheID,
-					Path:         "testpath",
+					Path:         testPath,
 					CollectionID: testCollectionID,
 					ReleaseTime:  staticTimePtr,
 				}
@@ -118,7 +120,7 @@ func TestGetCacheTimesEndpoint(t *testing.T) {
 				return []*models.CacheTime{
 					{
 						ID:           testCacheID,
-						Path:         "testpath",
+						Path:         testPath,
 						CollectionID: testCollectionID,
 						ReleaseTime:  staticTimePtr,
 					},
@@ -137,7 +139,7 @@ func TestGetCacheTimesEndpoint(t *testing.T) {
 					Items: []*models.CacheTime{
 						{
 							ID:           testCacheID,
-							Path:         "testpath",
+							Path:         testPath,
 							CollectionID: testCollectionID,
 							ReleaseTime:  staticTimePtr,
 						},
@@ -269,7 +271,7 @@ func TestCreateNewCacheTime(t *testing.T) {
 			Convey("Then a new cache time should be created with status code 204 with an empty response body", func() {
 				expectedCacheTime := models.CacheTime{
 					ID:           testCacheID,
-					Path:         "testpath",
+					Path:         testPath,
 					CollectionID: "",
 					ReleaseTime:  nil,
 				}
@@ -334,7 +336,7 @@ func TestCreateOrUpdateCacheTimeReturnsErr(t *testing.T) {
 		})
 
 		Convey("When an extra field is provided and the CreateOrUpdateCacheTime endpoint is called", func() {
-			body := `{"path": "testpath", "extra_field": "hello" }`
+			body := `{"path": testPath, "extra_field": "hello" }`
 			request := newRequestWithAuth(http.MethodPut, fmt.Sprintf("%s/%s", baseURL, testCacheID), bytes.NewBufferString(body))
 			responseRecorder := httptest.NewRecorder()
 			dataStoreAPI.Router.ServeHTTP(responseRecorder, request)

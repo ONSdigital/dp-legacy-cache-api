@@ -7,7 +7,14 @@ import (
 	"github.com/kelseyhightower/envconfig"
 )
 
-const CacheTimesCollection = "CacheTimesCollection"
+const (
+	CacheTimesCollection = "CacheTimesCollection"
+	port29100            = ":29100"
+	localhost8082        = "http://localhost:8082"
+	localhost27017       = "localhost:27017"
+	databaseName         = "cache"
+	collectionName       = "cachetimes"
+)
 
 type MongoConfig = mongodb.MongoDriverConfig
 
@@ -32,18 +39,18 @@ func Get() (*Config, error) {
 	}
 
 	cfg = &Config{
-		BindAddr:                   ":29100",
+		BindAddr:                   port29100,
 		GracefulShutdownTimeout:    5 * time.Second,
 		HealthCheckInterval:        30 * time.Second,
 		HealthCheckCriticalTimeout: 90 * time.Second,
 		IsPublishing:               false,
-		ZebedeeURL:                 "http://localhost:8082",
+		ZebedeeURL:                 localhost8082,
 		MongoConfig: MongoConfig{
-			ClusterEndpoint:               "localhost:27017",
+			ClusterEndpoint:               localhost27017,
 			Username:                      "",
 			Password:                      "",
-			Database:                      "cache",
-			Collections:                   map[string]string{CacheTimesCollection: "cachetimes"},
+			Database:                      databaseName,
+			Collections:                   map[string]string{CacheTimesCollection: collectionName},
 			ReplicaSet:                    "",
 			IsStrongReadConcernEnabled:    false,
 			IsWriteConcernMajorityEnabled: true,

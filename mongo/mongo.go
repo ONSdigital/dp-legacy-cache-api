@@ -15,6 +15,11 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
+const (
+	IDLabel          = "_id"
+	releaseTimeLabel = "release_time"
+)
+
 type Mongo struct {
 	mongoDriver.MongoDriverConfig
 
@@ -64,7 +69,7 @@ func (m *Mongo) IsConnected(ctx context.Context) bool {
 
 // GetCacheTime returns a cache time with its given id
 func (m *Mongo) GetCacheTime(ctx context.Context, id string) (*models.CacheTime, error) {
-	filter := bson.M{"_id": id}
+	filter := bson.M{IDLabel: id}
 
 	var result models.CacheTime
 	err := m.Connection.Collection(m.ActualCollectionName(config.CacheTimesCollection)).FindOne(ctx, filter, &result)
@@ -85,7 +90,7 @@ func (m *Mongo) GetCacheTimes(ctx context.Context, offset, limit int, releaseTim
 
 	if !releaseTime.IsZero() {
 		filter = bson.M{
-			"release_time": buildDateTimeFilter(releaseTime),
+			releaseTimeLabel: buildDateTimeFilter(releaseTime),
 		}
 	}
 
@@ -96,7 +101,7 @@ func (m *Mongo) GetCacheTimes(ctx context.Context, offset, limit int, releaseTim
 			&results,
 			mongoDriver.Offset(offset),
 			mongoDriver.Limit(limit),
-			mongoDriver.Sort(bson.D{{Key: "_id", Value: 1}}),
+			mongoDriver.Sort(bson.D{{Key: IDLabel, Value: 1}}),
 		)
 	if err != nil {
 		log.Error(ctx, "error targeting api.dataStore.GetCacheTimes", err)
@@ -111,9 +116,9 @@ func (m *Mongo) GetCacheTimes(ctx context.Context, offset, limit int, releaseTim
 // UpsertCacheTime adds or overrides an existing cache time
 func (m *Mongo) UpsertCacheTime(ctx context.Context, cacheTime *models.CacheTime) (err error) {
 	update := bson.M{
-		"$set": bson.M{"path": cacheTime.Path, "collection_id": cacheTime.CollectionID, "release_time": cacheTime.ReleaseTime},
+		"$set": bson.M{"path": cacheTime.Path, "collection_id": cacheTime.CollectionID, releaseTimeLabel: cacheTime.ReleaseTime},
 	}
-	selector := bson.M{"_id": cacheTime.ID}
+	selector := bson.M{IDLabel: cacheTime.ID}
 
 	_, err = m.Connection.Collection(m.ActualCollectionName(config.CacheTimesCollection)).UpsertOne(ctx, selector, update)
 
