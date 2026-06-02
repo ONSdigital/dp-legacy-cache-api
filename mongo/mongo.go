@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	IDLabel          = "_id"
+	idLabel          = "_id"
 	releaseTimeLabel = "release_time"
 )
 
@@ -69,7 +69,7 @@ func (m *Mongo) IsConnected(ctx context.Context) bool {
 
 // GetCacheTime returns a cache time with its given id
 func (m *Mongo) GetCacheTime(ctx context.Context, id string) (*models.CacheTime, error) {
-	filter := bson.M{IDLabel: id}
+	filter := bson.M{idLabel: id}
 
 	var result models.CacheTime
 	err := m.Connection.Collection(m.ActualCollectionName(config.CacheTimesCollection)).FindOne(ctx, filter, &result)
@@ -101,7 +101,7 @@ func (m *Mongo) GetCacheTimes(ctx context.Context, offset, limit int, releaseTim
 			&results,
 			mongoDriver.Offset(offset),
 			mongoDriver.Limit(limit),
-			mongoDriver.Sort(bson.D{{Key: IDLabel, Value: 1}}),
+			mongoDriver.Sort(bson.D{{Key: idLabel, Value: 1}}),
 		)
 	if err != nil {
 		log.Error(ctx, "error targeting api.dataStore.GetCacheTimes", err)
@@ -118,7 +118,7 @@ func (m *Mongo) UpsertCacheTime(ctx context.Context, cacheTime *models.CacheTime
 	update := bson.M{
 		"$set": bson.M{"path": cacheTime.Path, "collection_id": cacheTime.CollectionID, releaseTimeLabel: cacheTime.ReleaseTime},
 	}
-	selector := bson.M{IDLabel: cacheTime.ID}
+	selector := bson.M{idLabel: cacheTime.ID}
 
 	_, err = m.Connection.Collection(m.ActualCollectionName(config.CacheTimesCollection)).UpsertOne(ctx, selector, update)
 
