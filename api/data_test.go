@@ -21,7 +21,7 @@ import (
 
 const testPath = "testpath"
 
-var validBody = `{"path": testPath}`
+var validBody = `{"path": "testpath"}`
 var testCacheID = "a1b2c3d4e5f67890123456789abcdef0"
 var baseURL = "http://localhost:29100/v1/cache-times"
 var staticTime = time.Date(2024, time.January, 1, 0, 0, 0, 0, time.UTC)
@@ -336,7 +336,7 @@ func TestCreateOrUpdateCacheTimeReturnsErr(t *testing.T) {
 		})
 
 		Convey("When an extra field is provided and the CreateOrUpdateCacheTime endpoint is called", func() {
-			body := `{"path": testPath, "extra_field": "hello" }`
+			body := `{"path": "testpath", "extra_field": "hello" }`
 			request := newRequestWithAuth(http.MethodPut, fmt.Sprintf("%s/%s", baseURL, testCacheID), bytes.NewBufferString(body))
 			responseRecorder := httptest.NewRecorder()
 			dataStoreAPI.Router.ServeHTTP(responseRecorder, request)
