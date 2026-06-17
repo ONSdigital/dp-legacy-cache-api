@@ -185,6 +185,10 @@ definitions:
         description: "Collection ID - used for grouping and filtering of cache time objects"
         type: string
         example: "example-1a19e3462937d85804752375daa00ba41d1b6625d396f21000e3c4571ebf2606"
+      collection_title:
+        description: "Collection title - used for describing the collection in a human-readable format"
+        type: string
+        example: "Example Collection"
       release_time:
         description: "Release time in ISO-8601 format"
         type: string

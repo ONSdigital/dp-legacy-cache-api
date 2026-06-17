@@ -8,6 +8,7 @@ Feature: Get paginated cache times
         "_id": "5d41402abc4b2a76b9719d911017c592",
         "path": "/my-path",
         "collection_id": "test-1a19e3462937d85804752375daa00ba41d1b6625d396f21000e3c4571ebf2606",
+        "collection_title": "Example Collection",
         "release_time": "2024-01-31T01:23:45.678Z"
       }
       """
@@ -21,6 +22,7 @@ Feature: Get paginated cache times
             "_id": "5d41402abc4b2a76b9719d911017c592",
             "path": "/my-path",
             "collection_id": "test-1a19e3462937d85804752375daa00ba41d1b6625d396f21000e3c4571ebf2606",
+            "collection_title": "Example Collection",
             "release_time": "2024-01-31T01:23:45.678Z"
           }
         ],
@@ -37,6 +39,7 @@ Feature: Get paginated cache times
         "_id": "5d41402abc4b2a76b9719d911017c592",
         "path": "/my-path",
         "collection_id": "test-1a19e3462937d85804752375daa00ba41d1b6625d396f21000e3c4571ebf2606",
+        "collection_title": "Example Collection",
         "release_time": "2024-01-31T01:23:45.678Z"
       }
       """
@@ -46,6 +49,7 @@ Feature: Get paginated cache times
         "_id": "7e57d0042b97b6f99b5e6a8d6e0ae5ae",
         "path": "/my-path2",
         "collection_id": "test-1a19e3462937d85804752375daa00ba41d1b6625d396f21000e3c4571ebf2606",
+        "collection_title": "Example Collection",
         "release_time": "2024-02-01T12:00:00.000Z"
       }
       """
@@ -59,12 +63,14 @@ Feature: Get paginated cache times
             "_id": "5d41402abc4b2a76b9719d911017c592",
             "path": "/my-path",
             "collection_id": "test-1a19e3462937d85804752375daa00ba41d1b6625d396f21000e3c4571ebf2606",
+            "collection_title": "Example Collection",
             "release_time": "2024-01-31T01:23:45.678Z"
           },
           {
             "_id": "7e57d0042b97b6f99b5e6a8d6e0ae5ae",
             "path": "/my-path2",
             "collection_id": "test-1a19e3462937d85804752375daa00ba41d1b6625d396f21000e3c4571ebf2606",
+            "collection_title": "Example Collection",
             "release_time": "2024-02-01T12:00:00Z"
           }
         ],
@@ -83,6 +89,7 @@ Feature: Get paginated cache times
             "_id": "7e57d0042b97b6f99b5e6a8d6e0ae5ae",
             "path": "/my-path2",
             "collection_id": "test-1a19e3462937d85804752375daa00ba41d1b6625d396f21000e3c4571ebf2606",
+            "collection_title": "Example Collection",
             "release_time": "2024-02-01T12:00:00Z"
           }
         ],
@@ -101,6 +108,7 @@ Feature: Get paginated cache times
             "_id": "5d41402abc4b2a76b9719d911017c592",
             "path": "/my-path",
             "collection_id": "test-1a19e3462937d85804752375daa00ba41d1b6625d396f21000e3c4571ebf2606",
+            "collection_title": "Example Collection",
             "release_time": "2024-01-31T01:23:45.678Z"
           }
         ],
@@ -119,6 +127,7 @@ Feature: Get paginated cache times
       {
         "path": "/my-path",
         "collection_id": "test-1a19e3462937d85804752375daa00ba41d1b6625d396f21000e3c4571ebf2606",
+        "collection_title": "Example Collection",
         "release_time": "2024-01-31T01:23:45.678Z"
       }
       """
@@ -127,6 +136,7 @@ Feature: Get paginated cache times
       {
         "path": "/my-path2",
         "collection_id": "test-1a19e3462937d85804752375daa00ba41d1b6625d396f21000e3c4571ebf2606",
+        "collection_title": "Example Collection",
         "release_time": "2024-02-01T12:00:00.000Z"
       }
       """
@@ -140,6 +150,7 @@ Feature: Get paginated cache times
             "_id": "5d41402abc4b2a76b9719d911017c592",
             "path": "/my-path",
             "collection_id": "test-1a19e3462937d85804752375daa00ba41d1b6625d396f21000e3c4571ebf2606",
+            "collection_title": "Example Collection",
             "release_time": "2024-01-31T01:23:45.678Z"
           }
         ],

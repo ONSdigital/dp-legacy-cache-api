@@ -19,14 +19,19 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-const testPath = "testpath"
+const (
+	baseURL             = "http://localhost:29100/v1/cache-times"
+	testCacheID         = "a1b2c3d4e5f67890123456789abcdef0"
+	testCollectionID    = "test-1a19e3462937d85804752375daa00ba41d1b6625d396f21000e3c4571ebf2606"
+	testCollectionTitle = "Example Collection"
+	testPath            = "testpath"
+	validBody           = `{"path": "testpath"}`
+)
 
-var validBody = `{"path": "testpath"}`
-var testCacheID = "a1b2c3d4e5f67890123456789abcdef0"
-var baseURL = "http://localhost:29100/v1/cache-times"
-var staticTime = time.Date(2024, time.January, 1, 0, 0, 0, 0, time.UTC)
-var staticTimePtr = &staticTime
-var testCollectionID = "test-1a19e3462937d85804752375daa00ba41d1b6625d396f21000e3c4571ebf2606"
+var (
+	staticTime    = time.Date(2024, time.January, 1, 0, 0, 0, 0, time.UTC)
+	staticTimePtr = &staticTime
+)
 
 func TestGetCacheTimeEndpoint(t *testing.T) {
 	Convey("Given a GetCacheTime handler", t, func() {
@@ -35,10 +40,11 @@ func TestGetCacheTimeEndpoint(t *testing.T) {
 				switch id {
 				case testCacheID:
 					return &models.CacheTime{
-						ID:           testCacheID,
-						Path:         testPath,
-						CollectionID: testCollectionID,
-						ReleaseTime:  staticTimePtr,
+						ID:              testCacheID,
+						Path:            testPath,
+						CollectionID:    testCollectionID,
+						CollectionTitle: testCollectionTitle,
+						ReleaseTime:     staticTimePtr,
 					}, nil
 				default:
 					return nil, errors.New("something went wrong")
@@ -54,10 +60,11 @@ func TestGetCacheTimeEndpoint(t *testing.T) {
 
 			Convey("The matched cache time is returned with status code 200", func() {
 				expectedCacheTime := models.CacheTime{
-					ID:           testCacheID,
-					Path:         testPath,
-					CollectionID: testCollectionID,
-					ReleaseTime:  staticTimePtr,
+					ID:              testCacheID,
+					Path:            testPath,
+					CollectionID:    testCollectionID,
+					CollectionTitle: testCollectionTitle,
+					ReleaseTime:     staticTimePtr,
 				}
 				cacheTime := models.CacheTime{}
 				payload, _ := io.ReadAll(responseRecorder.Body)
@@ -119,10 +126,11 @@ func TestGetCacheTimesEndpoint(t *testing.T) {
 			GetCacheTimesFunc: func(ctx context.Context, offset, limit int, releaseTime time.Time) ([]*models.CacheTime, int, error) {
 				return []*models.CacheTime{
 					{
-						ID:           testCacheID,
-						Path:         testPath,
-						CollectionID: testCollectionID,
-						ReleaseTime:  staticTimePtr,
+						ID:              testCacheID,
+						Path:            testPath,
+						CollectionID:    testCollectionID,
+						CollectionTitle: testCollectionTitle,
+						ReleaseTime:     staticTimePtr,
 					},
 				}, 1, nil
 			},
@@ -138,10 +146,11 @@ func TestGetCacheTimesEndpoint(t *testing.T) {
 				expectedCacheTimes := models.CacheTimesList{
 					Items: []*models.CacheTime{
 						{
-							ID:           testCacheID,
-							Path:         testPath,
-							CollectionID: testCollectionID,
-							ReleaseTime:  staticTimePtr,
+							ID:              testCacheID,
+							Path:            testPath,
+							CollectionID:    testCollectionID,
+							CollectionTitle: testCollectionTitle,
+							ReleaseTime:     staticTimePtr,
 						},
 					},
 					Count:      1,
@@ -197,19 +206,21 @@ func TestUpdateExistingCacheTime(t *testing.T) {
 		dataStoreAPI := setupPublishingAPI(dataStoreMock)
 
 		existingCacheTime := models.CacheTime{
-			ID:           testCacheID,
-			Path:         "existingpath",
-			CollectionID: testCollectionID,
-			ReleaseTime:  staticTimePtr,
+			ID:              testCacheID,
+			Path:            "existingpath",
+			CollectionID:    testCollectionID,
+			CollectionTitle: testCollectionTitle,
+			ReleaseTime:     staticTimePtr,
 		}
 		db[testCacheID] = existingCacheTime
 
 		Convey("When updating the cache time", func() {
 			updatedCacheTime := models.CacheTime{
-				ID:           testCacheID,
-				Path:         "updatedpath",
-				CollectionID: testCollectionID,
-				ReleaseTime:  staticTimePtr,
+				ID:              testCacheID,
+				Path:            "updatedpath",
+				CollectionID:    testCollectionID,
+				CollectionTitle: testCollectionTitle,
+				ReleaseTime:     staticTimePtr,
 			}
 			payload, err := json.Marshal(updatedCacheTime)
 			So(err, ShouldBeNil)
@@ -242,10 +253,11 @@ func TestCreateNewCacheTime(t *testing.T) {
 
 		Convey("When creating a new cache time", func() {
 			newCacheTime := models.CacheTime{
-				ID:           testCacheID,
-				Path:         "newpath",
-				CollectionID: testCollectionID,
-				ReleaseTime:  staticTimePtr,
+				ID:              testCacheID,
+				Path:            "newpath",
+				CollectionID:    testCollectionID,
+				CollectionTitle: testCollectionTitle,
+				ReleaseTime:     staticTimePtr,
 			}
 			payload, err := json.Marshal(newCacheTime)
 			So(err, ShouldBeNil)
