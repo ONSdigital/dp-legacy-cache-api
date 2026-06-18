@@ -16,8 +16,7 @@ import (
 )
 
 const (
-	idLabel          = "_id"
-	releaseTimeLabel = "release_time"
+	idLabel = "_id"
 )
 
 type Mongo struct {
@@ -90,7 +89,7 @@ func (m *Mongo) GetCacheTimes(ctx context.Context, offset, limit int, releaseTim
 
 	if !releaseTime.IsZero() {
 		filter = bson.M{
-			releaseTimeLabel: buildDateTimeFilter(releaseTime),
+			"release_time": buildDateTimeFilter(releaseTime),
 		}
 	}
 
