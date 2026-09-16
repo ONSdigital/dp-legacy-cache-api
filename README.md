@@ -46,7 +46,7 @@ We use v2 of golangci-lint, which you will [need to install](https://golangci-li
 
 #### Specification validation
 
-To run `make validate-specification` you require Node v20.x and to install @redocly/cli:
+To run `make validate-specification` you require Node v24.x and to install @redocly/cli:
 
 ```sh
    npm install -g @redocly/cli
