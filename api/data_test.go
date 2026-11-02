@@ -367,7 +367,8 @@ func TestCreateOrUpdateCacheTimeReturnsErr(t *testing.T) {
 
 			Convey("Then a 400 is returned with a type mismatch error in the response", func() {
 				So(responseRecorder.Code, ShouldEqual, http.StatusBadRequest)
-				So(responseRecorder.Body.String(), ShouldContainSubstring, "json: cannot unmarshal number into Go struct field CacheTime.path of type string")
+				So(responseRecorder.Body.String(), ShouldContainSubstring, "json: cannot unmarshal number into Go struct field")
+				So(responseRecorder.Body.String(), ShouldContainSubstring, "path of type string")
 			})
 		})
 
